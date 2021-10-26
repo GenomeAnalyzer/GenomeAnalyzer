@@ -46,7 +46,7 @@ void calculating_matching_score(){
 }
 
 //////////////// Hamming calculation
-void hamming(){
-    // for (i = 0; i < min(lengt(seq0), lenghth(seq1)); i++)
-    //     d += popcount(seq0[i] xor seq1[i]);
+void hamming(int b1, int b2){
+    int x = b1 ^ b2;
+    return __builtin_popcount(x);
 }
