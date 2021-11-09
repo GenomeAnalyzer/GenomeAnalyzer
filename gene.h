@@ -1,0 +1,19 @@
+#pragma once 
+#define MAX_GENES  1024
+
+typedef struct gene_map_s{
+
+   //
+   unsigned long long genes_counter;
+
+   //Gene start position (AUG)
+   unsigned long long *gene_start;
+
+   //Gene stop position (UAA, UAG, UGA)
+   unsigned long long *gene_end;
+
+}gene_map_t;
+
+//extern struct gene_map_s gene_map;
+
+void  detecting_genes(unsigned int gene[],gene_map_t *gene_map);
