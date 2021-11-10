@@ -23,7 +23,7 @@ char *generating_mRNA(int *dna_seq, int seq_len){
 
     int j = 0;
     // Parse the binary DNA sequence two by two
-    for (unsigned long long i = 0; i < seq_len; i += 2){
+    for (int i = 0; i < seq_len; i += 2){
         switch(dna_seq[i]){
             case 0:
                 if(dna_seq[i + 1] == 0)
