@@ -38,41 +38,38 @@ void generating_amino_acid_chain(){
 }
 
 //////////////// Detecting probable mutation zones
-void detecting_mutations(unsigned long long size_sequence, unsigned int gene_seq[], unsigned int* mut_zone){
+/*
+* in : gene_seq : sequence of the gene
+* in : size_sequence : size of the sequence
+* out : boolean
+* The algorithm runs through a gene sequence and detects if there is a sequence with a high GC frequency (at least
+* 1/5th of the gene sequence's size) it returns true, else it returns false.
+*/
+bool detecting_mutations(unsigned int gene_seq[], unsigned long long size_sequence){
 
     unsigned long long detect_mut = 0;  //Counting size of GC sequence
-    unsigned long long start_mut = -1;  //First gene of GC sequence
-    unsigned long long end_mut = -1;    //Last gene of GC sequence
 
     //
-    for(unsigned long long i = 0; i < size_sequence ; i++){
+    for(unsigned long long i = 0; i < size_sequence ; i+=2){
 
         //Increment detect_mut if find a C or G gene
-        if(gene_seq[i] == G || gene_seq[i] == C){
-            //
-            if(detect_mut == 0){
-                start_mut = i;
-            }
-            end_mut = i;
+        if((pop_count(gene_seq[i]) == 1) && (pop_count(gene_seq[i+1]) == 1)){
             detect_mut++;
         }
         //Put detect_mut to 0 if find a A or T gene
         else{
-            //GC sequence is a probable mutation zone
+            //Check if previous GC sequence is a probable mutation zone
             if(detect_mut == (size_sequence / 5)){
-                mut_zone[0] = start_mut;
-                mut_zone[1] = end_mut;
-                return 0;
+                return true;
             }
             detect_mut = 0;
         }
     }
-    //Ending sequence is a probable mutation zone
+    //Check if ending sequence is a probable mutation zone
     if(detect_mut == (size_sequence / 5)){
-        mut_zone[0] = start_mut;
-        mut_zone[1] = end_mut;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 //////////////// Calculating the matching score of two sequences
