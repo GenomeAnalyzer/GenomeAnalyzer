@@ -1,6 +1,7 @@
-#include "gene.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include "gene.h"
 
 //////////////// Generating mRNA
 void generating_mRNA(){
@@ -44,29 +45,31 @@ void generating_amino_acid_chain(){
 * out : boolean
 * The algorithm runs through a gene sequence and detects if there is a sequence with a high GC frequency (at least
 * 1/5th of the gene sequence's size) it returns true, else it returns false.
+* Precondition: gene_seq is of size size_sequence.
 */
-bool detecting_mutations(unsigned int gene_seq[], unsigned long long size_sequence){
+bool detecting_mutations(const unsigned int gene_seq[], const unsigned long long size_sequence){
 
     unsigned long long detect_mut = 0;  //Counting size of GC sequence
 
-    //
+    //Read the sequence
     for(unsigned long long i = 0; i < size_sequence ; i+=2){
 
         //Increment detect_mut if find a C or G gene
-        if((pop_count(gene_seq[i]) == 1) && (pop_count(gene_seq[i+1]) == 1)){
+        if(((__builtin_popcount(gene_seq[i]) == 0) && (__builtin_popcount(gene_seq[i+1]) == 1)) ||
+            ((__builtin_popcount(gene_seq[i]) == 1) && (__builtin_popcount(gene_seq[i+1]) == 0))){
             detect_mut++;
         }
         //Put detect_mut to 0 if find a A or T gene
         else{
             //Check if previous GC sequence is a probable mutation zone
-            if(detect_mut == (size_sequence / 5)){
+            if(detect_mut >= ((size_sequence/2) / 5)){
                 return true;
             }
             detect_mut = 0;
         }
     }
     //Check if ending sequence is a probable mutation zone
-    if(detect_mut == (size_sequence / 5)){
+    if(detect_mut >= ((size_sequence/2) / 5)){
         return true;
     }
     return false;
@@ -78,7 +81,7 @@ void calculating_matching_score(){
 }
 
 //////////////// Hamming calculation
-void hamming(int b1, int b2){
+/*void hamming(int b1, int b2){
     int x = b1 ^ b2;
     return __builtin_popcount(x);
-}
+}*/
