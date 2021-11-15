@@ -1,6 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include "gene.h"
 
+//A   : 00
+//T/U : 11
+//C   : 10
+//G   : 01
+
+// UAA 110000
+// UAG 110001
+// UGA 110100
+
+// ATC 001110
 
 //////////////// Generating mRNA
 /**
@@ -45,19 +57,51 @@ char *generating_mRNA(int *dna_seq, int seq_len){
     return rna_seq;
 }
 
+//////////////// Algo naif
+void detecting_genes(unsigned int gene[],gene_map_t *gene_map)
+{
+    //struct gene_map_s gene_map;
+    gene_map->genes_counter = 0;
 
-//////////////// Detecting genes
-void detecting_genes(){
-    // struct gene_map_s {
-    //     //
-    //     unsigned long long genes_counter;
-    //     //Gene start position (AUG)
-    //     unsigned long long gene_start[MAX_GENES];
-    //     //Gene stop position (UAA, UAG, UGA)
-    //     unsigned long long gene_end[MAX_GENES];
-    // };
-    // gene_map_s gene_map;
+    int start_pos = -1;
+    int stop_pos = -1;
 
+    int i = 0;
+
+    while((i+6) < 1000)
+    {
+        
+
+    if (start_pos == -1 && stop_pos == -1)
+    {
+
+        // if (!(gene[i%32] & ( 1 << (i%32) ))
+        if(gene[i] == 0 && gene[i+1] == 0 && gene[i+2] == 1 && gene[i+3] == 1 && gene[i+4] == 1 && gene[i+5] == 0)
+        {
+            start_pos = i;
+        }
+    }else
+    if(start_pos != -1 && stop_pos == -1)
+    {
+         if(((gene[i] == 1 && gene[i+1] == 1 && gene[i+2] == 0) && (gene[i+3] == 0 && gene[i+4] == 0 && gene[i+5] == 0) )||(gene[i+3] == 0 && gene[i+4] == 0 && gene[i+5] == 1)||(gene[i+3] == 1 && gene[i+4] == 0 && gene[i+5] == 0))
+         {
+            stop_pos = i;  
+         }     
+    }else{
+
+       // if (start_pos != -1 && stop_pos != -1 )
+        
+             gene_map->gene_start[gene_map->genes_counter] = start_pos;
+            gene_map->gene_end[gene_map->genes_counter] = stop_pos;   
+
+            gene_map->genes_counter++;    
+
+            start_pos = -1;
+            stop_pos = -1;
+        }
+
+        i++;
+    }
 
 // Algorithm:
     // ----------
@@ -73,10 +117,44 @@ void generating_amino_acid_chain(){
 
 }
 
-//////////////// Detecting probable mutation zones
-void detecting_mutations(){
 
+//////////////// Detecting probable mutation zones
+/*
+* in : gene_seq : sequence of the gene
+* in : size_sequence : size of the sequence
+* out : boolean
+* The algorithm runs through a gene sequence and detects if there is a sequence with a high GC frequency (at least
+* 1/5th of the gene sequence's size) it returns true, else it returns false.
+* Precondition: gene_seq is of size size_sequence.
+*/
+bool detecting_mutations(const unsigned int gene_seq[], const unsigned long long size_sequence){
+
+    unsigned long long detect_mut = 0;  //Counting size of GC sequence
+
+    //Read the sequence
+    for(unsigned long long i = 0; i < size_sequence ; i+=2){
+
+        //Increment detect_mut if find a C or G gene
+        if(((__builtin_popcount(gene_seq[i]) == 0) && (__builtin_popcount(gene_seq[i+1]) == 1)) ||
+            ((__builtin_popcount(gene_seq[i]) == 1) && (__builtin_popcount(gene_seq[i+1]) == 0))){
+            detect_mut++;
+        }
+        //Put detect_mut to 0 if find a A or T gene
+        else{
+            //Check if previous GC sequence is a probable mutation zone
+            if(detect_mut >= ((size_sequence/2) / 5)){
+                return true;
+            }
+            detect_mut = 0;
+        }
+    }
+    //Check if ending sequence is a probable mutation zone
+    if(detect_mut >= ((size_sequence/2) / 5)){
+        return true;
+    }
+    return false;
 }
+
 
 //////////////// Calculating the matching score of two sequences
 void calculating_matching_score(){
