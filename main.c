@@ -14,7 +14,7 @@ unsigned int* alea_gen(){
     for (int i = 0; i < n ; i++ )
     {   
         gene[i] = rand()%2; 
-        printf(" %d",gene[i]);
+       // printf(" %d",gene[i]);
 
     }
     return gene;
@@ -42,6 +42,14 @@ unsigned int* test_gen(){
     return gene;  
 }
 
+void print_test(gene_map_t *gene_map)
+{
+    for(unsigned long long i = 0; i < gene_map->genes_counter; i ++)
+    {
+        printf("Gene \x1b[31m%lld\x1b[0m: \x1b[32m[%lld:%lld]\x1b[0m\n",i,gene_map->gene_start[i],gene_map->gene_end[i]);
+    }
+}
+
 int main(){
 
     //unsigned int* gene= test_gen();
@@ -61,7 +69,7 @@ int main(){
 
     //Test print 
 
-    printf("\n%llu \n",gene_map.genes_counter);
+    print_test(&gene_map);
 
     return 0;
 
