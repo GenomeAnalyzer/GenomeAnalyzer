@@ -1,4 +1,6 @@
 #include <Python.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include "gene.h"
 
 static PyObject *DNA_error = NULL;
@@ -14,9 +16,11 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 	Py_buffer view;
 	PyObject *obj = NULL;
 
+	//Get the parameter (1-dimensional arrays)
 	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
+	//Get the array memory view
 	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
     	return NULL;
 
@@ -34,6 +38,7 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 		return NULL;     
     }
 
+    //Return the char* value as a Python string object
 	return Py_BuildValue("s", generating_mRNA(view.buf, view.shape[0]));
 
 }
@@ -41,58 +46,53 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 //////////////// Detecting genes
 static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 {
-	Py_buffer view1;
-	unsigned long long n = 0;
-  	Py_buffer view3;
-  	Py_buffer view4;
-  	PyObject *obj1 = NULL;
-  	PyObject *obj3 = NULL;
-  	PyObject *obj4 = NULL;
+	Py_buffer view;
+  	PyObject *obj = NULL;
 
-	if(!PyArg_ParseTuple(args, "OKOO", &obj1, &n, &obj3, &obj4))
+  	//Get the parameter (1-dimensional arrays)
+	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
-	if (PyObject_GetBuffer(obj1, &view1, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	//Get the array memory view
+	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
     	return NULL;
 
-	if (PyObject_GetBuffer(obj3, &view3, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
-    	return NULL;
-
-	if (PyObject_GetBuffer(obj4, &view4, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
-    	return NULL;
-
-    if (view1.ndim != 1 || view3.ndim != 1 || view4.ndim != 1)
+    if (view.ndim != 1)
     {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view1);
-		PyBuffer_Release(&view3);
-		PyBuffer_Release(&view4);
+		PyBuffer_Release(&view);
 		return NULL;
     }
 
-    if (strcmp(view1.format, "I") || strcmp(view3.format, "K") || strcmp(view4.format, "K"))
+    if (strcmp(view.format, "I"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int and unsigned long long.");
-		PyBuffer_Release(&view1);
-		PyBuffer_Release(&view3);
-		PyBuffer_Release(&view3);
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int");
+		PyBuffer_Release(&view);
 		return NULL;     
     }
 
-	gene_map_t *gene_map;
-	gene_map.genes_counter = n;
-	gene_map->gene_start = view3.buf;
-	gene_map->gene_end = view4;.buf
+	gene_map_t g;
+	g.genes_counter = 0;
+	g.gene_start = malloc(sizeof(int*) * MAX_GENES);
+	g.gene_end = malloc(sizeof(int*) * MAX_GENES);
 
-	detecting_genes(view1.buf, gene_map);
+	detecting_genes(view.buf, &g);
+
+	//Return nothing because void type
     Py_RETURN_NONE;
 }
 
 //////////////// Generating an amino acid chain (protein)
 static PyObject *DNA_generating_amino_acid_chain(PyObject *self, PyObject *args)
 {
-	    
-    Py_RETURN_NONE;
+	char *obj = NULL;
+
+	//Get the parameter (char* value)
+	if(!PyArg_ParseTuple(args, "s", &obj))
+	    return NULL;
+
+	//Return the char* value as a Python string object
+    return Py_BuildValue("s", generating_amino_acid_chain(obj));
 }
 
 //////////////// Detecting probable mutation zones
@@ -101,9 +101,11 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 	Py_buffer view;
 	PyObject *obj = NULL;
 
+	//Get the parameter (1-dimensional arrays)
 	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
+	//Get the array memory view
 	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
     	return NULL;
 
@@ -120,40 +122,52 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 		PyBuffer_Release(&view);
 		return NULL;     
     }
-    return Py_BuildValue("p", detecting_mutations(view.buf, view.shape[0]));
+
+    //Return the boolean value as a Python boolean object
+    return Py_BuildValue("O", detecting_mutations(view.buf, view.shape[0]) ? Py_True : Py_False);
 }
 
 //////////////// Calculating the matching score of two sequences
 static PyObject *DNA_calculating_matching_score(PyObject *self, PyObject *args)
 {
-	    
-    Py_RETURN_NONE;
+	int obj1 = 0;
+	int obj2 = 0;
+
+	//Get the parameter (2 int values)
+	if(!PyArg_ParseTuple(args, "ii", &obj1, &obj2))
+		return NULL;
+
+	//Return the float value as a Python float object
+    return Py_BuildValue("f", calculating_matching_score(obj1, obj2));
 }
 
 //////////////// Hamming calculation
 static PyObject *DNA_hamming(PyObject *self, PyObject *args)
 {	
-	int b1 = 0;
-	int b2 = 0;
-	if(!PyArg_ParseTuple(args, "ii", &b1, &b2))
+	int obj1 = 0;
+	int obj2 = 0;
+
+	//Get the parameter (2 int values)
+	if(!PyArg_ParseTuple(args, "ii", &obj1, &obj2))
 	    return NULL;
 
-	hamming(b1,b1);
-    Py_RETURN_NONE;
+	//Return the int value as a Python int object
+    return Py_BuildValue("i", hamming(obj1, obj2));
 }
 
-static PyMethodDef DP_methods[] = {
+//Register the methods to be made available Python side
+static PyMethodDef DNA_methods[] = {
 	{ "generating_mRNA", DNA_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a string mRNA sequence"},
 	{ "detecting_genes", DNA_detecting_genes, METH_VARARGS, "Detect genes"},
 	{ "generating_amino_acid_chain", DNA_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein)"},
 	{ "detecting_mutations", DNA_detecting_mutations, METH_VARARGS, "Detecte probable mutation zones"},
-	{ "calculating_matching_score,", DNA_calculating_matching_score, METH_VARARGS, "Detecte probable mutation zones"},
+	{ "calculating_matching_score", DNA_calculating_matching_score, METH_VARARGS, "Detecte probable mutation zones"},
 	{ "hamming", DNA_hamming, METH_VARARGS, "Hamming distance calculation"},
 	{ "version", (PyCFunction)DNA_version, METH_VARARGS, "Return the version of the DNA library."},
 	{NULL, NULL, 0, NULL}
 };
 
-static PyModuleDef DP_module = {
+static PyModuleDef DNA_module = {
 	PyModuleDef_HEAD_INIT,
 	"DNA",
 	"Genome analyser",
