@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "gene.h"
 
@@ -67,19 +68,18 @@ void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
 
     int i = 0;
 
-    while ((i + 6) < 1000)     {
+    while ((i + 6) < 1000) {
 
-
-        if (start_pos == -1 && stop_pos == -1)     {
+        if (start_pos == -1 && stop_pos == -1) {
 
             // if (!(gene[i%32] & ( 1 << (i%32) ))
-            if (gene[i] == 0 && gene[i + 1] == 0 && gene[i + 2] == 1 && gene[i + 3] == 1 && gene[i + 4] == 1 && gene[i + 5] == 0)         {
+            if (gene[i] == 0 && gene[i + 1] == 0 && gene[i + 2] == 1 && gene[i + 3] == 1 && gene[i + 4] == 1 && gene[i + 5] == 0) {
                 start_pos = i;
             }
         }
         else
-            if (start_pos != -1 && stop_pos == -1)     {
-                if (((gene[i] == 1 && gene[i + 1] == 1 && gene[i + 2] == 0) && (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 0)) || (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 1) || (gene[i + 3] == 1 && gene[i + 4] == 0 && gene[i + 5] == 0))          {
+            if (start_pos != -1 && stop_pos == -1) {
+                if (((gene[i] == 1 && gene[i + 1] == 1 && gene[i + 2] == 0) && (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 0)) || (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 1) || (gene[i + 3] == 1 && gene[i + 4] == 0 && gene[i + 5] == 0)) {
                     stop_pos = i;
                 }
             }
@@ -109,8 +109,97 @@ void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
 }
 
 //////////////// Generating an amino acid chain (protein) 
-void generating_amino_acid_chain() {
+/*
+ * in : seq : original mRNA sequence.
+ * out : char* : protein in symbols
+*/
+// not working
+char* generating_amino_acid_chain(char* seq) {
+    // codon* codons = NULL;
+    // codons = malloc(sizeof(codon) * 21);
+    // if (!codons)
+    //     return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
+    codon codons[21];
 
+    char* filename = "codons.txt";
+
+    // would have been much easier in python with the .json file ._.
+    FILE* fp = NULL;
+    fp = fopen(filename, "r");
+    if (!fp)
+        return printf("ERROR: generating_amino_acid_chain: cannot open %s\n", filename), NULL;
+
+    char buffer[30];
+    char buffer2[30];
+    char buffer3[1];
+    char buffer4[30];
+    char* current_codon_name = NULL;
+    int codon_number = 0;
+
+    for (int i = 0; i < 21; i++) {
+        codons[i].number_of_codons = 0;
+        codons[i].codons[0] = NULL;
+        codons[i].short_name = NULL;
+        codons[i].symbol = NULL;
+        codons[i].full_name = NULL;
+    }
+
+
+    char file_contents[50];
+    int i = -1;
+
+    // First line is header
+    // for (int i = 0; i < 50; i++) {
+        // fscanf(fp, "%s%s%s%s", &buffer, &buffer2, &buffer3, &buffer4);
+    current_codon_name = "K";
+    while (fscanf(fp, "%[^\n] ", file_contents) != EOF) {
+        i++;
+        if (i == 0) continue;
+
+        printf("> %s\n", file_contents);
+        // sleep(1);
+        // if (i==0) continue;
+        sscanf(file_contents, "%s%s%s%s", &buffer, &buffer2, &buffer3, &buffer4);
+        printf("%s_%s_%s_%s\n", buffer, buffer2, buffer3, buffer4);
+
+        // if (i == 1) current_codon_name = buffer3;
+
+        printf("ahhh\n");
+        codons[codon_number].codons[codons[codon_number].number_of_codons] = buffer;
+        printf("ahhh\n");
+        codons[codon_number].number_of_codons++;
+        printf("ahhh\n");
+        // printf("strcmp : %d _ %s _ %s\n\n", (buffer3 == current_codon_name), buffer3, current_codon_name);
+        printf("ahhh\n");
+        if (buffer3 != current_codon_name) {
+            codons[codon_number].short_name = buffer2;
+            codons[codon_number].symbol = buffer3;
+            codons[codon_number].full_name = buffer4;
+
+            // printf("Full_name : %s",codons[codon_number].full_name);
+            printf("Full_name : %s\n\tNumber of codons : %d\n\tCodon : %s\n\tshort_name : %s\n\tSymbol : %c\t\n",
+                codons[codon_number].full_name, codons[codon_number].number_of_codons, codons[codon_number].codons[0], codons[codon_number].short_name, codons[codon_number].symbol);
+            // printf("Full_name : %s\n\tNumber of codons : %d\n\tCodon : %s\n\tshort_name : %s\n\tSymbol : %s\t\n", 
+            // codons[codon_number].full_name, codons[codon_number].number_of_codons, codons[codon_number].codons[0], codons[codon_number].short_name, codons[codon_number].symbol);
+            codon_number++;
+        }
+        // strcpy(current_codon_name, buffer3);
+        current_codon_name = buffer3[0];
+    }
+    printf("at least en of\n");
+    codons[codon_number].short_name = buffer2;
+    codons[codon_number].symbol = buffer3;
+    codons[codon_number].full_name = buffer4;
+
+    printf("at least en of for\n");
+
+    for (int i = 0; i < 21; i++) {
+        printf("Full_name : %s\n\tNumber of codons : %d\n\tCodon : %s\n\tshort_name : %s\n\tSymbol : %s\t\n",
+            codons[i].full_name, codons[i].number_of_codons, codons[i].codons[0], codons[i].short_name, codons[i].symbol);
+    }
+
+    fclose(fp);
+    free(codons);
 }
 
 
@@ -124,7 +213,6 @@ void generating_amino_acid_chain() {
 * Precondition: gene_seq is of size size_sequence.
 */
 bool detecting_mutations(const unsigned int gene_seq [], const unsigned long long size_sequence) {
-
     unsigned long long detect_mut = 0;  //Counting size of GC sequence
 
     //Read the sequence
@@ -153,12 +241,47 @@ bool detecting_mutations(const unsigned int gene_seq [], const unsigned long lon
 
 
 //////////////// Calculating the matching score of two sequences
-void calculating_matching_score() {
+/*
+ * in : seq1 : First sequence in binary
+ * in : seq2 : Second sequence in binary
+ * out : float : matching score in %
+ * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
+*/
 
+float calculating_matching_score(int seq1, int seq2) {
+    int size = binary_size_count(seq1);
+    // Make check outside of function ?
+    if (size != binary_size_count(seq2)) {
+        printf("ERROR: generating_mRNA: undefined sequence\n");
+        return -1.0;
+    }
+
+    return 100 * hamming(seq1, seq2) / size;
+}
+
+//////////////// Counting binary size
+/*
+ * in : b : binary number
+ * out : int : count of bits
+ * The algorithm return the count of bits the binary integer is.
+*/
+int binary_size_count(int b) {
+    int size = 0;
+    while (b) {
+        size++;
+        b >>= 1;
+    }
+    return size;
 }
 
 //////////////// Hamming calculation
-void hamming(int b1, int b2) {
-    int x = b1 ^ b2;
+/*
+ * in : seq1 : First sequence in binary
+ * in : seq2 : Second sequence in binary
+ * out : int : count of bits
+ * The algorithms calculate the hamming distance between two binary sequences
+*/
+int hamming(int seq1, int seq2) {
+    int x = seq1 ^ seq2;
     return __builtin_popcount(x);
 }

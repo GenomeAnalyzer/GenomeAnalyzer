@@ -14,6 +14,14 @@ typedef struct gene_map_s{
 
 }gene_map_t;
 
+typedef struct codon{
+    int number_of_codons;
+    char *codons[3];
+    char *short_name;
+    char symbol;
+    char *full_name;
+}codon;
+
 //extern struct gene_map_s gene_map;
 
 void  detecting_genes(unsigned int gene[],gene_map_t *gene_map);
