@@ -112,97 +112,37 @@ void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
 /*
  * in : seq : original mRNA sequence.
  * out : char* : protein in symbols
+ * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
 */
-// not working
-char* generating_amino_acid_chain(char* seq) {
-    return seq;
-    // // codon* codons = NULL;
-    // // codons = malloc(sizeof(codon) * 21);
-    // // if (!codons)
-    // //     return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
-    // codon codons[21];
 
-    // char* filename = "codons.txt";
+char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, codon codons []) {
+    gene_map_t gene;
+    char* protein = "";
+    gene.genes_counter = 0;
+    gene.gene_start = "AUG";
+    gene.gene_end = NULL;
 
-    // // would have been much easier in python with the .json file ._.
-    // FILE* fp = NULL;
-    // fp = fopen(filename, "r");
-    // if (!fp)
-    //     return printf("ERROR: generating_amino_acid_chain: cannot open %s\n", filename), NULL;
+    if ((seq_size % 3) != 0)
+        return printf("ERROR: generating_amino_acid_chain: Invalid sequence size\n"), NULL;
 
-    // char buffer[30];
-    // char buffer2[30];
-    // char buffer3[1];
-    // char buffer4[30];
-    // char* current_codon_name = NULL;
-    // int codon_number = 0;
-
-    // for (int i = 0; i < 21; i++) {
-    //     codons[i].number_of_codons = 0;
-    //     codons[i].codons[0] = NULL;
-    //     codons[i].short_name = NULL;
-    //     codons[i].symbol = NULL;
-    //     codons[i].full_name = NULL;
-    // }
-
-
-    // char file_contents[50];
-    // int i = -1;
-
-    // // First line is header
-    // // for (int i = 0; i < 50; i++) {
-    //     // fscanf(fp, "%s%s%s%s", &buffer, &buffer2, &buffer3, &buffer4);
-    // current_codon_name = "K";
-    // while (fscanf(fp, "%[^\n] ", file_contents) != EOF) {
-    //     i++;
-    //     if (i == 0) continue;
-
-    //     printf("> %s\n", file_contents);
-    //     // sleep(1);
-    //     // if (i==0) continue;
-    //     sscanf(file_contents, "%s%s%s%s", &buffer, &buffer2, &buffer3, &buffer4);
-    //     printf("%s_%s_%s_%s\n", buffer, buffer2, buffer3, buffer4);
-
-    //     // if (i == 1) current_codon_name = buffer3;
-
-    //     printf("ahhh\n");
-    //     codons[codon_number].codons[codons[codon_number].number_of_codons] = buffer;
-    //     printf("ahhh\n");
-    //     codons[codon_number].number_of_codons++;
-    //     printf("ahhh\n");
-    //     // printf("strcmp : %d _ %s _ %s\n\n", (buffer3 == current_codon_name), buffer3, current_codon_name);
-    //     printf("ahhh\n");
-    //     if (buffer3 != current_codon_name) {
-    //         codons[codon_number].short_name = buffer2;
-    //         codons[codon_number].symbol = buffer3;
-    //         codons[codon_number].full_name = buffer4;
-
-    //         // printf("Full_name : %s",codons[codon_number].full_name);
-    //         printf("Full_name : %s\n\tNumber of codons : %d\n\tCodon : %s\n\tshort_name : %s\n\tSymbol : %c\t\n",
-    //             codons[codon_number].full_name, codons[codon_number].number_of_codons, codons[codon_number].codons[0], codons[codon_number].short_name, codons[codon_number].symbol);
-    //         // printf("Full_name : %s\n\tNumber of codons : %d\n\tCodon : %s\n\tshort_name : %s\n\tSymbol : %s\t\n", 
-    //         // codons[codon_number].full_name, codons[codon_number].number_of_codons, codons[codon_number].codons[0], codons[codon_number].short_name, codons[codon_number].symbol);
-    //         codon_number++;
-    //     }
-    //     // strcpy(current_codon_name, buffer3);
-    //     current_codon_name = buffer3[0];
-    // }
-    // printf("at least en of\n");
-    // codons[codon_number].short_name = buffer2;
-    // codons[codon_number].symbol = buffer3;
-    // codons[codon_number].full_name = buffer4;
-
-    // printf("at least en of for\n");
-
-    // for (int i = 0; i < 21; i++) {
-    //     printf("Full_name : %s\n\tNumber of codons : %d\n\tCodon : %s\n\tshort_name : %s\n\tSymbol : %s\t\n",
-    //         codons[i].full_name, codons[i].number_of_codons, codons[i].codons[0], codons[i].short_name, codons[i].symbol);
-    // }
-
-    // fclose(fp);
-    // free(codons);
+    for (int i = 0; i < seq_size; i += 3) {
+        char cod = seq[i] + seq[i + 1] + seq[i + 2];
+        if (i == 0 && cod != "AUG")
+            return printf("ERROR: generating_amino_acid_chain: Sequence does not start with a start codon (AUG)\n"), NULL;
+        for (int j = 0; j < codons_count; j++) {
+            if (cod == codons[j].codon) {
+                protein += codons[j].symbol;
+                gene.genes_counter += 1;
+                if (codons[j].symbol == "O") {
+                    gene.gene_end = codons[j].codon;
+                    return protein;
+                }
+                break;
+            }
+        }
+    }
+    return printf("ERROR: generating_amino_acid_chain: sequence has no END codon\n"), NULL;
 }
-
 
 //////////////// Detecting probable mutation zones
 /*
