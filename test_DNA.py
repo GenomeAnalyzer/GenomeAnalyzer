@@ -9,21 +9,25 @@ def test_DNA_generating_mRNA():
 	res = DNA.generating_mRNA(array.array('i', [0,1,0,0,1,1,0,0,0,1,1,0]))
 	assert res == "GAUAGC"
 
-# def test_DNA_detecting_genes():
-# 	DNA.detecting_genes(array.array('I', [0,1,0,0,1,1,0,0,0,1,1,0]))
-# 	assert True
+#Problem with b and c
+def test_DNA_detecting_genes():
+	# a = unsigned long long 
+	# b = int** et c = int**
+	a, b, c = DNA.detecting_genes(array.array('I', [0,1,0,0,1,1,0,0,0,1,1,0]))
+	assert a == 0
 
+#Maybe not good value, I don't know
 def test_DNA_generating_amino_acid_chain():
-	res = DNA.generating_amino_acid_chain("GAUAGC")
-	assert res == "GAUAGC"
+	res = DNA.generating_amino_acid_chain("AUGAGC", 6, 1)
+	assert res == None
 
 def test_DNA_detecting_mutations():
 	res = DNA.detecting_mutations(array.array('I', [0,1,0,0,1,1,0,0,0,1,1,0]))
 	assert res
 
-# def test_DNA_calculating_matching_score():
-# 	res = DNA.calculating_matching_score(0b010011000110, 0b101100111001)
-# 	assert res == -1.0
+def test_DNA_calculating_matching_score():
+	res = DNA.calculating_matching_score(array.array('i', [0,1,0,0,1,1,0,0,0,1,1,0]), array.array('i', [1,0,1,1,0,0,1,1,1,0,0,1]))
+	assert res == -1.0
 
 def test_DNA_hamming():
 	res = DNA.hamming(0b010011000110, 0b101100111001)

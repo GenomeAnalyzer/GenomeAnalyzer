@@ -78,21 +78,24 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 
 	detecting_genes(view.buf, &g);
 
-	//Return nothing because void type
-    Py_RETURN_NONE;
+	return Py_BuildValue("KOO", g.genes_counter, g.gene_start, g.gene_end);
 }
 
 //////////////// Generating an amino acid chain (protein)
 static PyObject *DNA_generating_amino_acid_chain(PyObject *self, PyObject *args)
 {
-	char *obj = NULL;
+	char *obj1 = NULL;
+	int obj2 = 0;
+	int obj3 = 0;
 
 	//Get the parameter (char* value)
-	if(!PyArg_ParseTuple(args, "s", &obj))
+	if(!PyArg_ParseTuple(args, "sii", &obj1, &obj2, &obj3))
 	    return NULL;
 
+	codon c;
+
 	//Return the char* value as a Python string object
-    return Py_BuildValue("s", generating_amino_acid_chain(obj));
+    return Py_BuildValue("s", generating_amino_acid_chain(obj1, obj2, obj3, &c));
 }
 
 //////////////// Detecting probable mutation zones
@@ -130,15 +133,41 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 //////////////// Calculating the matching score of two sequences
 static PyObject *DNA_calculating_matching_score(PyObject *self, PyObject *args)
 {
-	int obj1 = 0;
-	int obj2 = 0;
+	Py_buffer view1;
+	Py_buffer view2;
+	PyObject *obj1 = NULL;
+	PyObject *obj2 = NULL;
 
-	//Get the parameter (2 int values)
-	if(!PyArg_ParseTuple(args, "ii", &obj1, &obj2))
+	//Get the parameter (2 1-dimensional arrays)
+	if(!PyArg_ParseTuple(args, "OO", &obj1, &obj2))
+	    return NULL;
+
+	//Get the first array memory view
+	if (PyObject_GetBuffer(obj1, &view1, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+    	return NULL;
+
+    //Get the second array memory view
+	if (PyObject_GetBuffer(obj2, &view2, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+    	return NULL;
+
+    if (view1.ndim != 1 || view2.ndim != 1)
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array.");
+		PyBuffer_Release(&view1);
+		PyBuffer_Release(&view2);
 		return NULL;
+    }
+
+    if (strcmp(view1.format, "i") || strcmp(view2.format, "i"))
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of int.");
+		PyBuffer_Release(&view1);
+		PyBuffer_Release(&view2);
+		return NULL;     
+    }
 
 	//Return the float value as a Python float object
-    return Py_BuildValue("f", calculating_matching_score(obj1, obj2));
+    return Py_BuildValue("f", calculating_matching_score(view1.shape[0], view1.buf, view2.buf));
 }
 
 //////////////// Hamming calculation
