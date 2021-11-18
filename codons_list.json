@@ -1,0 +1,386 @@
+[
+  {
+    "codon": "AAA",
+    "short_name": "Lys",
+    "full_name": "Lysine",
+    "symbol": "K"
+  },
+  {
+    "codon": "AAG",
+    "short_name": "Lys",
+    "full_name": "Lysine",
+    "symbol": "K"
+  },
+  {
+    "codon": "AAC",
+    "short_name": "Asn",
+    "full_name": "Asparagine",
+    "symbol": "N"
+  },
+  {
+    "codon": "AAU",
+    "short_name": "Asn",
+    "full_name": "Asparagine",
+    "symbol": "N"
+  },
+  {
+    "codon": "ACA",
+    "short_name": "Thr",
+    "full_name": "Threonine",
+    "symbol": "T"
+  },
+  {
+    "codon": "ACC",
+    "short_name": "Thr",
+    "full_name": "Threonine",
+    "symbol": "T"
+  },
+  {
+    "codon": "ACG",
+    "short_name": "Thr",
+    "full_name": "Threonine",
+    "symbol": "T"
+  },
+  {
+    "codon": "ACU",
+    "short_name": "Thr",
+    "full_name": "Threonine",
+    "symbol": "T"
+  },
+  {
+    "codon": "AGA",
+    "short_name": "Arg",
+    "full_name": "Arginine",
+    "symbol": "R"
+  },
+  {
+    "codon": "AGG",
+    "short_name": "Arg",
+    "full_name": "Arginine",
+    "symbol": "R"
+  },
+  {
+    "codon": "AGC",
+    "short_name": "Ser",
+    "full_name": "Serine",
+    "symbol": "S"
+  },
+  {
+    "codon": "AGU",
+    "short_name": "Ser",
+    "full_name": "Serine",
+    "symbol": "S"
+  },
+  {
+    "codon": "AUA",
+    "short_name": "Ile",
+    "full_name": "Isoleucine",
+    "symbol": "I"
+  },
+  {
+    "codon": "AUC",
+    "short_name": "Ile",
+    "full_name": "Isoleucine",
+    "symbol": "I"
+  },
+  {
+    "codon": "AUU",
+    "short_name": "Ile",
+    "full_name": "Isoleucine",
+    "symbol": "I"
+  },
+  {
+    "codon": "CAA",
+    "short_name": "Gln",
+    "full_name": "Glutamine",
+    "symbol": "Q"
+  },
+  {
+    "codon": "CAG",
+    "short_name": "Gln",
+    "full_name": "Glutamine",
+    "symbol": "Q"
+  },
+  {
+    "codon": "CAC",
+    "short_name": "His",
+    "full_name": "Histidine",
+    "symbol": "H"
+  },
+  {
+    "codon": "CAU",
+    "short_name": "His",
+    "full_name": "Histidine",
+    "symbol": "H"
+  },
+  {
+    "codon": "CCA",
+    "short_name": "Pro",
+    "full_name": "Proline",
+    "symbol": "P"
+  },
+  {
+    "codon": "CCC",
+    "short_name": "Pro",
+    "full_name": "Proline",
+    "symbol": "P"
+  },
+  {
+    "codon": "CCG",
+    "short_name": "Pro",
+    "full_name": "Proline",
+    "symbol": "P"
+  },
+  {
+    "codon": "CCU",
+    "short_name": "Pro",
+    "full_name": "Proline",
+    "symbol": "P"
+  },
+  {
+    "codon": "CGA",
+    "short_name": "Arg",
+    "full_name": "Arginine",
+    "symbol": "R"
+  },
+  {
+    "codon": "CGC",
+    "short_name": "Arg",
+    "full_name": "Arginine",
+    "symbol": "R"
+  },
+  {
+    "codon": "CGG",
+    "short_name": "Arg",
+    "full_name": "Arginine",
+    "symbol": "R"
+  },
+  {
+    "codon": "CGU",
+    "short_name": "Arg",
+    "full_name": "Arginine",
+    "symbol": "R"
+  },
+  {
+    "codon": "CUA",
+    "short_name": "Leu",
+    "full_name": "Leucine",
+    "symbol": "L"
+  },
+  {
+    "codon": "CUC",
+    "short_name": "Leu",
+    "full_name": "Leucine",
+    "symbol": "L"
+  },
+  {
+    "codon": "CUG",
+    "short_name": "Leu",
+    "full_name": "Leucine",
+    "symbol": "L"
+  },
+  {
+    "codon": "CUU",
+    "short_name": "Leu",
+    "full_name": "Leucine",
+    "symbol": "L"
+  },
+  {
+    "codon": "GAA",
+    "short_name": "Glu",
+    "full_name": "Glutamicacid",
+    "symbol": "E"
+  },
+  {
+    "codon": "GAG",
+    "short_name": "Glu",
+    "full_name": "Glutamicacid",
+    "symbol": "E"
+  },
+  {
+    "codon": "GAC",
+    "short_name": "Asp",
+    "full_name": "Asparticacid",
+    "symbol": "D"
+  },
+  {
+    "codon": "GAU",
+    "short_name": "Asp",
+    "full_name": "Asparticacid",
+    "symbol": "D"
+  },
+  {
+    "codon": "GCA",
+    "short_name": "Ala",
+    "full_name": "Alanine",
+    "symbol": "A"
+  },
+  {
+    "codon": "GCC",
+    "short_name": "Ala",
+    "full_name": "Alanine",
+    "symbol": "A"
+  },
+  {
+    "codon": "GCG",
+    "short_name": "Ala",
+    "full_name": "Alanine",
+    "symbol": "A"
+  },
+  {
+    "codon": "GCU",
+    "short_name": "Ala",
+    "full_name": "Alanine",
+    "symbol": "A"
+  },
+  {
+    "codon": "GGA",
+    "short_name": "Gly",
+    "full_name": "Glycine",
+    "symbol": "G"
+  },
+  {
+    "codon": "GGC",
+    "short_name": "Gly",
+    "full_name": "Glycine",
+    "symbol": "G"
+  },
+  {
+    "codon": "GGG",
+    "short_name": "Gly",
+    "full_name": "Glycine",
+    "symbol": "G"
+  },
+  {
+    "codon": "GGU",
+    "short_name": "Gly",
+    "full_name": "Glycine",
+    "symbol": "G"
+  },
+  {
+    "codon": "GUA",
+    "short_name": "Val",
+    "full_name": "Valine",
+    "symbol": "V"
+  },
+  {
+    "codon": "GUC",
+    "short_name": "Val",
+    "full_name": "Valine",
+    "symbol": "V"
+  },
+  {
+    "codon": "GUG",
+    "short_name": "Val",
+    "full_name": "Valine",
+    "symbol": "V"
+  },
+  {
+    "codon": "GUU",
+    "short_name": "Val",
+    "full_name": "Valine",
+    "symbol": "V"
+  },
+  {
+    "codon": "UAC",
+    "short_name": "Tyr",
+    "full_name": "Tyrosine",
+    "symbol": "Y"
+  },
+  {
+    "codon": "UAU",
+    "short_name": "Tyr",
+    "full_name": "Tyrosine",
+    "symbol": "Y"
+  },
+  {
+    "codon": "UCA",
+    "short_name": "Ser",
+    "full_name": "Serine",
+    "symbol": "S"
+  },
+  {
+    "codon": "UCC",
+    "short_name": "Ser",
+    "full_name": "Serine",
+    "symbol": "S"
+  },
+  {
+    "codon": "UCG",
+    "short_name": "Ser",
+    "full_name": "Serine",
+    "symbol": "S"
+  },
+  {
+    "codon": "UCU",
+    "short_name": "Ser",
+    "full_name": "Serine",
+    "symbol": "S"
+  },
+  {
+    "codon": "UGC",
+    "short_name": "Cys",
+    "full_name": "Cysteine",
+    "symbol": "C"
+  },
+  {
+    "codon": "UGU",
+    "short_name": "Cys",
+    "full_name": "Cysteine",
+    "symbol": "C"
+  },
+  {
+    "codon": "UGG",
+    "short_name": "Trp",
+    "full_name": "Tryptophan",
+    "symbol": "W"
+  },
+  {
+    "codon": "UUA",
+    "short_name": "Leu",
+    "full_name": "Leucine",
+    "symbol": "L"
+  },
+  {
+    "codon": "UUG",
+    "short_name": "Leu",
+    "full_name": "Leucine",
+    "symbol": "L"
+  },
+  {
+    "codon": "UUC",
+    "short_name": "Phe",
+    "full_name": "Phenylalanine",
+    "symbol": "F"
+  },
+  {
+    "codon": "UUU",
+    "short_name": "Phe",
+    "full_name": "Phenylalanine",
+    "symbol": "F"
+  },
+  {
+    "codon": "AUG",
+    "short_name": "Met",
+    "full_name": "Methionine",
+    "symbol": "M"
+  },
+  {
+    "codon": "UAA",
+    "short_name": "Stp",
+    "full_name": "Stop",
+    "symbol": "O"
+  },
+  {
+    "codon": "UAG",
+    "short_name": "Stp",
+    "full_name": "Stop",
+    "symbol": "O"
+  },
+  {
+    "codon": "UGA",
+    "short_name": "Stp",
+    "full_name": "Stop",
+    "symbol": "O"
+  }
+]
