@@ -28,6 +28,6 @@ char *generating_mRNA(int *dna_seq, int seq_len);
 void  detecting_genes(unsigned int gene[],gene_map_t *gene_map);
 char *generating_amino_acid_chain(char* seq);
 bool detecting_mutations(const unsigned int gene_seq[], const unsigned long long size_sequence);
-float calculating_matching_score(int seq1, int seq2);
+float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []);
 int binary_size_count(int b);
 int hamming(int seq1, int seq2);
