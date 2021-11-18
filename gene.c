@@ -248,15 +248,24 @@ bool detecting_mutations(const unsigned int gene_seq [], const unsigned long lon
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
 */
 
-float calculating_matching_score(int seq1, int seq2) {
-    int size = binary_size_count(seq1);
-    // Make check outside of function ?
-    if (size != binary_size_count(seq2)) {
-        printf("ERROR: generating_mRNA: undefined sequence\n");
-        return -1.0;
+float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []) {
+    // Check outside of function that seq1 and seq2 are the same size
+
+    int total_size_sequence = 0;
+    int total_hamming_distance = 0;
+
+    for (int i = 0; i < sequence_size, i++){
+        int size = binary_size_count(seq1[i]);
+        // Make check outside of function ?
+        if (size != binary_size_count(seq2[i])) {
+            printf("ERROR: generating_mRNA: wrong size sequence\n");
+            return -1.0;
+        }
+        total_size_sequence += size;
+        total_hamming_distance += hamming(seq1, seq2);
     }
 
-    return 100 * hamming(seq1, seq2) / size;
+    return 100 * total_hamming_distance / total_size_sequence;
 }
 
 //////////////// Counting binary size
