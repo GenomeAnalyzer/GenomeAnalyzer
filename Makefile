@@ -9,7 +9,11 @@ LDFLAGS = -lcmocka
 %.o: %.c 
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+#For all compiling, building and executing
 all: main DNA check
+
+#For only building and testing interface
+build: DNA test_DNA
 
 main: main.o gene.o
 	$(CC) $(CFLAGS) -o $@ $^
