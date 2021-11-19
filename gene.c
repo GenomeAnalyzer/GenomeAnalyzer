@@ -105,7 +105,6 @@ void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
 
         i++;
     }
-
 }
 
 //////////////// Generating an amino acid chain (protein) 
@@ -202,7 +201,7 @@ float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []) {
             return -1.0;
         }
         total_size_sequence += size;
-        total_hamming_distance += hamming(seq1, seq2);
+        total_hamming_distance += hamming(seq1[i], seq2[i]);
     }
 
     return 100 * total_hamming_distance / total_size_sequence;

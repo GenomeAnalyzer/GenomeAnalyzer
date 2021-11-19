@@ -9,12 +9,9 @@ def test_DNA_generating_mRNA():
 	res = DNA.generating_mRNA(array.array('i', [0,1,0,0,1,1,0,0,0,1,1,0]))
 	assert res == "GAUAGC"
 
-#Problem with b and c
 def test_DNA_detecting_genes():
-	# a = unsigned long long 
-	# b = int** et c = int**
-	a, b, c = DNA.detecting_genes(array.array('I', [0,1,0,0,1,1,0,0,0,1,1,0]))
-	assert a == 0
+	a = DNA.detecting_genes(array.array('I', [0,0,1,1,1,0,1,1,0,0,0,0]))
+	assert a == [[0,4]]
 
 #Maybe not good value, I don't know
 def test_DNA_generating_amino_acid_chain():

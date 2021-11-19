@@ -32,9 +32,9 @@ DNA :
 	cp build/lib*/*.so .
 
 test_DNA : 
-	python3 -m pytest
+	python3 -m pytest -s
 
 clean :
 	@rm -rf __pycache__ build .pytest_cache *.so
-	rm -f *.o main test_gene
+	@rm -f *.o main test_gene
 
