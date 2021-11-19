@@ -1,4 +1,5 @@
 #include <Python.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "gene.h"
@@ -50,7 +51,7 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
   	PyObject *obj = NULL;
 
   	//Get the parameter (1-dimensional arrays)
-	if(!PyArg_ParseTuple(args, "O", &obj))
+	if (!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
 	//Get the array memory view
@@ -73,12 +74,21 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 
 	gene_map_t g;
 	g.genes_counter = 0;
-	g.gene_start = malloc(sizeof(int*) * MAX_GENES);
-	g.gene_end = malloc(sizeof(int*) * MAX_GENES);
+	g.gene_start = malloc(sizeof(int) * MAX_GENES);
+	g.gene_end = malloc(sizeof(int) * MAX_GENES);
 
 	detecting_genes(view.buf, &g);
 
-	return Py_BuildValue("KOO", g.genes_counter, g.gene_start, g.gene_end);
+	PyObject *List = PyList_New(0);	
+	for(unsigned long long i = 0; i < g.genes_counter; i ++)
+    {
+		PyObject *l = PyList_New(2);
+    	PyList_SET_ITEM(l, 0, PyLong_FromUnsignedLongLong(g.gene_start[i]));
+    	PyList_SET_ITEM(l, 1, PyLong_FromUnsignedLongLong(g.gene_end[i]));
+    	PyList_Append(List, l);    	
+    }
+
+	return List;
 }
 
 //////////////// Generating an amino acid chain (protein)
