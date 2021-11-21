@@ -17,37 +17,40 @@
 
 //////////////// Generating mRNA
 /**
- * generating_mRNA - Convert a binary DNA sequence to a string mRNA sequence
- * dna_seq      array of binary
- * seq_len      size of dna_seq
- *
- * rna_seq      array of char
+ * in : gene_seq : array of binary
+ * in : seq_len : size of dna_seq
+ * out : rna_seq : array of char
+ * Convert a binary DNA sequence to a string mRNA sequence
  */
-char* generating_mRNA(int* dna_seq, int seq_len) {
+char* generating_mRNA(const unsigned int gene_seq [], const unsigned int seq_size) {
     // Check the input argument
-    if (!dna_seq)
+    if (!gene_seq)
         return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
 
     // Create and check the output
     char* rna_seq = NULL;
-    rna_seq = malloc(sizeof(*rna_seq) * (seq_len / 2));
+    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 1);
     if (!rna_seq)
         return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
 
     int j = 0;
     // Parse the binary DNA sequence two by two
-    for (int i = 0; i < seq_len; i += 2) {
-        switch (dna_seq[i]) {
+    for (int i = 0; i < seq_size; i += 2) {
+        switch (gene_seq[i]) {
         case 0:
-            if (dna_seq[i + 1] == 0)
+            if (gene_seq[i + 1] == 0)
+                // A = 00
                 rna_seq[j] = 'A';
-            else if (dna_seq[i + 1] == 1)
+            else if (gene_seq[i + 1] == 1)
+                // G = 01
                 rna_seq[j] = 'G';
             break;
         case 1:
-            if (dna_seq[i + 1] == 0)
+            if (gene_seq[i + 1] == 0)
+                // C = 10
                 rna_seq[j] = 'C';
-            else if (dna_seq[i + 1] == 1)
+            else if (gene_seq[i + 1] == 1)
+                // U = 11
                 rna_seq[j] = 'U';
             break;
         default:
@@ -60,11 +63,10 @@ char* generating_mRNA(int* dna_seq, int seq_len) {
 
 //////////////// Detecting genes 
 /*
-*
-*   Input : unsigned int gene[] -> sequence of genes , gene_map -> Struct to map the genes
-*   Output : void
-*   Function: detect if a gene exists in the sequence and insert it in the structure
-*
+* in : gene : sequence of genes
+* in : gene_map : struct to map the genes
+* out : void
+* Detect if a gene exists in the sequence and insert it in the structure
 */
 void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
     //struct gene_map_s gene_map;
@@ -113,7 +115,6 @@ void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
  * out : char* : protein in symbols
  * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
 */
-
 char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, codon codons []) {
     gene_map_t gene;
     char* protein = "";
@@ -181,23 +182,22 @@ bool detecting_mutations(const unsigned int gene_seq [], const unsigned long lon
 
 //////////////// Calculating the matching score of two sequences
 /*
- * in : seq1 : First sequence in binary
- * in : seq2 : Second sequence in binary
+ * in : seq1 : first sequence in binary
+ * in : seq2 : second sequence in binary
  * out : float : matching score in %
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
 */
-
 float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []) {
-    // Check outside of function that seq1 and seq2 are the same size
 
     int total_size_sequence = 0;
     int total_hamming_distance = 0;
 
+    // Check outside of function that seq1 and seq2 are the same size
     for (int i = 0; i < sequence_size; i++) {
         int size = binary_size_count(seq1[i]);
         // Make check outside of function ?
         if (size != binary_size_count(seq2[i])) {
-            printf("ERROR: generating_mRNA: wrong size sequence\n");
+            printf("ERROR: calculating_matching_score: wrong size sequence\n");
             return -1.0;
         }
         total_size_sequence += size;
@@ -224,8 +224,8 @@ int binary_size_count(int b) {
 
 //////////////// Hamming calculation
 /*
- * in : seq1 : First sequence in binary
- * in : seq2 : Second sequence in binary
+ * in : seq1 : first sequence in binary
+ * in : seq2 : second sequence in binary
  * out : int : count of bits
  * The algorithms calculate the hamming distance between two binary sequences
 */
