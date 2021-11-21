@@ -84,16 +84,20 @@ void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
 
             //If a start pos and a stop pos doesn't exist, search for ATC
             // if (!(gene[i%32] & ( 1 << (i%32) ))
-            if (gene[i] == 0 && gene[i + 1] == 0 && gene[i + 2] == 1 && gene[i + 3] == 1 && gene[i + 4] == 1 && gene[i + 5] == 0) {
-                //if atc, it's the start of a gene
+            if (gene[i] == 0 && gene[i + 1] == 0 && gene[i + 2] == 1 
+                && gene[i + 3] == 1 && gene[i + 4] == 1 && gene[i + 5] == 0) {
+            //if atc, it's the start of a gene
                 start_pos = i;
             }
         }
         else
             if (start_pos != -1 && stop_pos == -1) {
                 //if a start pos exists , search for UAA / UAG / UGA
-                if (((gene[i] == 1 && gene[i + 1] == 1 && gene[i + 2] == 0) && (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 0)) || (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 1) || (gene[i + 3] == 1 && gene[i + 4] == 0 && gene[i + 5] == 0)) {
-                    //It's the end of a gene          
+                if ((gene[i] == 1 && gene[i + 1] == 1 && gene[i + 2] == 0) 
+                    && ((gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 0)
+                        || (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 1)
+                        || (gene[i + 3] == 1 && gene[i + 4] == 0 && gene[i + 5] == 0))) {
+                   //It's the end of a gene          
                    //If a start pos and an stop pos has been found, a gene exists so we save it in the struc
                     gene_map->gene_start[gene_map->genes_counter] = start_pos;
                     gene_map->gene_end[gene_map->genes_counter] = i;
