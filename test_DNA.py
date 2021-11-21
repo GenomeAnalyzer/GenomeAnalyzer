@@ -10,8 +10,8 @@ def test_DNA_generating_mRNA():
 	assert res == "GAUAGC"
 
 def test_DNA_detecting_genes():
-	a = DNA.detecting_genes(array.array('I', [0,0,1,1,1,0,1,1,0,0,0,0]))
-	assert a == [[0,4]]
+	a = DNA.detecting_genes(array.array('I', [0,0,1,1,1,0,1,1,0,0,0,0]),12)
+	assert a == [[0,6]]
 
 #Maybe not good value, I don't know
 def test_DNA_generating_amino_acid_chain():

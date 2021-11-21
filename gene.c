@@ -68,16 +68,28 @@ char* generating_mRNA(const unsigned int gene_seq [], const unsigned int seq_siz
 * out : void
 * Detect if a gene exists in the sequence and insert it in the structure
 */
-void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
+void detecting_genes(const unsigned int gene [], const unsigned int gene_size, gene_map_t* gene_map) {
     //struct gene_map_s gene_map;
     gene_map->genes_counter = 0;
+
+    // Check if memory ever have been allocated, do it if not
+    if(!gene_map->gene_start || !gene_map->gene_end){
+        gene_map->gene_start = malloc(sizeof(*gene_map->gene_start) * MAX_GENES);
+        gene_map->gene_end = malloc(sizeof(*gene_map->gene_end) * MAX_GENES);
+
+        if (!gene_map->gene_start || !gene_map->gene_end){
+            printf("ERROR: detecting_genes: cannot allocate memory\n");
+            return;
+        }
+    }
+
 
     int start_pos = -1;
     int stop_pos = -1;
 
     int i = 0;
 
-    while ((i + 6) < 1000) {
+    while ((i + 6) <= gene_size) {
 
 
         if (start_pos == -1 && stop_pos == -1) {
@@ -88,9 +100,12 @@ void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
                 && gene[i + 3] == 1 && gene[i + 4] == 1 && gene[i + 5] == 0) {
             //if atc, it's the start of a gene
                 start_pos = i;
+                i += 6;
             }
+            else
+                i += 2;
         }
-        else
+        else{
             if (start_pos != -1 && stop_pos == -1) {
                 //if a start pos exists , search for UAA / UAG / UGA
                 if ((gene[i] == 1 && gene[i + 1] == 1 && gene[i + 2] == 0) 
@@ -106,13 +121,16 @@ void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
 
                     start_pos = -1;
                     stop_pos = -1;
+                    i += 6;
                 }
+                else
+                    i += 2;
             }
-
-        i++;
+            else
+                i += 2;
+        }
     }
 }
-
 //////////////// Generating an amino acid chain (protein) 
 /*
  * in : seq : original mRNA sequence.
