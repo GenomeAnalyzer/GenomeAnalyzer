@@ -17,18 +17,17 @@ static PyObject *DNA_convert_to_binary(PyObject *self, PyObject *args)
 {
 	char *obj = NULL;
 
+	unsigned obj2 = 0;
 	//Get the parameter (char* value)
-	if(!PyArg_ParseTuple(args, "s", &obj))
+	if(!PyArg_ParseTuple(args, "si", &obj,&obj2))
 	    return NULL;
 
-	 int *test = convert_to_binary(obj);
+	 short *test = convert_to_binary(obj,obj2);
 	 PyObject *pylist, *item;
 	 //TODO: Need to find max element 
-	pylist = PyList_New(20);
+	pylist = PyList_New(obj2);
 
-	for (int i=0; i < 20; i++) {
-			printf("%d\n",test[i]);
-
+	for (unsigned  i=0; i < obj2; i++) {
 		item = PyLong_FromLong(test[i]);
 		PyList_SetItem(pylist, i, item);
 	}

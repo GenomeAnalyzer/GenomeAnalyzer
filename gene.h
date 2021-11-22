@@ -23,7 +23,7 @@ typedef struct codon {
 
 //extern struct gene_map_s gene_map;
 
-int* convert_to_binary(char* dna_seq);
+short* convert_to_binary(char* dna_seq,unsigned size);
 char* generating_mRNA(int* dna_seq, int seq_len);
 void  detecting_genes(unsigned int gene [], gene_map_t* gene_map);
 char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, codon codons []);

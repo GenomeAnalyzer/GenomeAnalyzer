@@ -16,7 +16,7 @@
 // ATC 001110
 
 //TODO: optimize + exit when strange char
-int* convert_to_binary(char* dna_seq)
+short* convert_to_binary(char* dna_seq, unsigned size)
 {
 
     unsigned i = 0;
@@ -26,10 +26,11 @@ int* convert_to_binary(char* dna_seq)
     //dna_seq = "TGGGCCCA\n";
 
 
-    int *seq = malloc(sizeof(int)*MAX_GENES); 
-    while(dna_seq != "\n")
+    short *seq = calloc(sizeof(short),size); 
+    for (unsigned i = 0;i < size; i ++)
    //for(int c = 0; c <= sizeof(dna_seq); c ++ )
     {
+        //printf("%c %d \n",dna_seq[i],i);
         switch(dna_seq[i])
         {
             case 'A':
@@ -59,20 +60,21 @@ int* convert_to_binary(char* dna_seq)
 
                 break;
             case 'N':
+                seq[temp] = 0;
+                seq[temp+1] = 0; 
+                temp += 2;
+
                 break;
             default:
-                printf("Error: wrong letter in the sequence(%c).\nExit.\n",dna_seq[i]);
-                    seq[temp] = NULL;
+               // printf("Error: wrong letter in the sequence(%c).\nExit.\n",dna_seq[i]);
 
                 return seq;
 
                // exit(-1);
         }
-         i++; 
 
     }
 
-    seq[temp] = NULL;
     return seq;
 
 }
