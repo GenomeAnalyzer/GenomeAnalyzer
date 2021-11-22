@@ -41,7 +41,6 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 
     //Return the char* value as a Python string object
 	return Py_BuildValue("s", generating_mRNA(view.buf, view.shape[0]));
-
 }
 
 //////////////// Detecting genes
@@ -50,10 +49,8 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 	Py_buffer view;
   	PyObject *obj = NULL;
 
-	int obj2 = 0;
-
   	//Get the parameter (1-dimensional arrays)
-	if (!PyArg_ParseTuple(args, "Oi", &obj,&obj2))
+	if (!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
 	//Get the array memory view
@@ -75,13 +72,10 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
     }
 
 	gene_map_t g;
-	g.genes_counter = 0;
-	g.gene_start = malloc(sizeof(int) * MAX_GENES);
-	g.gene_end = malloc(sizeof(int) * MAX_GENES);
 
-	detecting_genes(view.buf, obj2,&g);
+	detecting_genes(view.buf, view.shape[0], &g);
 
-	PyObject *List = PyList_New(0);	
+	PyObject *List = PyList_New(0);
 	for(unsigned long long i = 0; i < g.genes_counter; i ++)
     {
 		PyObject *l = PyList_New(2);
