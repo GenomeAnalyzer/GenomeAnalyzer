@@ -15,6 +15,69 @@
 
 // ATC 001110
 
+//////////////// Convert to binary
+/**
+ * in : dna_seq : array of char
+ * in : size : size of dna_seq
+ * out : seq : array of binary
+ * Convert a char DNA sequence to its binary sequence
+ */
+short* convert_to_binary(char* dna_seq, unsigned size)
+{
+
+    unsigned i = 0;
+    unsigned temp = 0;
+    
+
+    short *seq = calloc(sizeof(short),size); 
+    
+    for (unsigned i = 0;i < size/2; i ++)
+    {
+        switch(dna_seq[i])
+        {
+            case 'A':
+                seq[temp] = 0;
+                seq[temp+1] = 0; 
+                temp += 2;
+
+                break;
+            
+            case 'T':
+                seq[temp] = 1;
+                seq[temp+1] = 1;
+                temp += 2;
+
+                break;
+            
+            case 'C':
+                seq[temp] = 1;
+                seq[temp+1] = 0;
+                temp += 2;
+
+                break;
+            case 'G':
+                seq[temp] = 0;
+                seq[temp+1] = 1;
+                temp += 2;
+
+                break;
+            case 'N':
+                seq[temp] = 0;
+                seq[temp+1] = 0; 
+                temp += 2;
+
+                break;
+            default:
+                printf("Error: wrong letter in the sequence(%c).\nExit.\n",dna_seq[i]);
+
+                return seq;
+        }
+
+    }
+
+    return seq;
+
+}
 //////////////// Generating mRNA
 /**
  * in : gene_seq : array of binary

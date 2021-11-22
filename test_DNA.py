@@ -1,8 +1,17 @@
 import pytest
 import DNA
 import array
+import moduleDNA as m
 
 ###### Verify if C extension in Python is working #####
+
+def test_DNA_convert_to_binary():
+	res = DNA.convert_to_binary("AATTG",10)
+	assert res == [0,0,0,0,1,1,1,1,0,1]
+
+def test_DNA_module_read_file():
+	res = m.read_file("fastas/test.fasta")
+	assert res == "AATTG"
 
 def test_DNA_generating_mRNA():
 	res = DNA.generating_mRNA(array.array('i', [0,1,0,0,1,1,0,0,0,1,1,0]))

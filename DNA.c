@@ -11,6 +11,28 @@ static PyObject *DNA_version(PyObject *self)
 	return Py_BuildValue("s", "DNA version 0.1");
 }
 
+//////////////// Convert to binary
+static PyObject *DNA_convert_to_binary(PyObject *self, PyObject *args)
+{
+	char *obj = NULL;
+
+	unsigned obj2 = 0;
+	//Get the parameter (char* value)
+	if(!PyArg_ParseTuple(args, "si", &obj,&obj2))
+	    return NULL;
+
+	 short *test = convert_to_binary(obj,obj2);
+	 PyObject *pylist, *item;
+	 //TODO: Need to find max element 
+	pylist = PyList_New(obj2);
+
+	for (unsigned  i=0; i < obj2; i++) {
+		item = PyLong_FromLong(test[i]);
+		PyList_SetItem(pylist, i, item);
+	}
+return pylist;
+}
+
 //////////////// Generating mRNA
 static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 {
@@ -192,6 +214,7 @@ static PyObject *DNA_hamming(PyObject *self, PyObject *args)
 
 //Register the methods to be made available Python side
 static PyMethodDef DNA_methods[] = {
+	{ "convert_to_binary", DNA_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},	
 	{ "generating_mRNA", DNA_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a string mRNA sequence"},
 	{ "detecting_genes", DNA_detecting_genes, METH_VARARGS, "Detect genes"},
 	{ "generating_amino_acid_chain", DNA_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein)"},
