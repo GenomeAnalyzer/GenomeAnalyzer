@@ -60,8 +60,8 @@ static void test_detecting_genes(void ** state){
   detecting_genes((unsigned int[])
     {1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0},
                   26, gene_map);
-  assert_ptr_equal(0, gene_map->gene_start[0]);
-  assert_ptr_equal(0, gene_map->gene_end[0]);
+  assert_int_equal(0, gene_map->gene_start[0]);
+  assert_int_equal(0, gene_map->gene_end[0]);
   assert_int_equal(0, gene_map->genes_counter);
 
   // Test if the algorithm is OK in a multiple gene case: xxxxAUGxxxxUAGxxxAUGxxxUAAxxx
