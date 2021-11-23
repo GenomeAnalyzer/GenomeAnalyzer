@@ -24,13 +24,12 @@
  */
 short* convert_to_binary(char* dna_seq, unsigned size)
 {
-
     unsigned i = 0;
     unsigned temp = 0;
     
 
-    short *seq = calloc(sizeof(short),size); 
-    
+    short *seq = malloc(sizeof(short)*size); 
+
     for (unsigned i = 0;i < size/2; i ++)
     {
         switch(dna_seq[i])

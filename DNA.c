@@ -21,9 +21,9 @@ static PyObject *DNA_convert_to_binary(PyObject *self, PyObject *args)
 	if(!PyArg_ParseTuple(args, "si", &obj,&obj2))
 	    return NULL;
 
+	obj2 *=2;
 	 short *test = convert_to_binary(obj,obj2);
 	 PyObject *pylist, *item;
-	 //TODO: Need to find max element 
 	pylist = PyList_New(obj2);
 
 	for (unsigned  i=0; i < obj2; i++) {

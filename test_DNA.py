@@ -6,7 +6,7 @@ import moduleDNA as m
 ###### Verify if C extension in Python is working #####
 
 def test_DNA_convert_to_binary():
-	res = DNA.convert_to_binary("AATTG",10)
+	res = DNA.convert_to_binary("AATTG",5)
 	assert res == [0,0,0,0,1,1,1,1,0,1]
 
 def test_DNA_module_read_file():
