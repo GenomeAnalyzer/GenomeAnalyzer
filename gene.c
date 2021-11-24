@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "gene.h"
 
 //A   : 00
@@ -15,39 +16,136 @@
 
 // ATC 001110
 
+//////////////// Convert to binary
+/**
+ * in : dna_seq : array of char
+ * in : size : size of dna_seq
+ * out : seq : array of binary
+ * Convert a char DNA sequence to its binary sequence
+ */
+short* convert_to_binary(char* dna_seq, unsigned size){
+    unsigned i = 0;
+    unsigned temp = 0;
+
+    short* seq = calloc(2*size, sizeof(short));
+
+    for (unsigned i = 0;i < size; i++){
+        switch (dna_seq[i]){
+            case 'A':
+                seq[temp] = 0;
+                seq[temp + 1] = 0;
+                temp += 2;
+                break;
+
+            case 'T':
+                seq[temp] = 1;
+                seq[temp + 1] = 1;
+                temp += 2;
+
+                break;
+
+            case 'C':
+                seq[temp] = 1;
+                seq[temp + 1] = 0;
+                temp += 2;
+
+                break;
+            case 'G':
+                seq[temp] = 0;
+                seq[temp + 1] = 1;
+                temp += 2;
+
+                break;
+            case 'N':
+                seq[temp] = 0;
+                seq[temp + 1] = 0;
+                temp += 2;
+
+                break;
+            default:
+                printf("Error: wrong letter in the sequence(%c).\nExit.\n", dna_seq[i]);
+                return seq;
+        }
+    }
+
+    return seq;
+}
+
+
+// short * compress(int size, char* dna_seq){
+//     int it = 0;
+//     printf("%s_%d", dna_seq, size);
+//     // short * seq = malloc(size*2*sizeof(short ));
+//     short * seq[2*size];
+
+//     printf("uhuh\n");
+
+//     for (int i = 0;i < size; i++) {
+//         it += 2;
+//         if(dna_seq[i] == 'A'){
+//             seq[it] = 0;
+//             seq[it + 1] = 0;
+//         }
+//         else if(dna_seq[i] == 'T'){
+//             seq[it] = 1;
+//             seq[it + 1] = 1;
+//         }
+//         else if(dna_seq[i] == 'C'){
+//             seq[it] = 1;
+//             seq[it + 1] = 0;
+//         }
+//         else if(dna_seq[i] == 'G'){
+//             seq[it] = 0;
+//             seq[it + 1] = 1;
+//         }
+//         else if(dna_seq[i] == 'N'){
+//             seq[it] = 0;
+//             seq[it + 1] = 0;
+//         }
+//         else{
+//             printf("Error: wrong letter in the sequence(%c).\nExit.\n", dna_seq[i]);
+//             return seq;
+//         }
+//     }
+//     return seq;
+// }
+
 //////////////// Generating mRNA
 /**
- * generating_mRNA - Convert a binary DNA sequence to a string mRNA sequence
- * dna_seq      array of binary
- * seq_len      size of dna_seq
- *
- * rna_seq      array of char
+ * in : gene_seq : array of binary
+ * in : seq_len : size of dna_seq
+ * out : rna_seq : array of char
+ * Convert a binary DNA sequence to a string mRNA sequence
  */
-char* generating_mRNA(int* dna_seq, int seq_len) {
+char* generating_mRNA(const unsigned int gene_seq [], const unsigned int seq_size) {
     // Check the input argument
-    if (!dna_seq)
+    if (!gene_seq)
         return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
 
     // Create and check the output
     char* rna_seq = NULL;
-    rna_seq = malloc(sizeof(*rna_seq) * (seq_len / 2));
+    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 1);
     if (!rna_seq)
         return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
 
     int j = 0;
     // Parse the binary DNA sequence two by two
-    for (int i = 0; i < seq_len; i += 2) {
-        switch (dna_seq[i]) {
+    for (int i = 0; i < seq_size; i += 2) {
+        switch (gene_seq[i]) {
         case 0:
-            if (dna_seq[i + 1] == 0)
+            if (gene_seq[i + 1] == 0)
+                // A = 00
                 rna_seq[j] = 'A';
-            else if (dna_seq[i + 1] == 1)
+            else if (gene_seq[i + 1] == 1)
+                // G = 01
                 rna_seq[j] = 'G';
             break;
         case 1:
-            if (dna_seq[i + 1] == 0)
+            if (gene_seq[i + 1] == 0)
+                // C = 10
                 rna_seq[j] = 'C';
-            else if (dna_seq[i + 1] == 1)
+            else if (gene_seq[i + 1] == 1)
+                // U = 11
                 rna_seq[j] = 'U';
             break;
         default:
@@ -60,38 +158,56 @@ char* generating_mRNA(int* dna_seq, int seq_len) {
 
 //////////////// Detecting genes 
 /*
-*
-*   Input : unsigned int gene[] -> sequence of genes , gene_map -> Struct to map the genes
-*   Output : void
-*   Function: detect if a gene exists in the sequence and insert it in the structure
-*
+* in : gene : sequence of genes
+* in : gene_map : struct to map the genes
+* out : void
+* Detect if a gene exists in the sequence and insert it in the structure
 */
-void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
+void detecting_genes(const unsigned int gene [], const unsigned int gene_size, gene_map_t* gene_map) {
     //struct gene_map_s gene_map;
     gene_map->genes_counter = 0;
+
+    // Check if memory ever have been allocated, do it if not
+    if(!gene_map->gene_start || !gene_map->gene_end){
+        gene_map->gene_start = malloc(sizeof(*gene_map->gene_start) * MAX_GENES);
+        gene_map->gene_end = malloc(sizeof(*gene_map->gene_end) * MAX_GENES);
+
+        if (!gene_map->gene_start || !gene_map->gene_end){
+            printf("ERROR: detecting_genes: cannot allocate memory\n");
+            return;
+        }
+    }
+
 
     int start_pos = -1;
     int stop_pos = -1;
 
     int i = 0;
 
-    while ((i + 6) < 1000) {
+    while ((i + 6) <= gene_size) {
 
 
         if (start_pos == -1 && stop_pos == -1) {
 
             //If a start pos and a stop pos doesn't exist, search for ATC
             // if (!(gene[i%32] & ( 1 << (i%32) ))
-            if (gene[i] == 0 && gene[i + 1] == 0 && gene[i + 2] == 1 && gene[i + 3] == 1 && gene[i + 4] == 1 && gene[i + 5] == 0) {
-                //if atc, it's the start of a gene
+            if (gene[i] == 0 && gene[i + 1] == 0 && gene[i + 2] == 1 
+                && gene[i + 3] == 1 && gene[i + 4] == 1 && gene[i + 5] == 0) {
+            //if atc, it's the start of a gene
                 start_pos = i;
+                i += 6;
             }
+            else
+                i += 2;
         }
-        else
+        else{
             if (start_pos != -1 && stop_pos == -1) {
                 //if a start pos exists , search for UAA / UAG / UGA
-                if (((gene[i] == 1 && gene[i + 1] == 1 && gene[i + 2] == 0) && (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 0)) || (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 1) || (gene[i + 3] == 1 && gene[i + 4] == 0 && gene[i + 5] == 0)) {
-                    //It's the end of a gene          
+                if ((gene[i] == 1 && gene[i + 1] == 1 && gene[i + 2] == 0) 
+                    && ((gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 0)
+                        || (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 1)
+                        || (gene[i + 3] == 1 && gene[i + 4] == 0 && gene[i + 5] == 0))) {
+                   //It's the end of a gene          
                    //If a start pos and an stop pos has been found, a gene exists so we save it in the struc
                     gene_map->gene_start[gene_map->genes_counter] = start_pos;
                     gene_map->gene_end[gene_map->genes_counter] = i;
@@ -100,48 +216,55 @@ void detecting_genes(unsigned int gene [], gene_map_t* gene_map) {
 
                     start_pos = -1;
                     stop_pos = -1;
+                    i += 6;
                 }
+                else
+                    i += 2;
             }
-
-        i++;
+            else
+                i += 2;
+        }
     }
-
 }
-
 //////////////// Generating an amino acid chain (protein) 
 /*
  * in : seq : original mRNA sequence.
  * out : char* : protein in symbols
  * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
 */
+// char* generating_amino_acid_chain(int seq_size, char* seq, const unsigned int gene_size, gene_map_t* gene_map, int codons_count, codon codons []) {
+// char* generating_amino_acid_chain(int seq_size, char* seq, int codons_count, codon codons []) {
+void generating_amino_acid_chain(char ** proteines, short seq_size, short* seq, gene_map_t gene_map, short codons_count, codon codons[]) {
+    for (int i = 0; i < gene_map.genes_counter; i ++){
+        printf("gene_map start, end : %llu, %llu || proteine sizeof : %llu\n", gene_map.gene_start[i], gene_map.gene_end[i], (gene_map.gene_end[i] - gene_map.gene_start[i]) / 6);
+        proteines[i] = malloc(sizeof(char) * (gene_map.gene_end[i] - gene_map.gene_start[i]) / 6 + 1);
+        short count = 0;
+        // j + 6 <= gene_end car on lit j + 6 dans la boucle, et on s'arrête avant gene_end.
+        for (int j = gene_map.gene_start[i]; j + 6 <= gene_map.gene_end[i]; j += 6) {
+            short *cdn = malloc(sizeof(short)*6);
+            if (!cdn) printf("ERROR\n");
+            memcpy(cdn, seq + j, 6*sizeof(short));
+            char aa = codon_binary_to_aa(cdn, codons_count, codons);
+            free(cdn);
+            proteines[i][count] = aa;
+            count ++;
+        }
+        proteines[i][count] = '\0'; // End protein here.
+    }
+}
 
-char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, codon codons []) {
-    gene_map_t gene;
-    char* protein = "";
-    gene.genes_counter = 0;
-    gene.gene_start = "AUG";
-    gene.gene_end = NULL;
-
-    if ((seq_size % 3) != 0)
-        return printf("ERROR: generating_amino_acid_chain: Invalid sequence size\n"), NULL;
-
-    for (int i = 0; i < seq_size; i += 3) {
-        char cod = seq[i] + seq[i + 1] + seq[i + 2];
-        if (i == 0 && cod != "AUG")
-            return printf("ERROR: generating_amino_acid_chain: Sequence does not start with a start codon (AUG)\n"), NULL;
-        for (int j = 0; j < codons_count; j++) {
-            if (cod == codons[j].codon) {
-                protein += codons[j].symbol;
-                gene.genes_counter += 1;
-                if (codons[j].symbol == "O") {
-                    gene.gene_end = codons[j].codon;
-                    return protein;
-                }
-                break;
-            }
+char codon_binary_to_aa(short* cdn, short codons_count, codon *codons){
+    for(int i =0; i<6;i++)
+    printf("%d", cdn[i]);
+    for (short i = 0; i < codons_count; i++){
+        if (!memcmp(cdn, codons[i].codon, 6 * sizeof(short))) {
+            printf("=> %c\n", codons[i].symbol);
+            return codons[i].symbol;
         }
     }
-    return printf("ERROR: generating_amino_acid_chain: sequence has no END codon\n"), NULL;
+    printf("=> A\n");
+    return 'A';
+    return printf("ERROR: codon_binary_to_aa: Codon not found\n"), NULL;
 }
 
 //////////////// Detecting probable mutation zones
@@ -182,27 +305,26 @@ bool detecting_mutations(const unsigned int gene_seq [], const unsigned long lon
 
 //////////////// Calculating the matching score of two sequences
 /*
- * in : seq1 : First sequence in binary
- * in : seq2 : Second sequence in binary
+ * in : seq1 : first sequence in binary
+ * in : seq2 : second sequence in binary
  * out : float : matching score in %
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
 */
-
 float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []) {
-    // Check outside of function that seq1 and seq2 are the same size
 
     int total_size_sequence = 0;
     int total_hamming_distance = 0;
 
+    // Check outside of function that seq1 and seq2 are the same size
     for (int i = 0; i < sequence_size; i++) {
         int size = binary_size_count(seq1[i]);
         // Make check outside of function ?
         if (size != binary_size_count(seq2[i])) {
-            printf("ERROR: generating_mRNA: wrong size sequence\n");
+            printf("ERROR: calculating_matching_score: wrong size sequence\n");
             return -1.0;
         }
         total_size_sequence += size;
-        total_hamming_distance += hamming(seq1, seq2);
+        total_hamming_distance += hamming(seq1[i], seq2[i]);
     }
 
     return 100 * total_hamming_distance / total_size_sequence;
@@ -225,8 +347,8 @@ int binary_size_count(int b) {
 
 //////////////// Hamming calculation
 /*
- * in : seq1 : First sequence in binary
- * in : seq2 : Second sequence in binary
+ * in : seq1 : first sequence in binary
+ * in : seq2 : second sequence in binary
  * out : int : count of bits
  * The algorithms calculate the hamming distance between two binary sequences
 */

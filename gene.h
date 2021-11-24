@@ -15,7 +15,7 @@ typedef struct gene_map_s {
 }gene_map_t;
 
 typedef struct codon {
-    char* codon;
+    short codon[6];
     char* short_name;
     char* full_name;
     char symbol;
@@ -23,9 +23,14 @@ typedef struct codon {
 
 //extern struct gene_map_s gene_map;
 
-char* generating_mRNA(int* dna_seq, int seq_len);
-void  detecting_genes(unsigned int gene [], gene_map_t* gene_map);
-char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, codon codons []);
+char* generating_mRNA(const unsigned int gene_seq [], const unsigned int seq_size);
+void detecting_genes(const unsigned int gene [], const unsigned int gene_size, gene_map_t* gene_map);
+// char* generating_amino_acid_chain(int seq_size, char* seq, const unsigned int gene_size, gene_map_t* gene_map, int codons_count, codon codons []);
+// char* generating_amino_acid_chain(int seq_size, char* seq, int codons_count, codon codons []);
+// short* compress(int size, char* dna_seq);
+// char* generating_amino_acid_chain(int seq_size, char* seq);
+void generating_amino_acid_chain(char** proteines, short seq_size, short* seq, gene_map_t gene_map, short codons_count, codon codons[]);
+char codon_binary_to_aa(short* cdn, short codons_count, codon* codons);
 bool detecting_mutations(const unsigned int gene_seq [], const unsigned long long size_sequence);
 float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []);
 int binary_size_count(int b);
