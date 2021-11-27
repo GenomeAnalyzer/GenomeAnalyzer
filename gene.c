@@ -231,30 +231,38 @@ char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, cod
 * (at least 1/5th of the gene sequence's size) it returns true, else it returns false.
 * Precondition: gene_seq is of size size_sequence.
 */
-bool detecting_mutations(const unsigned int gene_seq [], const unsigned long long size_sequence) {
-    unsigned long long detect_mut = 0;  //Counting size of GC sequence
+void detecting_mutations(const unsigned short gene_seq [], const unsigned long size_sequence,
+    mutation_map mut_m) {
+    unsigned long detect_mut = 0;  //Counting size of GC sequence
+    unsigned short tmp_start_mut = 0;   //stock start mutation
+    unsigned cmp = 0;   //counter of all mutation zones
 
     //Read the sequence
-    for (unsigned long long i = 0; i < size_sequence; i += 2) {
-        //Increment detect_mut if find a C or G gene
+    for (unsigned long i = 0; i < size_sequence; i += 2) {
+        //Increment detect_mut if find a C or G nucl
         if (((__builtin_popcount(gene_seq[i]) == 0) && (__builtin_popcount(gene_seq[i + 1]) == 1)) ||
             ((__builtin_popcount(gene_seq[i]) == 1) && (__builtin_popcount(gene_seq[i + 1]) == 0))) {
-            detect_mut++;
+            if(detect_mut == 0){tmp_start_mut = i;}
+            detect_mut+=2;
         }
-        //Put detect_mut to 0 if find a A or T gene
+        //Put detect_mut to 0 if find a A or T nucl
         else {
             //Check if previous GC sequence is a probable mutation zone
-            if (detect_mut >= ((size_sequence / 2) / 5)) {
-                return true;
+            if (detect_mut >= (size_sequence / 5)) {
+                mut_m.start_mut[cmp] = tmp_start_mut;
+                mut_m.end_mut[cmp] = i-1;
+                mut_m.size[cmp] = detect_mut-1;
+                cmp++;
             }
             detect_mut = 0;
         }
     }
     //Check if ending sequence is a probable mutation zone
-    if (detect_mut >= ((size_sequence / 2) / 5)) {
-        return true;
+    if (detect_mut >= (size_sequence / 5)) {
+        mut_m.start_mut[cmp] = tmp_start_mut;
+        mut_m.end_mut[cmp] = size_sequence-1;
+        mut_m.size[cmp] = detect_mut-1;
     }
-    return false;
 }
 
 
