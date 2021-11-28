@@ -83,9 +83,9 @@ static void test_detecting_genes(void ** state){
 //Tests for detecting_mutations function
 static void test_detecting_mutations(void ** state){
   mutation_map M;
-  M.size = malloc(60 * sizeof(unsigned short));
-  M.start_mut = malloc(60 * sizeof(unsigned short));
-  M.end_mut = malloc(60 * sizeof(unsigned short));
+  M.size = malloc(5 * sizeof(unsigned long));
+  M.start_mut = malloc(5 * sizeof(unsigned long));
+  M.end_mut = malloc(5 * sizeof(unsigned long));
 
   //A : 00
   //T : 11
@@ -140,6 +140,10 @@ static void test_detecting_mutations(void ** state){
   assert_int_equal(0,M.size[3]);
   assert_int_equal(0,M.start_mut[3]);
   assert_int_equal(0,M.end_mut[3]);
+
+  free(M.size);
+  free(M.start_mut);
+  free(M.end_mut);
   }
 
 int main(void) {

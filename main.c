@@ -16,9 +16,9 @@ int main(int argc, char const *argv[])
 	unsigned short sequence2[30] = {0,1,1,1,0,1,0,0,0,0,1,0,1,1,1,1,0,1,0,1,0,0,1,0,1,0,0,0,1,1};
 
 	mutation_map M;
-	M.size = malloc(30 * sizeof(unsigned long));
-	M.start_mut = malloc(30 * sizeof(unsigned long));
-	M.end_mut = malloc(30 * sizeof(unsigned long));
+	M.size = malloc(5 * sizeof(unsigned long));
+	M.start_mut = malloc(5 * sizeof(unsigned long));
+	M.end_mut = malloc(5 * sizeof(unsigned long));
 
 	detecting_mutations(sequence1, 30, M);
 	if(M.size[0]){
@@ -41,5 +41,8 @@ int main(int argc, char const *argv[])
 
 	printf("ok\n");
 
+	free(M.size);
+	free(M.start_mut);
+	free(M.end_mut);
 	return 0;
 }
