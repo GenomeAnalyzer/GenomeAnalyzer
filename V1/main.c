@@ -21,21 +21,30 @@ unsigned int* alea_gen(){
 }
 
 
- int* test_gen(){
-      int* gene= calloc(sizeof(int*),MAX_GENES);
+unsigned int* test_gen(){
+     unsigned int* gene= calloc(sizeof(int*),MAX_GENES);
     
 
     //Example of a gene so the gene map register it 
-    gene[0] = 000011011100;
-
+    gene[0] = 0;
+    gene[1] = 0;
+    gene[2] = 1;
+    gene[3] = 1;
+    gene[4] = 1;
+    gene[5] = 0;
+    gene[6] = 1;
+    gene[7] = 1;
+    gene[8] = 0;
+    gene[9]= 0;
+    gene[10] = 0;
+    gene[11] = 0; 
 
     return gene;  
 }
 
 void print_test(gene_map_t *gene_map)
 {
-    printf("Début print de test\n");
-    for( long long i = 0; i < gene_map->genes_counter; i ++)
+    for(unsigned long long i = 0; i < gene_map->genes_counter; i ++)
     {
         printf("Gene \x1b[31m%lld\x1b[0m: \x1b[32m[%lld:%lld]\x1b[0m\n",i,gene_map->gene_start[i],gene_map->gene_end[i]);
     }
@@ -43,9 +52,9 @@ void print_test(gene_map_t *gene_map)
 
 int main(){
 
-     int* gene= test_gen();
+    //unsigned int* gene= test_gen();
     
-    // int* gene= alea_gen();
+    unsigned int* gene= alea_gen();
 
 
    gene_map_t gene_map;
@@ -56,7 +65,7 @@ int main(){
 
     gene_map.gene_start = calloc(sizeof(int*),MAX_GENES);
 
-    detecting_genes(gene,13,&gene_map);
+    detecting_genes(gene,&gene_map);
 
     //Test print 
 

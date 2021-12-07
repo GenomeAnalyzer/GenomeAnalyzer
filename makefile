@@ -6,7 +6,7 @@ run: test
 	./main
 
 test: gene.c main.c
-	gcc -Wall -Wextra *.c -o  main
+	gcc -Wall -Wextra gene.c main.c -o  main
 
 clean:
 	rm -f *.o main

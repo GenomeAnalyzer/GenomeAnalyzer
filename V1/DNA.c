@@ -11,6 +11,7 @@ static PyObject *DNA_version(PyObject *self)
 	return Py_BuildValue("s", "DNA version 0.1");
 }
 
+
 //////////////// Convert to binary
 static PyObject *DNA_convert_to_binary(PyObject *self, PyObject *args)
 {
@@ -21,9 +22,9 @@ static PyObject *DNA_convert_to_binary(PyObject *self, PyObject *args)
 	if(!PyArg_ParseTuple(args, "si", &obj,&obj2))
 	    return NULL;
 
-	obj2 *=2;
 	 short *test = convert_to_binary(obj,obj2);
 	 PyObject *pylist, *item;
+	 //TODO: Need to find max element 
 	pylist = PyList_New(obj2);
 
 	for (unsigned  i=0; i < obj2; i++) {
@@ -31,6 +32,8 @@ static PyObject *DNA_convert_to_binary(PyObject *self, PyObject *args)
 		PyList_SetItem(pylist, i, item);
 	}
 return pylist;
+	//return ctypes.cast(test, ctypes.POINTER(ctypes.c_int));
+   //return Py_BuildValue("O", PyLong_FromVoidPtr(test));
 }
 
 //////////////// Generating mRNA
@@ -63,6 +66,7 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 
     //Return the char* value as a Python string object
 	return Py_BuildValue("s", generating_mRNA(view.buf, view.shape[0]));
+
 }
 
 //////////////// Detecting genes
@@ -94,10 +98,13 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
     }
 
 	gene_map_t g;
+	g.genes_counter = 0;
+	g.gene_start = malloc(sizeof(int) * MAX_GENES);
+	g.gene_end = malloc(sizeof(int) * MAX_GENES);
 
-	detecting_genes(view.buf, view.shape[0], &g);
+	detecting_genes(view.buf, &g);
 
-	PyObject *List = PyList_New(0);
+	PyObject *List = PyList_New(0);	
 	for(unsigned long long i = 0; i < g.genes_counter; i ++)
     {
 		PyObject *l = PyList_New(2);
@@ -214,7 +221,7 @@ static PyObject *DNA_hamming(PyObject *self, PyObject *args)
 
 //Register the methods to be made available Python side
 static PyMethodDef DNA_methods[] = {
-	{ "convert_to_binary", DNA_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},	
+	{ "convert_to_binary", DNA_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},
 	{ "generating_mRNA", DNA_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a string mRNA sequence"},
 	{ "detecting_genes", DNA_detecting_genes, METH_VARARGS, "Detect genes"},
 	{ "generating_amino_acid_chain", DNA_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein)"},
