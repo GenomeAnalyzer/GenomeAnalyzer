@@ -613,11 +613,6 @@ float calculating_matching_score(const unsigned short seq1 [], const int sequenc
     if (!seq1 || !seq2)
         return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
 
-    int max_size = sequence_size1 >= sequence_size2 ? sequence_size1 : sequence_size2;
-    int min_size = sequence_size1 >= sequence_size2 ? sequence_size2 : sequence_size1;
-    int diff_size = (max_size - min_size);
-    int count = 0;
-
     // If the sequences don't have the same size, do (with x = 1 or 0):
 
     //  xxxxxxxxx
@@ -628,25 +623,18 @@ float calculating_matching_score(const unsigned short seq1 [], const int sequenc
 
     // And, 0 ^ x = x
 
-    if(max_size == sequence_size1){
-        for (int i = 0; i < diff_size; ++i){
-            if (seq1[i] == 1)
-                ++count;
-        }
-        for (int i = diff_size; i < max_size; ++i){
-            if ((seq1[i] ^ seq2[i - diff_size]) == 1)
-                    ++count;
-        }
-    }
-    else{
-        for (int i = 0; i < diff_size; ++i){
-            if (seq2[i] == 1)
-                ++count;
-        }
-        for (int i = diff_size; i < max_size; ++i){
-            if ((seq1[i  - diff_size] ^ seq2[i]) == 1)
-                    ++count;
-        }
+    const unsigned short* s1 = sequence_size1 >= sequence_size2 ? seq1 : seq2;
+    const unsigned short* s2 = sequence_size1 >= sequence_size2 ? seq2 : seq1;
+    int diff_size = sequence_size1 >= sequence_size2 ? sequence_size1 - sequence_size2 : sequence_size2 - sequence_size1;
+    int max_size = sequence_size1 >= sequence_size2 ? sequence_size1 : sequence_size2;
+    int count = 0;
+
+    for (int i = 0; i < diff_size; i++)
+        if (s1[i]) ++count;
+
+
+    for (int i = diff_size; i < max_size; ++i) {
+        if (s1[i] ^ s2[i - diff_size]) ++count;
     }
 
     float y = ((float)count * 100.0) / (float)max_size;
