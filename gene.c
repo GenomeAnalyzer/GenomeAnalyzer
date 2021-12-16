@@ -574,8 +574,8 @@ void detecting_mutations(const unsigned short gene_seq [], const unsigned long s
     //Read the sequence
     for (unsigned long i = 0; i < size_sequence; i += 2) {
         //Increment detect_mut if find a C or G nucl
-        if (((__builtin_popcount(gene_seq[i]) == 0) && (__builtin_popcount(gene_seq[i + 1]) == 1)) ||
-            ((__builtin_popcount(gene_seq[i]) == 1) && (__builtin_popcount(gene_seq[i + 1]) == 0))) {
+        if (((gene_seq[i] == 0) && (gene_seq[i + 1] == 1)) ||
+            ((gene_seq[i] == 1) && (gene_seq[i + 1]) == 0)) {
             if(detect_mut == 0){tmp_start_mut = i;}
             detect_mut+=2;
         }
