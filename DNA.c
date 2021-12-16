@@ -112,18 +112,33 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 //////////////// Generating an amino acid chain (protein)
 static PyObject *DNA_generating_amino_acid_chain(PyObject *self, PyObject *args)
 {
-	char *obj1 = NULL;
-	int obj2 = 0;
-	int obj3 = 0;
+    Py_buffer view;
+	PyObject *obj = NULL;
 
-	//Get the parameter (char* value)
-	if(!PyArg_ParseTuple(args, "sii", &obj1, &obj2, &obj3))
+	//Get the parameter (1-dimensional arrays)
+	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
-	codon c;
+	//Get the array memory view
+	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+        return NULL;
 
-	//Return the char* value as a Python string object
-    return Py_BuildValue("s", generating_amino_acid_chain(obj1, obj2, obj3, &c));
+    if (view.ndim != 1)
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
+		PyBuffer_Release(&view);
+		return NULL;
+    }
+
+    if (strcmp(view.format, "i"))
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of int.");
+		PyBuffer_Release(&view);
+		return NULL;
+    }
+
+    //Return the char* value as a Python string object
+	return Py_BuildValue("s", generating_amino_acid_chain(view.buf, view.shape[0]));
 }
 
 //////////////// Detecting probable mutation zones

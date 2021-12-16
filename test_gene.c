@@ -80,6 +80,35 @@ static void test_detecting_genes(void ** state){
   free(gene_map);
 }
 
+static void test_generating_aa_chain(void ** state){
+  // Test if the algorithm is OK
+  //  --- Test all the amino acid
+  assert_string_equal("KNKNTTTTRSRSIIIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYYSSSSCWCLFLFMOOO",
+                      generating_amino_acid_chain((unsigned short[]){0,0,0,0,0,0,0,0,0,0,1,0,
+                         0,0,0,0,0,1,0,0,0,0,1,1,0,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,
+                         1,1,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,1,0,1,0,0,0,1,1,1,0,0,1,1,0,0,0,0,
+                         1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,1,1,0,0,0,1,1,
+                         1,0,1,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,0,1,0,1,1,1,0,0,1,0,0,1,0,0,1,
+                         1,0,1,0,0,1,0,1,1,0,0,1,1,1,1,0,1,1,0,0,1,0,1,1,1,0,1,0,1,1,0,1,1,0,
+                         1,1,1,1,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,1,0,1,0,0,1,1,0,1,1,0,0,0,
+                         0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,1,0,1,0,1,0,0,0,1,0,1,1,0,0,1,0,1,
+                         0,1,0,1,0,1,1,1,0,1,1,1,0,0,0,1,1,1,1,0,0,1,1,1,0,1,0,1,1,1,1,1,1,1,
+                         0,0,1,0,1,1,0,0,1,1,1,1,1,0,0,0,1,1,1,0,1,0,1,1,1,0,0,1,1,1,1,0,1,1,
+                         1,1,0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,0,1,1,1,1,
+                         0,1,1,1,1,1,1,1,0,0,1,1,0,1,1,1,0,0,0,0,1,1,0,0,0,1,1,1,0,1,0,0},
+                        384));
+
+  // Test whether the function correctly detects errors:
+  // --- NULL error
+  assert_ptr_equal(NULL, generating_amino_acid_chain(NULL, 0));
+  // --- invalid value in gene_seq
+  assert_ptr_not_equal("MRGO",
+                       generating_amino_acid_chain((unsigned short[]){0,0,1,44,0,1,1,0,0,1,1,1,
+                        0,1,0,1,0,1,1,1,0,0,0,1},
+                       24));
+
+}
+
 //Tests for detecting_mutations function
 static void test_detecting_mutations(void ** state){
   //The function should return true if we give in input an array with a 0,1 or 1,0 continuous sequence
@@ -95,6 +124,7 @@ int main(void) {
   const struct CMUnitTest tests[] = {
       cmocka_unit_test(test_generating_mRNA),
       cmocka_unit_test(test_detecting_genes),
+      cmocka_unit_test(test_generating_aa_chain),
       cmocka_unit_test(test_detecting_mutations),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
