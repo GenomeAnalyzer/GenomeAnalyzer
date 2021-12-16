@@ -132,8 +132,7 @@ static void test_calculating_matching_score(void ** state){
 
   // Test whether the function correctly detects errors:
   // --- NULL error
-
-  // --- invalid value in gene_seq
+  assert_float_equal(-1.0, calculating_matching_score(NULL, 0, NULL, 0), 0);
 
 }
 

@@ -609,6 +609,9 @@ void detecting_mutations(const unsigned short gene_seq [], const unsigned long s
 */
 float calculating_matching_score(const unsigned short seq1 [], const int sequence_size1,
                                  const unsigned short seq2 [], const int sequence_size2) {
+    // Check the input argument
+    if (!seq1 || !seq2)
+        return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
 
     int max_size = sequence_size1 >= sequence_size2 ? sequence_size1 : sequence_size2;
     int min_size = sequence_size1 >= sequence_size2 ? sequence_size2 : sequence_size1;
