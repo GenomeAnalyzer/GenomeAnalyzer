@@ -10,7 +10,7 @@
 static void test_generating_mRNA(void ** state){
   // Test if the algorithm is OK
   assert_string_equal("AUGCGUGGGUAG",
-                      generating_mRNA((unsigned int[]){0,0,1,1,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1},
+                      generating_mRNA((unsigned short[]){0,0,1,1,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1},
                                       24));
 
   // Test whether the function correctly detects errors:
@@ -18,7 +18,7 @@ static void test_generating_mRNA(void ** state){
   assert_ptr_equal(NULL, generating_mRNA(NULL, 0));
   // --- invalid value in gene_seq
   assert_ptr_not_equal("AUGCGUGGGUAG",
-                       generating_mRNA((unsigned int[]){0,0,1,44,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1},
+                       generating_mRNA((unsigned short[]){0,0,1,44,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1},
                                        24));
 }
 

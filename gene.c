@@ -77,6 +77,7 @@ short* convert_to_binary(char* dna_seq, unsigned size)
     return seq;
 
 }
+
 //////////////// Generating mRNA
 /**
  * in : gene_seq : array of binary
@@ -84,7 +85,7 @@ short* convert_to_binary(char* dna_seq, unsigned size)
  * out : rna_seq : array of char
  * Convert a binary DNA sequence to a string mRNA sequence
  */
-char* generating_mRNA(const unsigned int gene_seq [], const unsigned int seq_size) {
+char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_size) {
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
