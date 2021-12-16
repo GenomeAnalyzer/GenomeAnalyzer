@@ -193,24 +193,24 @@ static PyObject *DNA_calculating_matching_score(PyObject *self, PyObject *args)
 	if (PyObject_GetBuffer(obj2, &view2, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
     	return NULL;
 
-    if (view1.ndim != 1 || view2.ndim != 1)
-    {
+    if (view1.ndim != 1 || view2.ndim != 1){
 		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array.");
 		PyBuffer_Release(&view1);
 		PyBuffer_Release(&view2);
 		return NULL;
     }
 
-    if (strcmp(view1.format, "i") || strcmp(view2.format, "i"))
-    {
-		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of int.");
+    if (strcmp(view1.format, "H") || strcmp(view2.format, "H")){
+		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of unsigned short.");
 		PyBuffer_Release(&view1);
 		PyBuffer_Release(&view2);
-		return NULL;     
+		return NULL;
     }
 
+	// printf("%ld\n", view1.shape[0]);
+
 	//Return the float value as a Python float object
-    return Py_BuildValue("f", calculating_matching_score(view1.shape[0], view1.buf, view2.buf));
+	return Py_BuildValue("f", calculating_matching_score(view1.buf, view1.shape[0], view2.buf, view2.shape[0]));
 }
 
 //////////////// Hamming calculation
