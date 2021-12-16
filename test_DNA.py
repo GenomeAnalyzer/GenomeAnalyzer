@@ -17,14 +17,21 @@ def test_DNA_generating_mRNA():
 	res = DNA.generating_mRNA(array.array('i', [0,1,0,0,1,1,0,0,0,1,1,0]))
 	assert res == "GAUAGC"
 
-def test_DNA_detecting_genes():
-	a = DNA.detecting_genes(array.array('I', [0,0,1,1,0,1,0,0,1,1,0,1,1,1,0,0,0,0]))
-	assert a == [[6,12]]
+# def test_DNA_detecting_genes():
+# 	a = DNA.detecting_genes(array.array('I', [0,0,1,1,0,1,0,0,1,1,0,1,1,1,0,0,0,0]))
+# 	assert a == [[6,12]]
 
-#Maybe not good value, I don't know
 def test_DNA_generating_amino_acid_chain():
-	res = DNA.generating_amino_acid_chain("AUGAGC", 6, 1)
-	assert res == None
+	aa = "AATTGGCCA"
+	# UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf6 in position 4: invalid start byte
+	# UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc5 in position 3: invalid continuation byte
+
+	# bin_dna_seq_array = DNA.convert_to_binary(aa,len(aa))
+
+	bin_dna_seq = array.array('H', [0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0])
+	# bin_dna_seq = array.array('H', bin_dna_seq_array)
+	res = DNA.generating_amino_acid_chain(bin_dna_seq)
+	assert aa == res
 
 def test_DNA_detecting_mutations():
 	res = DNA.detecting_mutations(array.array('I', [0,1,0,0,1,1,0,0,0,1,1,0]))
