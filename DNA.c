@@ -62,7 +62,7 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
     }
 
     //Return the char* value as a Python string object
-	return Py_BuildValue("s", generating_mRNA(view.buf, view.shape[0]));
+	return Py_BuildValue("s#", generating_mRNA(view.buf, view.shape[0]));
 }
 
 //////////////// Detecting genes
@@ -94,6 +94,11 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
     }
 
 	gene_map_t g;
+
+    g.gene_start = malloc(sizeof(*g.gene_start) * view.shape[0]);
+    g.gene_end = malloc(sizeof(*g.gene_end) * view.shape[0]);
+
+
 
 	detecting_genes(view.buf, view.shape[0], &g);
 
