@@ -22,7 +22,7 @@
  * out : seq : array of binary
  * Convert a char DNA sequence to its binary sequence
  */
-short* convert_to_binary(char* dna_seq, unsigned size)
+unsigned short* convert_to_binary(char* dna_seq, unsigned size)
 {
     unsigned i = 0;
     unsigned temp = 0;
@@ -77,6 +77,7 @@ short* convert_to_binary(char* dna_seq, unsigned size)
     return seq;
 
 }
+
 //////////////// Generating mRNA
 /**
  * in : gene_seq : array of binary
@@ -84,7 +85,7 @@ short* convert_to_binary(char* dna_seq, unsigned size)
  * out : rna_seq : array of char
  * Convert a binary DNA sequence to a string mRNA sequence
  */
-char* generating_mRNA(const unsigned int gene_seq [], const unsigned int seq_size) {
+char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_size) {
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
@@ -122,6 +123,7 @@ char* generating_mRNA(const unsigned int gene_seq [], const unsigned int seq_siz
     }
     return rna_seq;
 }
+
 
 //////////////// Detecting genes 
 /*
@@ -175,7 +177,6 @@ void detecting_genes(const unsigned int gene [], const unsigned int gene_size, g
                     gene_map->gene_start[gene_map->genes_counter] = start_pos;
                     gene_map->gene_end[gene_map->genes_counter] = i;
 
-                    printf(" %d %d",start_pos,i);
                     gene_map->genes_counter++;
 
                     start_pos = -1;
@@ -191,39 +192,265 @@ void detecting_genes(const unsigned int gene [], const unsigned int gene_size, g
     }
 
 }
+
+//////////////// Convert binary aa to codon
+/**
+ * in : bin_dna_seq : unsigned short array - size must be 3*2 = 6.
+ * out : aa : array of binary
+ * Convert a binary aa sequence to its aa codon
+ */
+char* binary_to_aa(unsigned short* bin_dna_seq, unsigned size){
+    if (size%2 != 0) {
+        printf("Error: wrong binary size (%d). Must be odd.\nExit.\n",size);
+        return NULL;
+    }
+
+    // char *codon[size/2];
+    char* codon = malloc(sizeof(char)*size/2);
+    for (unsigned i = 0;i < size/2; i ++){
+        if (bin_dna_seq[2*i] == 0 && bin_dna_seq[2*i+1] == 0)
+            codon[i] = 'A'; // Assuming "N" is "A", as it's done in convert_to_binary
+        else if (bin_dna_seq[2*i] == 1 && bin_dna_seq[2*i+1] == 1)
+            codon[i] = 'T';
+        else if (bin_dna_seq[2*i] == 1 && bin_dna_seq[2*i+1] == 0)
+            codon[i] = 'C';
+        else if (bin_dna_seq[2*i] == 0 && bin_dna_seq[2*i+1] == 1)
+            codon[i] = 'G';
+    }
+
+    return codon;
+}
+
 //////////////// Generating an amino acid chain (protein) 
 /*
  * in : seq : original mRNA sequence.
  * out : char* : protein in symbols
  * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
 */
-char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, codon codons []) {
-    gene_map_t gene;
-    char* protein = "";
-    gene.genes_counter = 0;
-    gene.gene_start = "AUG";
-    gene.gene_end = NULL;
+char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsigned int seq_size) {
+    short codon_size = 6;
+    // Check the input argument
+    if (!gene_seq)
+        return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
 
-    if ((seq_size % 3) != 0)
-        return printf("ERROR: generating_amino_acid_chain: Invalid sequence size\n"), NULL;
+    // Create and check the output
+    char* aa_seq = NULL;
+    aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    if (!aa_seq)
+        return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
-    for (int i = 0; i < seq_size; i += 3) {
-        char cod = seq[i] + seq[i + 1] + seq[i + 2];
-        if (i == 0 && cod != "AUG")
-            return printf("ERROR: generating_amino_acid_chain: Sequence does not start with a start codon (AUG)\n"), NULL;
-        for (int j = 0; j < codons_count; j++) {
-            if (cod == codons[j].codon) {
-                protein += codons[j].symbol;
-                gene.genes_counter += 1;
-                if (codons[j].symbol == "O") {
-                    gene.gene_end = codons[j].codon;
-                    return protein;
-                }
-                break;
-            }
+    unsigned temp = 0;
+
+    for (unsigned int i = 0; i < seq_size; i += codon_size) {
+        // The hash functions, takes the 6 bits, and transform the array into an integer.
+        // The integer first char is a 2, for hash generation purposes.
+        int hash = 2;
+        for(int k = i; k<i+codon_size; k++){
+            hash = 10 * hash + gene_seq[k];
         }
+
+        // Switch over the hash.
+        switch(hash){
+        case 2000000 :
+            aa_seq[temp] = 'K';
+            break;
+        case 2000001 :
+            aa_seq[temp] = 'K';
+            break;
+        case 2000010 :
+            aa_seq[temp] = 'N';
+            break;
+        case 2000011 :
+            aa_seq[temp] = 'N';
+            break;
+        case 2000100 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2000101 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2000110 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2000111 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2001000 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001001 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001010 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001011 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001100 :
+            aa_seq[temp] = 'I';
+            break;
+        case 2001101 :
+            aa_seq[temp] = 'M';
+            break;
+        case 2001110 :
+            aa_seq[temp] = 'I';
+            break;
+        case 2001111 :
+            aa_seq[temp] = 'I';
+            break;
+        case 2010000 :
+            aa_seq[temp] = 'E';
+            break;
+        case 2010001 :
+            aa_seq[temp] = 'E';
+            break;
+        case 2010010 :
+            aa_seq[temp] = 'D';
+            break;
+        case 2010011 :
+            aa_seq[temp] = 'D';
+            break;
+        case 2010100 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2010101 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2010110 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2010111 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2011000 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011001 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011010 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011011 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011100 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2011101 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2011110 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2011111 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2100000 :
+            aa_seq[temp] = 'Q';
+            break;
+        case 2100001 :
+            aa_seq[temp] = 'Q';
+            break;
+        case 2100010 :
+            aa_seq[temp] = 'H';
+            break;
+        case 2100011 :
+            aa_seq[temp] = 'H';
+            break;
+        case 2100100 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2100101 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2100110 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2100111 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2101000 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101001 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101010 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101011 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101100 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2101101 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2101110 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2101111 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2110000 :
+            aa_seq[temp] = 'O';
+            break;
+        case 2110001 :
+            aa_seq[temp] = 'O';
+            break;
+        case 2110010 :
+            aa_seq[temp] = 'Y';
+            break;
+        case 2110011 :
+            aa_seq[temp] = 'Y';
+            break;
+        case 2110100 :
+            aa_seq[temp] = 'O';
+            break;
+        case 2110101 :
+            aa_seq[temp] = 'W';
+            break;
+        case 2110110 :
+            aa_seq[temp] = 'C';
+            break;
+        case 2110111 :
+            aa_seq[temp] = 'C';
+            break;
+        case 2111000 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111001 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111010 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111011 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111100 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2111101 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2111110 :
+            aa_seq[temp] = 'F';
+            break;
+        case 2111111 :
+            aa_seq[temp] = 'F';
+            break;
+
+        default:
+            return printf("ERROR: generating_amino_acid_chain: invalid value (%d) in RNA sequence\n", hash), NULL;
+        }
+    
+        temp++;
     }
-    return printf("ERROR: generating_amino_acid_chain: sequence has no END codon\n"), NULL;
+    return aa_seq;
 }
 
 //////////////// Detecting probable mutation zones
@@ -235,7 +462,6 @@ char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, cod
 * (at least 1/5th of the gene sequence's size) it returns true, else it returns false.
 * Precondition: gene_seq is of size size_sequence.
 */
-/*
 void detecting_mutations(const unsigned short gene_seq [], const unsigned long size_sequence,
     mutation_map mut_m) {
     unsigned long detect_mut = 0;  //Counting size of GC sequence
@@ -245,8 +471,8 @@ void detecting_mutations(const unsigned short gene_seq [], const unsigned long s
     //Read the sequence
     for (unsigned long i = 0; i < size_sequence; i += 2) {
         //Increment detect_mut if find a C or G nucl
-        if (((__builtin_popcount(gene_seq[i]) == 0) && (__builtin_popcount(gene_seq[i + 1]) == 1)) ||
-            ((__builtin_popcount(gene_seq[i]) == 1) && (__builtin_popcount(gene_seq[i + 1]) == 0))) {
+        if (((gene_seq[i] == 0) && (gene_seq[i + 1] == 1)) ||
+            ((gene_seq[i] == 1) && (gene_seq[i + 1]) == 0)) {
             if(detect_mut == 0){tmp_start_mut = i;}
             detect_mut+=2;
         }
@@ -269,7 +495,6 @@ void detecting_mutations(const unsigned short gene_seq [], const unsigned long s
         mut_m.size[cmp] = detect_mut-1;
     }
 }
-*/
 
 
 //////////////// Calculating the matching score of two sequences
@@ -279,24 +504,38 @@ void detecting_mutations(const unsigned short gene_seq [], const unsigned long s
  * out : float : matching score in %
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
 */
-float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []) {
+float calculating_matching_score(const unsigned short seq1 [], const int sequence_size1,
+                                 const unsigned short seq2 [], const int sequence_size2) {
+    // Check the input argument
+    if (!seq1 || !seq2)
+        return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
 
-    int total_size_sequence = 0;
-    int total_hamming_distance = 0;
+    // If the sequences don't have the same size, do (with x = 1 or 0):
 
-    // Check outside of function that seq1 and seq2 are the same size
-    for (int i = 0; i < sequence_size; i++) {
-        int size = binary_size_count(seq1[i]);
-        // Make check outside of function ?
-        if (size != binary_size_count(seq2[i])) {
-            printf("ERROR: calculating_matching_score: wrong size sequence\n");
-            return -1.0;
-        }
-        total_size_sequence += size;
-        total_hamming_distance += hamming(seq1[i], seq2[i]);
+    //  xxxxxxxxx
+    // ^
+    //  000xxxxxx
+    // -----------
+    //  xxxxxxxxx
+
+    // And, 0 ^ x = x
+
+    const unsigned short* s1 = sequence_size1 >= sequence_size2 ? seq1 : seq2;
+    const unsigned short* s2 = sequence_size1 >= sequence_size2 ? seq2 : seq1;
+    int diff_size = sequence_size1 >= sequence_size2 ? sequence_size1 - sequence_size2 : sequence_size2 - sequence_size1;
+    int max_size = sequence_size1 >= sequence_size2 ? sequence_size1 : sequence_size2;
+    int count = 0;
+
+    for (int i = 0; i < diff_size; i++)
+        if (s1[i]) ++count;
+
+
+    for (int i = diff_size; i < max_size; ++i) {
+        if (s1[i] ^ s2[i - diff_size]) ++count;
     }
 
-    return 100 * total_hamming_distance / total_size_sequence;
+    float y = ((float)count * 100.0) / (float)max_size;
+    return 100.0 - y;
 }
 
 //////////////// Counting binary size

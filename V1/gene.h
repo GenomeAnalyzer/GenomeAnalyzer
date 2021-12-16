@@ -28,11 +28,12 @@ typedef struct mutation_map {
 }mutation_map;
 
 //extern struct gene_map_s gene_map;
-short* convert_to_binary(char* dna_seq, unsigned size);
-char* generating_mRNA(const unsigned int gene_seq [], const unsigned int seq_size);
+unsigned short* convert_to_binary(char* dna_seq, unsigned size);
+char* binary_to_codon(unsigned short* bin_dna_seq, unsigned size);
+char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_size);
 void detecting_genes(const unsigned int gene [], const unsigned int gene_size, gene_map_t* gene_map);
-char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, codon codons []);
+char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsigned int seq_size);
 void detecting_mutations(const unsigned short gene_seq [], const unsigned long size_sequence, mutation_map mut_m);
-float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []);
+float calculating_matching_score(const unsigned short seq1 [], const int sequence_size1, const unsigned short seq2 [], const int sequence_size2);
 int binary_size_count(int b);
 int hamming(int seq1, int seq2);

@@ -62,7 +62,7 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
     }
 
     //Return the char* value as a Python string object
-	return Py_BuildValue("s", generating_mRNA(view.buf, view.shape[0]));
+	return Py_BuildValue("s#", generating_mRNA(view.buf, view.shape[0]));
 }
 
 //////////////// Detecting genes
@@ -118,18 +118,33 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 //////////////// Generating an amino acid chain (protein)
 static PyObject *DNA_generating_amino_acid_chain(PyObject *self, PyObject *args)
 {
-	char *obj1 = NULL;
-	int obj2 = 0;
-	int obj3 = 0;
+    Py_buffer view;
+	PyObject *obj = NULL;
 
-	//Get the parameter (char* value)
-	if(!PyArg_ParseTuple(args, "sii", &obj1, &obj2, &obj3))
+	//Get the parameter (1-dimensional arrays)
+	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
-	codon c;
+	//Get the array memory view
+	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+        return NULL;
 
-	//Return the char* value as a Python string object
-    return Py_BuildValue("s", generating_amino_acid_chain(obj1, obj2, obj3, &c));
+    if (view.ndim != 1)
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
+		PyBuffer_Release(&view);
+		return NULL;
+    }
+
+    if (strcmp(view.format, "i"))
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of int.");
+		PyBuffer_Release(&view);
+		return NULL;
+    }
+
+    //Return the char* value as a Python string object
+	return Py_BuildValue("s#", generating_amino_acid_chain(view.buf, view.shape[0]));
 }
 
 /*
@@ -163,8 +178,8 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 
     //Return the boolean value as a Python boolean object
     return Py_BuildValue("O", detecting_mutations(view.buf, view.shape[0]) ? Py_True : Py_False);
-}*/
-
+}
+*/
 //////////////// Calculating the matching score of two sequences
 static PyObject *DNA_calculating_matching_score(PyObject *self, PyObject *args)
 {
@@ -185,24 +200,24 @@ static PyObject *DNA_calculating_matching_score(PyObject *self, PyObject *args)
 	if (PyObject_GetBuffer(obj2, &view2, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
     	return NULL;
 
-    if (view1.ndim != 1 || view2.ndim != 1)
-    {
+    if (view1.ndim != 1 || view2.ndim != 1){
 		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array.");
 		PyBuffer_Release(&view1);
 		PyBuffer_Release(&view2);
 		return NULL;
     }
 
-    if (strcmp(view1.format, "i") || strcmp(view2.format, "i"))
-    {
-		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of int.");
+    if (strcmp(view1.format, "H") || strcmp(view2.format, "H")){
+		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of unsigned short.");
 		PyBuffer_Release(&view1);
 		PyBuffer_Release(&view2);
-		return NULL;     
+		return NULL;
     }
 
+	// printf("%ld\n", view1.shape[0]);
+
 	//Return the float value as a Python float object
-    return Py_BuildValue("f", calculating_matching_score(view1.shape[0], view1.buf, view2.buf));
+	return Py_BuildValue("f", calculating_matching_score(view1.buf, view1.shape[0], view2.buf, view2.shape[0]));
 }
 
 //////////////// Hamming calculation
