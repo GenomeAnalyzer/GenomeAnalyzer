@@ -1,0 +1,256 @@
+        case 2000000 :
+            aa_seq[temp] = 'K';
+            temp++;
+            break;
+        case 2000001 :
+            aa_seq[temp] = 'K';
+            temp++;
+            break;
+        case 2000010 :
+            aa_seq[temp] = 'N';
+            temp++;
+            break;
+        case 2000011 :
+            aa_seq[temp] = 'N';
+            temp++;
+            break;
+        case 2000100 :
+            aa_seq[temp] = 'R';
+            temp++;
+            break;
+        case 2000101 :
+            aa_seq[temp] = 'R';
+            temp++;
+            break;
+        case 2000110 :
+            aa_seq[temp] = 'S';
+            temp++;
+            break;
+        case 2000111 :
+            aa_seq[temp] = 'S';
+            temp++;
+            break;
+        case 2001000 :
+            aa_seq[temp] = 'T';
+            temp++;
+            break;
+        case 2001001 :
+            aa_seq[temp] = 'T';
+            temp++;
+            break;
+        case 2001010 :
+            aa_seq[temp] = 'T';
+            temp++;
+            break;
+        case 2001011 :
+            aa_seq[temp] = 'T';
+            temp++;
+            break;
+        case 2001100 :
+            aa_seq[temp] = 'I';
+            temp++;
+            break;
+        case 2001101 :
+            aa_seq[temp] = 'M';
+            temp++;
+            break;
+        case 2001110 :
+            aa_seq[temp] = 'I';
+            temp++;
+            break;
+        case 2001111 :
+            aa_seq[temp] = 'I';
+            temp++;
+            break;
+        case 2010000 :
+            aa_seq[temp] = 'E';
+            temp++;
+            break;
+        case 2010001 :
+            aa_seq[temp] = 'E';
+            temp++;
+            break;
+        case 2010010 :
+            aa_seq[temp] = 'D';
+            temp++;
+            break;
+        case 2010011 :
+            aa_seq[temp] = 'D';
+            temp++;
+            break;
+        case 2010100 :
+            aa_seq[temp] = 'G';
+            temp++;
+            break;
+        case 2010101 :
+            aa_seq[temp] = 'G';
+            temp++;
+            break;
+        case 2010110 :
+            aa_seq[temp] = 'G';
+            temp++;
+            break;
+        case 2010111 :
+            aa_seq[temp] = 'G';
+            temp++;
+            break;
+        case 2011000 :
+            aa_seq[temp] = 'A';
+            temp++;
+            break;
+        case 2011001 :
+            aa_seq[temp] = 'A';
+            temp++;
+            break;
+        case 2011010 :
+            aa_seq[temp] = 'A';
+            temp++;
+            break;
+        case 2011011 :
+            aa_seq[temp] = 'A';
+            temp++;
+            break;
+        case 2011100 :
+            aa_seq[temp] = 'V';
+            temp++;
+            break;
+        case 2011101 :
+            aa_seq[temp] = 'V';
+            temp++;
+            break;
+        case 2011110 :
+            aa_seq[temp] = 'V';
+            temp++;
+            break;
+        case 2011111 :
+            aa_seq[temp] = 'V';
+            temp++;
+            break;
+        case 2100000 :
+            aa_seq[temp] = 'Q';
+            temp++;
+            break;
+        case 2100001 :
+            aa_seq[temp] = 'Q';
+            temp++;
+            break;
+        case 2100010 :
+            aa_seq[temp] = 'H';
+            temp++;
+            break;
+        case 2100011 :
+            aa_seq[temp] = 'H';
+            temp++;
+            break;
+        case 2100100 :
+            aa_seq[temp] = 'R';
+            temp++;
+            break;
+        case 2100101 :
+            aa_seq[temp] = 'R';
+            temp++;
+            break;
+        case 2100110 :
+            aa_seq[temp] = 'R';
+            temp++;
+            break;
+        case 2100111 :
+            aa_seq[temp] = 'R';
+            temp++;
+            break;
+        case 2101000 :
+            aa_seq[temp] = 'P';
+            temp++;
+            break;
+        case 2101001 :
+            aa_seq[temp] = 'P';
+            temp++;
+            break;
+        case 2101010 :
+            aa_seq[temp] = 'P';
+            temp++;
+            break;
+        case 2101011 :
+            aa_seq[temp] = 'P';
+            temp++;
+            break;
+        case 2101100 :
+            aa_seq[temp] = 'L';
+            temp++;
+            break;
+        case 2101101 :
+            aa_seq[temp] = 'L';
+            temp++;
+            break;
+        case 2101110 :
+            aa_seq[temp] = 'L';
+            temp++;
+            break;
+        case 2101111 :
+            aa_seq[temp] = 'L';
+            temp++;
+            break;
+        case 2110000 :
+            aa_seq[temp] = 'O';
+            temp++;
+            break;
+        case 2110001 :
+            aa_seq[temp] = 'O';
+            temp++;
+            break;
+        case 2110010 :
+            aa_seq[temp] = 'Y';
+            temp++;
+            break;
+        case 2110011 :
+            aa_seq[temp] = 'Y';
+            temp++;
+            break;
+        case 2110100 :
+            aa_seq[temp] = 'O';
+            temp++;
+            break;
+        case 2110101 :
+            aa_seq[temp] = 'W';
+            temp++;
+            break;
+        case 2110110 :
+            aa_seq[temp] = 'C';
+            temp++;
+            break;
+        case 2110111 :
+            aa_seq[temp] = 'C';
+            temp++;
+            break;
+        case 2111000 :
+            aa_seq[temp] = 'S';
+            temp++;
+            break;
+        case 2111001 :
+            aa_seq[temp] = 'S';
+            temp++;
+            break;
+        case 2111010 :
+            aa_seq[temp] = 'S';
+            temp++;
+            break;
+        case 2111011 :
+            aa_seq[temp] = 'S';
+            temp++;
+            break;
+        case 2111100 :
+            aa_seq[temp] = 'L';
+            temp++;
+            break;
+        case 2111101 :
+            aa_seq[temp] = 'L';
+            temp++;
+            break;
+        case 2111110 :
+            aa_seq[temp] = 'F';
+            temp++;
+            break;
+        case 2111111 :
+            aa_seq[temp] = 'F';
+            temp++;
+            break;
