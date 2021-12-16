@@ -217,363 +217,228 @@ void detecting_genes(const unsigned int gene [], const unsigned int gene_size, g
  * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
 */
 char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsigned int seq_size) {
+    short codon_size = 6;
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
 
     // Create and check the output
     char* aa_seq = NULL;
-    aa_seq = malloc(sizeof(*aa_seq) * (seq_size / 6) + 1);
+    aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
-    unsigned int j = 0;
+    unsigned temp = 0;
 
-    // Parse the binary DNA sequence six by six
-   for (unsigned int i = 0; i < seq_size; i += 6) {
-
-        // If Axx
-        if (gene_seq[i] == 0 &&  gene_seq[i + 1] == 0){
-
-            // If AAx
-            if (gene_seq[i + 2] == 0 &&  gene_seq[i + 3] == 0) {
-
-                if (gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // AAA = K
-                    aa_seq[j] = 'K';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // AAC = N
-                    aa_seq[j] = 'N';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // AAG = K
-                    aa_seq[j] = 'K';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // AAU = N
-                    aa_seq[j] = 'N';
-            }
-
-            // If ACx
-            else if (gene_seq[i + 2] == 1 &&  gene_seq[i + 3] == 0) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // ACA = T
-                    aa_seq[j] = 'T';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // ACC = T
-                    aa_seq[j] = 'T';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // ACG = T
-                    aa_seq[j] = 'T';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // ACU = T
-                    aa_seq[j] = 'T';
-            }
-
-            // If AGx
-            else if (gene_seq[i + 2] == 0 &&  gene_seq[i + 3] == 1) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // AGA = R
-                    aa_seq[j] = 'R';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // AGC = S
-                    aa_seq[j] = 'S';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // AGG = R
-                    aa_seq[j] = 'R';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // AGU = S
-                    aa_seq[j] = 'S';
-            }
-
-            // If AUx
-            else if (gene_seq[i + 2] == 1 &&  gene_seq[i + 3] == 1) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // AUA = I
-                    aa_seq[j] = 'I';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // AUC = I
-                    aa_seq[j] = 'I';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // AUG = Start = M
-                    aa_seq[j] = 'M';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // AUU = I
-                    aa_seq[j] = 'I';
-            }
+    for (unsigned int i = 0; i < seq_size; i += codon_size) {
+        // The hash functions, takes the 6 bits, and transform the array into an integer.
+        // The integer first char is a 2, for hash generation purposes.
+        int hash = 2;
+        for(int k = i; k<i+codon_size; k++){
+            hash = 10 * hash + gene_seq[k];
         }
 
-        // If Cxx
-        else if (gene_seq[i] == 1 &&  gene_seq[i + 1] == 0){
+        // Switch over the hash.
+        switch(hash){
+        case 2000000 :
+            aa_seq[temp] = 'K';
+            break;
+        case 2000001 :
+            aa_seq[temp] = 'K';
+            break;
+        case 2000010 :
+            aa_seq[temp] = 'N';
+            break;
+        case 2000011 :
+            aa_seq[temp] = 'N';
+            break;
+        case 2000100 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2000101 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2000110 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2000111 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2001000 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001001 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001010 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001011 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001100 :
+            aa_seq[temp] = 'I';
+            break;
+        case 2001101 :
+            aa_seq[temp] = 'M';
+            break;
+        case 2001110 :
+            aa_seq[temp] = 'I';
+            break;
+        case 2001111 :
+            aa_seq[temp] = 'I';
+            break;
+        case 2010000 :
+            aa_seq[temp] = 'E';
+            break;
+        case 2010001 :
+            aa_seq[temp] = 'E';
+            break;
+        case 2010010 :
+            aa_seq[temp] = 'D';
+            break;
+        case 2010011 :
+            aa_seq[temp] = 'D';
+            break;
+        case 2010100 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2010101 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2010110 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2010111 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2011000 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011001 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011010 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011011 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011100 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2011101 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2011110 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2011111 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2100000 :
+            aa_seq[temp] = 'Q';
+            break;
+        case 2100001 :
+            aa_seq[temp] = 'Q';
+            break;
+        case 2100010 :
+            aa_seq[temp] = 'H';
+            break;
+        case 2100011 :
+            aa_seq[temp] = 'H';
+            break;
+        case 2100100 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2100101 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2100110 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2100111 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2101000 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101001 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101010 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101011 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101100 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2101101 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2101110 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2101111 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2110000 :
+            aa_seq[temp] = 'O';
+            break;
+        case 2110001 :
+            aa_seq[temp] = 'O';
+            break;
+        case 2110010 :
+            aa_seq[temp] = 'Y';
+            break;
+        case 2110011 :
+            aa_seq[temp] = 'Y';
+            break;
+        case 2110100 :
+            aa_seq[temp] = 'O';
+            break;
+        case 2110101 :
+            aa_seq[temp] = 'W';
+            break;
+        case 2110110 :
+            aa_seq[temp] = 'C';
+            break;
+        case 2110111 :
+            aa_seq[temp] = 'C';
+            break;
+        case 2111000 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111001 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111010 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111011 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111100 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2111101 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2111110 :
+            aa_seq[temp] = 'F';
+            break;
+        case 2111111 :
+            aa_seq[temp] = 'F';
+            break;
 
-            // If CAx
-            if (gene_seq[i + 2] == 0 &&  gene_seq[i + 3] == 0) {
-
-                if (gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // CAA = Q
-                    aa_seq[j] = 'Q';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // CAC = H
-                    aa_seq[j] = 'H';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // CAG = Q
-                    aa_seq[j] = 'Q';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // CAU = N
-                    aa_seq[j] = 'H';
-            }
-
-            // If CCx
-            else if (gene_seq[i + 2] == 1 &&  gene_seq[i + 3] == 0) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // CCA = P
-                    aa_seq[j] = 'P';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // CCC = T
-                    aa_seq[j] = 'P';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // CCG = T
-                    aa_seq[j] = 'P';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // CCU = T
-                    aa_seq[j] = 'P';
-            }
-
-            // If CGx
-            else if (gene_seq[i + 2] == 0 &&  gene_seq[i + 3] == 1) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // CGA = R
-                    aa_seq[j] = 'R';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // CGC = R
-                    aa_seq[j] = 'R';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // CGG = R
-                    aa_seq[j] = 'R';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // CGU = R
-                    aa_seq[j] = 'R';
-            }
-
-            // If CUx
-            else if (gene_seq[i + 2] == 1 &&  gene_seq[i + 3] == 1) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // CUA = L
-                    aa_seq[j] = 'L';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // CUC = L
-                    aa_seq[j] = 'L';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // CUG = I
-                    aa_seq[j] = 'L';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // CUU = L
-                    aa_seq[j] = 'L';
-            }
+        default:
+            return printf("ERROR: generating_amino_acid_chain: invalid value (%d) in RNA sequence\n", hash), NULL;
         }
-
-        // If Gxx
-        else if (gene_seq[i] == 0 &&  gene_seq[i + 1] == 1){
-
-            // If GAx
-            if (gene_seq[i + 2] == 0 &&  gene_seq[i + 3] == 0) {
-
-                if (gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // GAA = E
-                    aa_seq[j] = 'E';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // GAC = D
-                    aa_seq[j] = 'D';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // GAG = E
-                    aa_seq[j] = 'E';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // GAU = D
-                    aa_seq[j] = 'D';
-            }
-
-            // If GCx
-            else if (gene_seq[i + 2] == 1 &&  gene_seq[i + 3] == 0) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // GCA = A
-                    aa_seq[j] = 'A';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // GCC = T
-                    aa_seq[j] = 'A';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // GCG = T
-                    aa_seq[j] = 'A';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // GCU = T
-                    aa_seq[j] = 'A';
-            }
-
-            // If GGx
-            else if (gene_seq[i + 2] == 0 &&  gene_seq[i + 3] == 1) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // CGA = G
-                    aa_seq[j] = 'G';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // GGC = G
-                    aa_seq[j] = 'G';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // GGG = G
-                    aa_seq[j] = 'G';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // GGU = R
-                    aa_seq[j] = 'G';
-            }
-
-            // If GUx
-            else if (gene_seq[i + 2] == 1 &&  gene_seq[i + 3] == 1) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // GUA = V
-                    aa_seq[j] = 'V';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // GUC = V
-                    aa_seq[j] = 'V';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // GUG = V
-                    aa_seq[j] = 'V';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // GUU = V
-                    aa_seq[j] = 'V';
-            }
-        }
-
-        // If Uxx
-        else if (gene_seq[i] == 1 &&  gene_seq[i + 1] == 1){
-
-            // If UAx
-            if (gene_seq[i + 2] == 0 &&  gene_seq[i + 3] == 0) {
-
-                if (gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // UAA = Stop = O
-                    aa_seq[j] = 'O';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // UAC = Y
-                    aa_seq[j] = 'Y';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // UAG = Stop = O
-                    aa_seq[j] = 'O';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // UAU = Y
-                    aa_seq[j] = 'Y';
-            }
-
-            // If UCx
-            else if (gene_seq[i + 2] == 1 &&  gene_seq[i + 3] == 0) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // UCA = S
-                    aa_seq[j] = 'S';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // UCC = S
-                    aa_seq[j] = 'S';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // UCG = S
-                    aa_seq[j] = 'S';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // UCU = S
-                    aa_seq[j] = 'S';
-            }
-
-            // If UGx
-            else if (gene_seq[i + 2] == 0 &&  gene_seq[i + 3] == 1) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // UGA = Stop = O
-                    aa_seq[j] = 'O';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // UGC = C
-                    aa_seq[j] = 'C';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // UGG = W
-                    aa_seq[j] = 'W';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // UGU = C
-                    aa_seq[j] = 'C';
-            }
-
-            // If UUx
-            else if (gene_seq[i + 2] == 1 &&  gene_seq[i + 3] == 1) {
-
-                if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 0)
-                    // UUA = L
-                    aa_seq[j] = 'L';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 0)
-                    // UUC = F
-                    aa_seq[j] = 'F';
-
-                else if(gene_seq[i + 4] == 0 &&  gene_seq[i + 5] == 1)
-                    // UUG = L
-                    aa_seq[j] = 'L';
-
-                else if(gene_seq[i + 4] == 1 &&  gene_seq[i + 5] == 1)
-                    // UUU = F
-                    aa_seq[j] = 'F';
-            }
-        }
-        else{
-            return printf("ERROR: generating_amino_acid_chain: invalid value in RNA sequence\n"), NULL;
-        }
-
-        j++;
+    
+        temp++;
     }
-
     return aa_seq;
 }
 
