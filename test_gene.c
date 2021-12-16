@@ -111,13 +111,69 @@ static void test_generating_aa_chain(void ** state){
 
 //Tests for detecting_mutations function
 static void test_detecting_mutations(void ** state){
-  //The function should return true if we give in input an array with a 0,1 or 1,0 continuous sequence
-  //higher than 1/5th of the half size of the array.
- assert_true(detecting_mutations((unsigned int[]){0,1,0,1,0,1,1,1,1,1,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,0,1,1,1,1,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1},60));
-  //The function should return false if we give in input an array with a 0,1 or 1,0 continuous sequence
-  //lower than 1/5th of the half size of the array.
-  assert_false(detecting_mutations((unsigned int[]){0,1,1,1,1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,0,1,1,1,1,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1},60));
-}
+  mutation_map M;
+  M.size = malloc(5 * sizeof(unsigned long));
+  M.start_mut = malloc(5 * sizeof(unsigned long));
+  M.end_mut = malloc(5 * sizeof(unsigned long));
+
+  //A : 00
+  //T : 11
+  //C : 10
+  //G : 01
+
+  //GGGTTGCGCGCGTTAAAGGTTTGAAAGGTG
+  //Test if sequence 10 to 23 is a mutation zone and no other mutation zone
+  M.size[1]=0;
+  M.start_mut[1]=0;
+  M.end_mut[1]=0;
+  detecting_mutations((unsigned short[]){0,1,0,1,0,1,1,1,1,1,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,0,1,1,1,1,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1},60, M);
+  //First mutation is updated with right values
+  assert_int_equal(13,M.size[0]);
+  assert_int_equal(10,M.start_mut[0]);
+  assert_int_equal(23,M.end_mut[0]);
+  //No other mutations, should not be updated
+  assert_int_equal(0,M.size[1]);
+  assert_int_equal(0,M.start_mut[1]);
+  assert_int_equal(0,M.end_mut[1]);
+
+  //GTTTTGCAAACGTTAAAGGTTTGAAAGGTG
+  //Test if no mutation in this sequence
+  M.size[0]=0;
+  M.start_mut[0]=0;
+  M.end_mut[0]=0;
+  detecting_mutations((unsigned short[]){0,1,1,1,1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0,1,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,0,1,1,1,1,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1},60, M);
+  //No possible mutation zones detected, should not be updated
+  assert_int_equal(0,M.size[0]);
+  assert_int_equal(0,M.start_mut[0]);
+  assert_int_equal(0,M.end_mut[0]);
+
+  //GGGCCGTTCCGCCCATAGGCCCGGCTAAGA
+  //Test with 3 mutation zones in this sequence
+  M.size[3]=0;
+  M.start_mut[3]=0;
+  M.end_mut[3]=0;
+  detecting_mutations((unsigned short[]){0,1,0,1,0,1,1,0,1,0,0,1,1,1,1,1,1,0,1,0,0,1,1,0,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,0,1,0,1,0,0,1,0,1,1,0,1,1,0,0,0,0,0,1,0,0},60, M);
+  //First mutation is updated with right values
+  assert_int_equal(11,M.size[0]);
+  assert_int_equal(0,M.start_mut[0]);
+  assert_int_equal(11,M.end_mut[0]);
+  //First mutation is updated with right values
+  assert_int_equal(11,M.size[1]);
+  assert_int_equal(16,M.start_mut[1]);
+  assert_int_equal(27,M.end_mut[1]);
+  //First mutation is updated with right values
+  assert_int_equal(15,M.size[2]);
+  assert_int_equal(34,M.start_mut[2]);
+  assert_int_equal(49,M.end_mut[2]);
+  //No other mutations, should not be updated
+  assert_int_equal(0,M.size[3]);
+  assert_int_equal(0,M.start_mut[3]);
+  assert_int_equal(0,M.end_mut[3]);
+
+  free(M.size);
+  free(M.start_mut);
+  free(M.end_mut);
+  }
 
 int main(void) {
   int result = 0;
