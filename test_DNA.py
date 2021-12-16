@@ -31,8 +31,13 @@ def test_DNA_detecting_mutations():
 	assert res
 
 def test_DNA_calculating_matching_score():
-	res = DNA.calculating_matching_score(array.array('i', [0,1,0,0,1,1,0,0,0,1,1,0]), array.array('i', [1,0,1,1,0,0,1,1,1,0,0,1]))
-	assert res == -1.0
+	size = 20
+	ar1 = array.array('H', [0 for i in range(size)])
+	ar2 = array.array('H', [1 for i in range(size)])
+	for i in range(size):
+		ar1[i] = 1
+		assert (i+1)*100/size == DNA.calculating_matching_score(ar1, ar2)
+	# Warning here, (i+1)*100/size might generate a floating number with low precision error, which might result in a false assert.
 
 def test_DNA_hamming():
 	res = DNA.hamming(0b010011000110, 0b101100111001)
