@@ -130,6 +130,16 @@ static void test_calculating_matching_score(void ** state){
                       (unsigned short[]){0,1,0,0,1,0,1,0,1,1,1,1,1,0,0,1,0}, 17),
                     0);
 
+  // --- Test the matching score for each size
+  unsigned short ar1[20] = { 0 };
+  unsigned short ar2[20] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  for (short i = 0; i < 20; i++) {
+    ar1[i] = 1;
+    assert_float_equal( (float)(i + 1) * 5,
+                        calculating_matching_score(ar1, i + 1, ar2, 20),
+                      0);
+  }
+
   // Test whether the function correctly detects errors:
   // --- NULL error
   assert_float_equal(-1.0, calculating_matching_score(NULL, 0, NULL, 0), 0);
