@@ -607,24 +607,47 @@ void detecting_mutations(const unsigned short gene_seq [], const unsigned long s
  * out : float : matching score in %
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
 */
-float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []) {
+float calculating_matching_score(const unsigned short seq1 [], const int sequence_size1,
+                                 const unsigned short seq2 [], const int sequence_size2) {
 
-    int total_size_sequence = 0;
-    int total_hamming_distance = 0;
+    int max_size = sequence_size1 >= sequence_size2 ? sequence_size1 : sequence_size2;
+    int min_size = sequence_size1 >= sequence_size2 ? sequence_size2 : sequence_size1;
+    int diff_size = (max_size - min_size);
+    int count = 0;
 
-    // Check outside of function that seq1 and seq2 are the same size
-    for (int i = 0; i < sequence_size; i++) {
-        int size = binary_size_count(seq1[i]);
-        // Make check outside of function ?
-        if (size != binary_size_count(seq2[i])) {
-            printf("ERROR: calculating_matching_score: wrong size sequence\n");
-            return -1.0;
+    // If the sequences don't have the same size, do (with x = 1 or 0):
+
+    //  xxxxxxxxx
+    // ^
+    //  000xxxxxx
+    // -----------
+    //  xxxxxxxxx
+
+    // And, 0 ^ x = x
+
+    if(max_size == sequence_size1){
+        for (int i = 0; i < diff_size; ++i){
+            if (seq1[i] == 1)
+                ++count;
         }
-        total_size_sequence += size;
-        total_hamming_distance += hamming(seq1[i], seq2[i]);
+        for (int i = diff_size; i < max_size; ++i){
+            if ((seq1[i] ^ seq2[i - diff_size]) == 1)
+                    ++count;
+        }
+    }
+    else{
+        for (int i = 0; i < diff_size; ++i){
+            if (seq2[i] == 1)
+                ++count;
+        }
+        for (int i = diff_size; i < max_size; ++i){
+            if ((seq1[i  - diff_size] ^ seq2[i]) == 1)
+                    ++count;
+        }
     }
 
-    return 100 * total_hamming_distance / total_size_sequence;
+    float y = ((float)count * 100.0) / (float)max_size;
+    return 100.0 - y;
 }
 
 //////////////// Counting binary size

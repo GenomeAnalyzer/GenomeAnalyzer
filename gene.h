@@ -31,13 +31,8 @@ typedef struct mutation_map {
 short* convert_to_binary(char* dna_seq, unsigned size);
 char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_size);
 void detecting_genes(const unsigned int gene [], const unsigned int gene_size, gene_map_t* gene_map);
-<<<<<<< HEAD
 char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsigned int seq_size);
-bool detecting_mutations(const unsigned int gene_seq [], const unsigned long long size_sequence);
-=======
-char* generating_amino_acid_chain(char* seq, int seq_size, int codons_count, codon codons []);
 void detecting_mutations(const unsigned short gene_seq [], const unsigned long size_sequence, mutation_map mut_m);
->>>>>>> c37103f72b91797289bcb1a5e55a6c14ae6ba4cc
-float calculating_matching_score(int sequence_size, int seq1 [], int seq2 []);
+float calculating_matching_score(const unsigned short seq1 [], const int sequence_size1, const unsigned short seq2 [], const int sequence_size2);
 int binary_size_count(int b);
 int hamming(int seq1, int seq2);

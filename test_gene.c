@@ -109,6 +109,34 @@ static void test_generating_aa_chain(void ** state){
 
 }
 
+static void test_calculating_matching_score(void ** state){
+  // Test if the algorithm is OK
+  // --- With same size
+  assert_float_equal(81.250000,
+                    calculating_matching_score(
+                      (unsigned short[]){0,1,0,0,1,0,1,0,1,0,0,1,0,0,1,0}, 16,
+                      (unsigned short[]){0,1,0,1,1,0,1,0,0,0,0,1,0,1,1,0}, 16),
+                    0);
+  // --- With different size
+  assert_float_equal(42.105263,
+                    calculating_matching_score(
+                      (unsigned short[]){0,1,0,0,1,0,1,0,1,0,0,1,0,0,1,0}, 16,
+                      (unsigned short[]){1,1,1,1,1,1,1,0,0,0,0,1,0,1,1,0,1,1,1}, 19),
+                    0);
+
+  assert_float_equal(47.368420,
+                    calculating_matching_score(
+                      (unsigned short[]){1,1,1,1,1,1,1,0,0,0,0,1,0,1,1,0,1,1,1}, 19,
+                      (unsigned short[]){0,1,0,0,1,0,1,0,1,1,1,1,1,0,0,1,0}, 17),
+                    0);
+
+  // Test whether the function correctly detects errors:
+  // --- NULL error
+
+  // --- invalid value in gene_seq
+
+}
+
 //Tests for detecting_mutations function
 static void test_detecting_mutations(void ** state){
   mutation_map M;
@@ -181,6 +209,7 @@ int main(void) {
       cmocka_unit_test(test_generating_mRNA),
       cmocka_unit_test(test_detecting_genes),
       cmocka_unit_test(test_generating_aa_chain),
+      cmocka_unit_test(test_calculating_matching_score),
       cmocka_unit_test(test_detecting_mutations),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
