@@ -109,6 +109,23 @@ static void test_generating_aa_chain(void ** state){
 
 }
 
+static void test_convert_to_binary(void ** state){
+  // Test aa to binary conversions
+  unsigned short* res = convert_to_binary("ATCGN", 10);
+  unsigned short expected_res[10] = {0,0,1,1,1,0,0,1,0,0};
+
+  // --- Test all valid letters
+  for(unsigned short i = 0; i < 10; i++)
+    assert_int_equal(res[i], expected_res[i]);
+
+
+  // Test whether the function correctly detects errors:
+  unsigned short* res2 = convert_to_binary("AK", 10);
+  
+  // --- Unknown letter in sequence
+  assert_ptr_equal(NULL, res2[2]);
+}
+
 static void test_calculating_matching_score(void ** state){
   // Test if the algorithm is OK
   // --- With same size
@@ -220,6 +237,7 @@ int main(void) {
       cmocka_unit_test(test_generating_aa_chain),
       cmocka_unit_test(test_calculating_matching_score),
       cmocka_unit_test(test_detecting_mutations),
+      cmocka_unit_test(test_convert_to_binary),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 
