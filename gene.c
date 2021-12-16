@@ -22,18 +22,14 @@
  * out : seq : array of binary
  * Convert a char DNA sequence to its binary sequence
  */
-short* convert_to_binary(char* dna_seq, unsigned size)
-{
+unsigned short* convert_to_binary(char* dna_seq, unsigned size){
     unsigned i = 0;
     unsigned temp = 0;
-    
 
     short *seq = malloc(sizeof(short)*size); 
 
-    for (unsigned i = 0;i < size/2; i ++)
-    {
-        switch(dna_seq[i])
-        {
+    for (unsigned i = 0;i < size/2; i ++){
+        switch(dna_seq[i]){
             case 'A':
                 seq[temp] = 0;
                 seq[temp+1] = 0; 
@@ -71,11 +67,37 @@ short* convert_to_binary(char* dna_seq, unsigned size)
 
                 return seq;
         }
-
     }
 
     return seq;
+}
 
+//////////////// Convert binary aa to codon
+/**
+ * in : bin_dna_seq : unsigned short array - size must be 3*2 = 6.
+ * out : aa : array of binary
+ * Convert a binary aa sequence to its aa codon
+ */
+char* binary_to_aa(unsigned short* bin_dna_seq, unsigned size){
+    if (size%2 != 0) {
+        printf("Error: wrong binary size (%d). Must be odd.\nExit.\n",size);
+        return NULL;
+    }
+
+    // char *codon[size/2];
+    char* codon = malloc(sizeof(char)*size/2);
+    for (unsigned i = 0;i < size/2; i ++){
+        if (bin_dna_seq[2*i] == 0 && bin_dna_seq[2*i+1] == 0)
+            codon[i] = 'A'; // Assuming "N" is "A", as it's done in convert_to_binary
+        else if (bin_dna_seq[2*i] == 1 && bin_dna_seq[2*i+1] == 1)
+            codon[i] = 'T';
+        else if (bin_dna_seq[2*i] == 1 && bin_dna_seq[2*i+1] == 0)
+            codon[i] = 'C';
+        else if (bin_dna_seq[2*i] == 0 && bin_dna_seq[2*i+1] == 1)
+            codon[i] = 'G';
+    }
+
+    return codon;
 }
 
 //////////////// Generating mRNA
@@ -195,7 +217,6 @@ void detecting_genes(const unsigned int gene [], const unsigned int gene_size, g
  * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
 */
 char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsigned int seq_size) {
-
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
