@@ -126,6 +126,19 @@ static void test_convert_to_binary(void ** state){
   assert_ptr_equal(NULL, res2[2]);
 }
 
+static void test_binary_to_aa(void ** state){
+  // Test binary to aa conversions
+
+  // --- Test all conversion
+  unsigned short bin_dna_seq[8] = { 0,0,1,1,1,0,0,1 };
+  assert_string_equal("ATCG", binary_to_aa(bin_dna_seq, 8));
+
+  // Test whether the function correctly detects errors:
+  // --- Wrong size bin_dna_seq
+  unsigned short bin_dna_seq2[3] = {0,0,1};
+  assert_ptr_equal(NULL, binary_to_aa(bin_dna_seq2, 3));
+}
+
 static void test_calculating_matching_score(void ** state){
   // Test if the algorithm is OK
   // --- With same size
@@ -238,6 +251,7 @@ int main(void) {
       cmocka_unit_test(test_calculating_matching_score),
       cmocka_unit_test(test_detecting_mutations),
       cmocka_unit_test(test_convert_to_binary),
+      cmocka_unit_test(test_binary_to_aa),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 
