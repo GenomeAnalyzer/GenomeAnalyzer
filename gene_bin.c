@@ -567,4 +567,53 @@ char* generating_amino_acid_chain(const unsigned int *gene_seq, const unsigned i
 }
 
 
+/**
+* in : gene_seq : sequence of the gene : "binary array"
+* in : size_sequence : size of the sequence : number of used bits in gene_seq
+* in : mut_m : map of the possible mutation's areas
+* out : boolean
+* The algorithm runs through a gene sequence and detects if there is a sequence with a high GC frequency
+* (at least 1/5th of the gene sequence's size) it returns true, else it returns false.
+* Precondition: gene_seq is of size size_sequence.
+*/
+void detecting_mutations(const unsigned int *gene_seq, const unsigned int size_sequence,
+                         mutation_map mut_m) {
+    unsigned long detect_mut = 0;  //Counting size of GC sequence
+    unsigned short tmp_start_mut = 0;   //stock start mutation
+    unsigned cmp = 0;   //counter of all mutation zones
+
+    //Read the sequence
+    for (unsigned long i = 0; i < size_sequence; i += 2) {
+
+        // nitrogenous base = A, T/U, G, C
+        int nit_base1 = get_binary_value(gene_seq, i);
+        int nit_base2 = get_binary_value(gene_seq, i + 1);
+
+        //Increment detect_mut if find a C or G nucl
+        if (((nit_base1 == 0) && (nit_base2 == 1)) ||
+            ((nit_base1 == 1) && (nit_base2 == 0))) {
+            if(detect_mut == 0){tmp_start_mut = i;}
+            detect_mut+=2;
+        }
+        //Put detect_mut to 0 if find a A or T nucl
+        else {
+            //Check if previous GC sequence is a probable mutation zone
+            if (detect_mut >= (size_sequence / 5)) {
+                mut_m.start_mut[cmp] = tmp_start_mut;
+                mut_m.end_mut[cmp] = i-1;
+                mut_m.size[cmp] = detect_mut-1;
+                cmp++;
+            }
+            detect_mut = 0;
+        }
+    }
+    //Check if ending sequence is a probable mutation zone
+    if (detect_mut >= (size_sequence / 5)) {
+        mut_m.start_mut[cmp] = tmp_start_mut;
+        mut_m.end_mut[cmp] = size_sequence-1;
+        mut_m.size[cmp] = detect_mut-1;
+    }
+}
+
+
 
