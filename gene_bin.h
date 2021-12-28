@@ -1,7 +1,8 @@
 #pragma once 
 
 #define MAX_GENES  1024
-
+// Number of bits in an integer
+#define int_SIZE 31
 
 typedef struct gene_map_s {
 
