@@ -41,12 +41,41 @@ static void test_set_binary_array(void ** state){
   free(seq_bin);
 }
 
+static void test_xor_binary_array(void ** state){
+  // Test if the algorithm is OK
+  char *seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA";
+  unsigned seq_size = 45;
+  unsigned int *seq_bin = NULL;
+  seq_bin = set_binary_array(seq_char, seq_size);
+
+  char *seq_char2 = "GACCTTTTTTTTTTTTTCTTCGA";
+  unsigned seq_size2 = 23;
+  unsigned int *seq_bin2 = NULL;
+  seq_bin2 = set_binary_array(seq_char2, seq_size2);
+
+  unsigned int *xor = NULL;
+  xor = xor_binary_array(seq_bin, 2 * seq_size, seq_bin2, 2 * seq_size2);
+  // xor_size = max size
+  int xor_size = seq_size >= seq_size2 ? seq_size : seq_size2;
+
+  unsigned int xor_sol[3] = {2101911379, 364800657, 2934};
+
+  for (int i = 0; i < 3; ++i)
+    assert_int_equal(xor[i], xor_sol[i]);
+
+  free(seq_bin);
+  free(seq_bin2);
+  free(xor);
+}
+
+
 int main(void) {
   int result = 0;
   const struct CMUnitTest tests[] = {
     cmocka_unit_test(test_get_binary_value),
     cmocka_unit_test(test_change_binary_value),
     cmocka_unit_test(test_set_binary_array),
+    cmocka_unit_test(test_xor_binary_array),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 

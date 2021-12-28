@@ -85,6 +85,66 @@ unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
     return seq_bin;
 }
 
+/**
+ * in : seq_bin1 : first sequence to xor: "binary array"
+ * in : seq_size1 : number total of used bits in the sequence seq_bin1
+ * in : seq_bin2 : second sequence to xor: "binary array"
+ * in : seq_size2 : number total of used bits in the sequence seq_bin2
+ * out : xor : "binary array" which is the result of the xor operation beteween seq1 and seq2
+ */
+unsigned int* xor_binary_array(const unsigned int *seq_bin1, const unsigned seq_size1,
+                                const unsigned int *seq_bin2, const unsigned seq_size2){
+
+    // "nb" = number of 'int' in the arrays 'seq1' and 'seq2' 
+    //      = size of the 'unsigned int*' arrays
+    int nb_seq1 = seq_size1 / int_SIZE;
+    if(seq_size1 % int_SIZE != 0)   nb_seq1++;
+    int nb_seq2 = seq_size2 / int_SIZE;
+    if(seq_size2 % int_SIZE != 0)   nb_seq2++;
+
+    int max_nb = nb_seq1 >= nb_seq2 ? nb_seq1 : nb_seq2;
+
+    int max_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
+    int min_size = seq_size1 >= seq_size2 ? seq_size2 : seq_size1;
+    int diff_size = max_size - min_size;
+
+    unsigned int *xor = NULL;
+    xor = malloc(sizeof(*xor) * max_nb);
+
+
+    // If the sequences don't have the same size, do (with x = 1 or 0):
+
+    //  xxxxxxxxx
+    // ^
+    //  000xxxxxx
+    // -----------
+    //  xxxxxxxxx
+
+    // And, 0 ^ x = x
+
+    int bit = 0;
+    if(max_size == seq_size1){
+        for (int i = 0; i < diff_size; ++i){
+           bit = get_binary_value(seq_bin1, i);
+           xor = change_binary_value(xor, i, bit);
+        }
+        for (int i = diff_size; i < max_size; ++i){
+           bit = get_binary_value(seq_bin1, i) ^ get_binary_value(seq_bin2, i - diff_size);
+           xor = change_binary_value(xor, i, bit);
+        }
+    }
+    else{
+        for (int i = 0; i < diff_size; ++i){
+           bit = get_binary_value(seq_bin2, i);
+           xor = change_binary_value(xor, i, bit);
+        }
+        for (int i = diff_size; i < max_size; ++i){
+           bit = get_binary_value(seq_bin1, i - diff_size) ^ get_binary_value(seq_bin2, i);
+           xor = change_binary_value(xor, i, bit);
+        }
+    }
+    return xor;
+}
 
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
