@@ -167,6 +167,23 @@ static void test_detecting_genes(void ** state){
   free(gene_map);
 }
 
+static void test_generating_aa_chain(void ** state){
+  // Test if the algorithm is OK
+  //  --- Test all the amino acid
+  assert_string_equal("KNKNTTTTRSRSIIIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYYSSSSCWCLFLFMOOO",
+                      generating_amino_acid_chain((unsigned int[]){79823872, -2096862942,
+                            -1577991368, 547545866, -1792699787, -1126245655, 1210084514,
+                            -752012202, 1001024414, -106443080, -1380064261, -1612777443,
+                            189184},
+                        384));
+
+  // Test whether the function correctly detects errors:
+  // --- NULL error
+  assert_ptr_equal(NULL, generating_amino_acid_chain(NULL, 0));
+  // --- invalid value in gene_seq
+  assert_ptr_not_equal("MRGO",
+                       generating_amino_acid_chain((unsigned int[]){1821290092, 18263}, 24));
+}
 
 int main(void) {
   int result = 0;
@@ -182,6 +199,7 @@ int main(void) {
     cmocka_unit_test(test_binary_to_dna),
     cmocka_unit_test(test_generating_mRNA),
     cmocka_unit_test(test_detecting_genes),
+    cmocka_unit_test(test_generating_aa_chain),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 

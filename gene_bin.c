@@ -333,7 +333,238 @@ void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gen
     }
 }
 
+//////////////// Generating an amino acid chain (protein) 
+/**
+ * in : gene_seq : unsigned int array : "binary array"
+ * in : seq_size : size of gene_seq : number of used bits in gene_seq
+ * out : char* : protein in symbols
+ * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
+*/
+char* generating_amino_acid_chain(const unsigned int *gene_seq, const unsigned int seq_size) {
+    short codon_size = 6;
+    // Check the input argument
+    if (!gene_seq)
+        return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
 
+    // Create and check the output
+    char* aa_seq = NULL;
+    aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    if (!aa_seq)
+        return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
+
+    unsigned temp = 0;
+
+    for (unsigned int i = 0; i < seq_size; i += codon_size) {
+        // The hash functions, takes the 6 bits, and transform the array into an integer.
+        // The integer first char is a 2, for hash generation purposes.
+        int hash = 2;
+        for(int k = i; k < i + codon_size; k++){
+            hash = 10 * hash + get_binary_value(gene_seq, k);
+        }
+
+        // Switch over the hash.
+        switch(hash){
+        case 2000000 :
+            aa_seq[temp] = 'K';
+            break;
+        case 2000001 :
+            aa_seq[temp] = 'K';
+            break;
+        case 2000010 :
+            aa_seq[temp] = 'N';
+            break;
+        case 2000011 :
+            aa_seq[temp] = 'N';
+            break;
+        case 2000100 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2000101 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2000110 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2000111 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2001000 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001001 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001010 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001011 :
+            aa_seq[temp] = 'T';
+            break;
+        case 2001100 :
+            aa_seq[temp] = 'I';
+            break;
+        case 2001101 :
+            aa_seq[temp] = 'M';
+            break;
+        case 2001110 :
+            aa_seq[temp] = 'I';
+            break;
+        case 2001111 :
+            aa_seq[temp] = 'I';
+            break;
+        case 2010000 :
+            aa_seq[temp] = 'E';
+            break;
+        case 2010001 :
+            aa_seq[temp] = 'E';
+            break;
+        case 2010010 :
+            aa_seq[temp] = 'D';
+            break;
+        case 2010011 :
+            aa_seq[temp] = 'D';
+            break;
+        case 2010100 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2010101 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2010110 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2010111 :
+            aa_seq[temp] = 'G';
+            break;
+        case 2011000 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011001 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011010 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011011 :
+            aa_seq[temp] = 'A';
+            break;
+        case 2011100 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2011101 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2011110 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2011111 :
+            aa_seq[temp] = 'V';
+            break;
+        case 2100000 :
+            aa_seq[temp] = 'Q';
+            break;
+        case 2100001 :
+            aa_seq[temp] = 'Q';
+            break;
+        case 2100010 :
+            aa_seq[temp] = 'H';
+            break;
+        case 2100011 :
+            aa_seq[temp] = 'H';
+            break;
+        case 2100100 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2100101 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2100110 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2100111 :
+            aa_seq[temp] = 'R';
+            break;
+        case 2101000 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101001 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101010 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101011 :
+            aa_seq[temp] = 'P';
+            break;
+        case 2101100 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2101101 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2101110 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2101111 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2110000 :
+            aa_seq[temp] = 'O';
+            break;
+        case 2110001 :
+            aa_seq[temp] = 'O';
+            break;
+        case 2110010 :
+            aa_seq[temp] = 'Y';
+            break;
+        case 2110011 :
+            aa_seq[temp] = 'Y';
+            break;
+        case 2110100 :
+            aa_seq[temp] = 'O';
+            break;
+        case 2110101 :
+            aa_seq[temp] = 'W';
+            break;
+        case 2110110 :
+            aa_seq[temp] = 'C';
+            break;
+        case 2110111 :
+            aa_seq[temp] = 'C';
+            break;
+        case 2111000 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111001 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111010 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111011 :
+            aa_seq[temp] = 'S';
+            break;
+        case 2111100 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2111101 :
+            aa_seq[temp] = 'L';
+            break;
+        case 2111110 :
+            aa_seq[temp] = 'F';
+            break;
+        case 2111111 :
+            aa_seq[temp] = 'F';
+            break;
+
+        default:
+            return printf("ERROR: generating_amino_acid_chain: invalid value (%d) in RNA sequence\n", hash), NULL;
+        }
+    
+        temp++;
+    }
+    return aa_seq;
+}
 
 
 
