@@ -29,6 +29,14 @@ typedef struct mutation_map {
     unsigned long *end_mut;
 }mutation_map;
 
+
+/********** BINARIES FUNCTION **********/
+
+int get_binary_value(const unsigned int *seq_bin, const int pos);
+
+
+/******** DNA & GENES FUNCTION *********/
+
 unsigned int* convert_to_binary(const char* dna_seq, const unsigned size);
 char* binary_to_dna(unsigned int* bin_dna_seq, const unsigned size);
 char* generating_mRNA(const unsigned int* gene_seq, const unsigned int seq_size);
