@@ -76,14 +76,30 @@ static void test_popcount_binary_array(void ** state){
   assert_int_equal(13, popcount_binary_array((unsigned int[]){9350764}, 24));
 }
 
+static void test_convert_to_binary(void ** state){
+  // Test aa to binary conversions
+  // --- Test all valid letters
+  unsigned int* res = convert_to_binary("ATCGN", 10);
+  assert_int_equal(res[0], 156);
+
+
+  // Test whether the function correctly detects errors:
+  // --- Unknown letter in sequence
+  unsigned int* res2 = convert_to_binary("AK", 10);
+  assert_ptr_equal(NULL, res2[2]);
+}
+
 int main(void) {
   int result = 0;
   const struct CMUnitTest tests[] = {
+    // BINARIES ARRAYS FUNCTIONS
     cmocka_unit_test(test_get_binary_value),
     cmocka_unit_test(test_change_binary_value),
     cmocka_unit_test(test_set_binary_array),
     cmocka_unit_test(test_xor_binary_array),
     cmocka_unit_test(test_popcount_binary_array),
+    // DNA & GENES FUNCTIONS
+    cmocka_unit_test(test_convert_to_binary),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 

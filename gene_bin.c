@@ -166,3 +166,20 @@ int popcount_binary_array(const unsigned int *seq_bin, const unsigned int seq_si
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
 /***************************************/
+
+//////////////// Convert to binary
+/**
+ * in : dna_seq : array of char
+ * in : size : size of dna_seq = number of nitrogenous bases (= number of letter)
+ * out : seq : array of int
+ * Convert a char DNA sequence to its binary sequence
+ */
+unsigned int* convert_to_binary(const char* dna_seq, const unsigned size){
+    return set_binary_array(dna_seq, size);
+}
+
+
+
+
+
+
