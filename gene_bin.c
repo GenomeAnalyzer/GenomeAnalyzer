@@ -261,6 +261,79 @@ char* generating_mRNA(const unsigned int* gene_seq, const unsigned int seq_size)
     return rna_seq;
 }
 
+//////////////// Detecting genes 
+/**
+* in : gene : unsigned int array : "binary array"
+* in : gene_size : size of gene : number of used bits in gene
+* in : gene_map : struct to map the genes
+* out : void
+* Detect if a gene exists in the sequence and insert it in the structure
+*/
+void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gene_map_t* gene_map) {
+    //struct gene_map_s gene_map;
+    gene_map->genes_counter = 0;
+
+    // Check if memory ever have been allocated, do it if not
+    if(!gene_map->gene_start || !gene_map->gene_end){
+        gene_map->gene_start = malloc(sizeof(*gene_map->gene_start) * MAX_GENES);
+        gene_map->gene_end = malloc(sizeof(*gene_map->gene_end) * MAX_GENES);
+
+        if (!gene_map->gene_start || !gene_map->gene_end){
+            printf("ERROR: detecting_genes: cannot allocate memory\n");
+            return;
+        }
+    }
+
+
+    int start_pos = -1;
+
+    int i = 0;
+
+    while ((i + 6) <= gene_size) {
+        // nitrogenous bases = A, T/U, G, C
+        int nit_base1 = get_binary_value(gene, i);
+        int nit_base2 = get_binary_value(gene, i + 1);
+        int nit_base3 = get_binary_value(gene, i + 2);
+        int nit_base4 = get_binary_value(gene, i + 3);
+        int nit_base5 = get_binary_value(gene, i + 4);
+        int nit_base6 = get_binary_value(gene, i + 5);
+
+        //If a start pos and a stop pos doesn't exist, search for AUG
+        // if (!(gene[i%32] & ( 1 << (i%32) ))
+        if (nit_base1 == 0 && nit_base2 == 0 && nit_base3 == 1 
+            && nit_base4 == 1 && nit_base5 == 0 && nit_base6 == 1) {
+        //if atc, it's the start of a gene
+            start_pos = i;
+            i += 6;
+        }
+        else{
+
+            if (start_pos != -1 ) {
+                //if a start pos exists , search for UAA / UAG / UGA
+                if ((nit_base1 == 1 && nit_base2 == 1 && nit_base3 == 0) 
+                    && ((nit_base4 == 0 && nit_base5 == 0 && nit_base6 == 0)
+                        || (nit_base4 == 0 && nit_base5 == 0 && nit_base6 == 1)
+                        || (nit_base4 == 1 && nit_base5 == 0 && nit_base6 == 0))) {
+                   //It's the end of a gene          
+                   //If a start pos and an stop pos has been found, a gene exists so we save it in the struc
+                    gene_map->gene_start[gene_map->genes_counter] = start_pos;
+                    gene_map->gene_end[gene_map->genes_counter] = i;
+
+                    gene_map->genes_counter++;
+
+                    start_pos = -1;
+                    i += 6;
+                }
+                else
+                    i += 2;
+            }
+            else
+                i += 2;
+        }
+    }
+}
+
+
 
 
 
