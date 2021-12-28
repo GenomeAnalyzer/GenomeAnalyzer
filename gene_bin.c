@@ -216,6 +216,51 @@ char* binary_to_dna(unsigned int* bin_dna_seq, const unsigned size){
     return dna_seq;
 }
 
+//////////////// Generating mRNA
+/**
+ * in : gene_seq : unsigned int array : "binary array"
+ * in : seq_size : size of gene_seq : number of used bits in gene_seq
+ * out : rna_seq : array of char
+ * Convert a binary DNA sequence to a string mRNA sequence
+ */
+char* generating_mRNA(const unsigned int* gene_seq, const unsigned int seq_size) {
+    // Check the input argument
+    if (!gene_seq)
+        return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
+
+    // Create and check the output
+    char* rna_seq = NULL;
+    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 1);
+    if (!rna_seq)
+        return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
+
+    int j = 0;
+    // Parse the binary DNA sequence two by two
+    for (int i = 0; i < seq_size; i += 2) {
+
+        // nitrogenous base = A, T/U, G, C
+        int nit_base1 = get_binary_value(gene_seq, i);
+        int nit_base2 = get_binary_value(gene_seq, i + 1);
+
+        if (nit_base1 == 0 && nit_base2 == 0)
+            // 00 = A
+            rna_seq[j] = 'A';
+        else if (nit_base1 == 1 && nit_base2 == 1)
+            // 11 = U
+            rna_seq[j] = 'U';
+        else if (nit_base1 == 1 && nit_base2 == 0)
+            // 10 = C
+            rna_seq[j] = 'C';
+        else if (nit_base1 == 0 && nit_base2 == 1)
+            // 01 = G
+            rna_seq[j] = 'G';
+        else
+            return printf("ERROR: generating_mRNA: invalid value in DNA sequence\n"), NULL;
+        j++;
+    }
+    return rna_seq;
+}
+
 
 
 

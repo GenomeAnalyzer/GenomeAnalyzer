@@ -100,6 +100,24 @@ static void test_binary_to_dna(void ** state){
   assert_ptr_equal(NULL, binary_to_dna((unsigned int[]){0}, 3));
 }
 
+static void test_generating_mRNA(void ** state){
+  // Test if the algorithm is OK
+      //9350764 = 001101100111010101110001
+  assert_string_equal("AUGCGUGGGUAG",
+                      generating_mRNA((unsigned int[]){9350764}, 24));
+      //913666358 = 00110110011101010111000100110110, 30065 = 0111010101110001
+  assert_string_equal("AUGCGUGGGUAGAUGCGUGGGUAG",
+                      generating_mRNA((unsigned int[]){1821290092, 18263}, 48));
+
+  // Test whether the function correctly detects errors:
+  // --- NULL error
+  assert_ptr_equal(NULL, generating_mRNA(NULL, 0));
+  // --- invalid value in gene_seq
+      //11957616 = 101101100111010101110000
+  assert_ptr_not_equal("AUGCGUGGGUAG",
+                       generating_mRNA((unsigned int[]){1821290092, 18263}, 48));
+}
+
 int main(void) {
   int result = 0;
   const struct CMUnitTest tests[] = {
@@ -112,6 +130,7 @@ int main(void) {
     // DNA & GENES FUNCTIONS
     cmocka_unit_test(test_convert_to_binary),
     cmocka_unit_test(test_binary_to_dna),
+    cmocka_unit_test(test_generating_mRNA),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 
