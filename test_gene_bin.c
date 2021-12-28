@@ -58,7 +58,7 @@ static void test_xor_binary_array(void ** state){
   // xor_size = max size
   int xor_size = seq_size >= seq_size2 ? seq_size : seq_size2;
 
-  unsigned int xor_sol[3] = {2101911379, 364800657, 2934};
+  unsigned int xor_sol[3] = {2101911378, 364800657, 2934};
 
   for (int i = 0; i < 3; ++i)
     assert_int_equal(xor[i], xor_sol[i]);
@@ -68,6 +68,13 @@ static void test_xor_binary_array(void ** state){
   free(xor);
 }
 
+static void test_popcount_binary_array(void ** state){
+  // Test if the algorithm is OK
+      // 1 = 0000000000000000000000000000001
+  assert_int_equal(1, popcount_binary_array((unsigned int[]){1}, 31));
+      //9350764 = 001101100111010101110001
+  assert_int_equal(13, popcount_binary_array((unsigned int[]){9350764}, 24));
+}
 
 int main(void) {
   int result = 0;
@@ -76,6 +83,7 @@ int main(void) {
     cmocka_unit_test(test_change_binary_value),
     cmocka_unit_test(test_set_binary_array),
     cmocka_unit_test(test_xor_binary_array),
+    cmocka_unit_test(test_popcount_binary_array),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 

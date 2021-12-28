@@ -146,6 +146,23 @@ unsigned int* xor_binary_array(const unsigned int *seq_bin1, const unsigned seq_
     return xor;
 }
 
+/**
+ * in : seq_bin : "binary array"
+ * in : seq_size : number total of used bits in the sequence
+ * out : s : popcount of the seq : number of '1'
+ */
+int popcount_binary_array(const unsigned int *seq_bin, const unsigned int seq_size){
+    int s = 0;
+
+    int nb = seq_size / int_SIZE;
+    if(seq_size % int_SIZE != 0)    nb++;
+
+    for (int i = 0; i < nb; ++i)
+        s += __builtin_popcount(seq_bin[i]);
+
+    return s;
+}
+
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
 /***************************************/
