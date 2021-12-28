@@ -615,5 +615,28 @@ void detecting_mutations(const unsigned int *gene_seq, const unsigned int size_s
     }
 }
 
+/**
+ * in : seq1 : first sequence in binary
+ * in : sequence_size1 : number total of used bits in the sequence seq1
+ * in : seq2 : second sequence in binary
+ * in : sequence_size2 : number total of used bits in the sequence seq2
+ * out : float : matching score in %
+ * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
+*/
+float calculating_matching_score(const unsigned int *seq1, const int seq_size1,
+                                 const unsigned int *seq2, const int seq_size2) {
+    // Check the input argument
+    if (!seq1 || !seq2)
+        return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
 
+    unsigned int *xor = NULL;
+    xor = xor_binary_array(seq1, seq_size1, seq2, seq_size2);
 
+    // xor_size = max size
+    int xor_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
+
+    int pop = popcount_binary_array(xor, xor_size);
+
+    float y = ((float)pop * 100.0) / (float)xor_size;
+    return 100.0 - y;
+}
