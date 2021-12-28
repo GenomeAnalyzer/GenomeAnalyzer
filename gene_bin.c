@@ -40,7 +40,7 @@ unsigned int* change_binary_value(unsigned int *seq_bin, const int pos, const in
 
 /**
  * in : seq_char : the DNA seq in it's char* mode
- * in : seq_size : size of the array 'seq_char' = number of nitrogenous bases
+ * in : seq_size : size of the array 'seq_char' = number of nucleotides
  * out : seq_bin : "binary array" filled
  */
 unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
@@ -170,7 +170,7 @@ int popcount_binary_array(const unsigned int *seq_bin, const unsigned int seq_si
 //////////////// Convert to binary
 /**
  * in : dna_seq : array of char
- * in : size : size of dna_seq = number of nitrogenous bases (= number of letter)
+ * in : size : size of dna_seq = number of nucleotides (= number of letter)
  * out : seq : array of int
  * Convert a char DNA sequence to its binary sequence
  */
@@ -195,20 +195,20 @@ char* binary_to_dna(unsigned int* bin_dna_seq, const unsigned size){
 
     int j = 0;
     for (unsigned i = 0; i < size; i += 2){
-        // nitrogenous base = A, T/U, G, C
-        int nit_base1 = get_binary_value(bin_dna_seq, i);
-        int nit_base2 = get_binary_value(bin_dna_seq, i + 1);
+        // nucleotides = A, T/U, G, C
+        int nucl1 = get_binary_value(bin_dna_seq, i);
+        int nucl2 = get_binary_value(bin_dna_seq, i + 1);
 
-        if (nit_base1 == 0 && nit_base2 == 0)
+        if (nucl1 == 0 && nucl2 == 0)
             // 00 = A/N
             dna_seq[j] = 'A';
-        else if (nit_base1 == 1 && nit_base2 == 1)
+        else if (nucl1 == 1 && nucl2 == 1)
             // 11 = T
             dna_seq[j] = 'T';
-        else if (nit_base1 == 1 && nit_base2 == 0)
+        else if (nucl1 == 1 && nucl2 == 0)
             // 10 = C
             dna_seq[j] = 'C';
-        else if (nit_base1 == 0 && nit_base2 == 1)
+        else if (nucl1 == 0 && nucl2 == 1)
             // 01 = G
             dna_seq[j] = 'G';
         j++;
@@ -238,20 +238,20 @@ char* generating_mRNA(const unsigned int* gene_seq, const unsigned int seq_size)
     // Parse the binary DNA sequence two by two
     for (int i = 0; i < seq_size; i += 2) {
 
-        // nitrogenous base = A, T/U, G, C
-        int nit_base1 = get_binary_value(gene_seq, i);
-        int nit_base2 = get_binary_value(gene_seq, i + 1);
+        // nucleotides = A, T/U, G, C
+        int nucl1 = get_binary_value(gene_seq, i);
+        int nucl2 = get_binary_value(gene_seq, i + 1);
 
-        if (nit_base1 == 0 && nit_base2 == 0)
+        if (nucl1 == 0 && nucl2 == 0)
             // 00 = A
             rna_seq[j] = 'A';
-        else if (nit_base1 == 1 && nit_base2 == 1)
+        else if (nucl1 == 1 && nucl2 == 1)
             // 11 = U
             rna_seq[j] = 'U';
-        else if (nit_base1 == 1 && nit_base2 == 0)
+        else if (nucl1 == 1 && nucl2 == 0)
             // 10 = C
             rna_seq[j] = 'C';
-        else if (nit_base1 == 0 && nit_base2 == 1)
+        else if (nucl1 == 0 && nucl2 == 1)
             // 01 = G
             rna_seq[j] = 'G';
         else
@@ -290,18 +290,18 @@ void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gen
     int i = 0;
 
     while ((i + 6) <= gene_size) {
-        // nitrogenous bases = A, T/U, G, C
-        int nit_base1 = get_binary_value(gene, i);
-        int nit_base2 = get_binary_value(gene, i + 1);
-        int nit_base3 = get_binary_value(gene, i + 2);
-        int nit_base4 = get_binary_value(gene, i + 3);
-        int nit_base5 = get_binary_value(gene, i + 4);
-        int nit_base6 = get_binary_value(gene, i + 5);
+        // nucleotides = A, T/U, G, C
+        int nucl1 = get_binary_value(gene, i);
+        int nucl2 = get_binary_value(gene, i + 1);
+        int nucl3 = get_binary_value(gene, i + 2);
+        int nucl4 = get_binary_value(gene, i + 3);
+        int nucl5 = get_binary_value(gene, i + 4);
+        int nucl6 = get_binary_value(gene, i + 5);
 
         //If a start pos and a stop pos doesn't exist, search for AUG
         // if (!(gene[i%32] & ( 1 << (i%32) ))
-        if (nit_base1 == 0 && nit_base2 == 0 && nit_base3 == 1 
-            && nit_base4 == 1 && nit_base5 == 0 && nit_base6 == 1) {
+        if (nucl1 == 0 && nucl2 == 0 && nucl3 == 1 
+            && nucl4 == 1 && nucl5 == 0 && nucl6 == 1) {
         //if atc, it's the start of a gene
             start_pos = i;
             i += 6;
@@ -310,10 +310,10 @@ void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gen
 
             if (start_pos != -1 ) {
                 //if a start pos exists , search for UAA / UAG / UGA
-                if ((nit_base1 == 1 && nit_base2 == 1 && nit_base3 == 0) 
-                    && ((nit_base4 == 0 && nit_base5 == 0 && nit_base6 == 0)
-                        || (nit_base4 == 0 && nit_base5 == 0 && nit_base6 == 1)
-                        || (nit_base4 == 1 && nit_base5 == 0 && nit_base6 == 0))) {
+                if ((nucl1 == 1 && nucl2 == 1 && nucl3 == 0) 
+                    && ((nucl4 == 0 && nucl5 == 0 && nucl6 == 0)
+                        || (nucl4 == 0 && nucl5 == 0 && nucl6 == 1)
+                        || (nucl4 == 1 && nucl5 == 0 && nucl6 == 0))) {
                    //It's the end of a gene          
                    //If a start pos and an stop pos has been found, a gene exists so we save it in the struc
                     gene_map->gene_start[gene_map->genes_counter] = start_pos;
@@ -333,7 +333,6 @@ void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gen
     }
 }
 
-//////////////// Generating an amino acid chain (protein) 
 /**
  * in : gene_seq : unsigned int array : "binary array"
  * in : seq_size : size of gene_seq : number of used bits in gene_seq
@@ -585,13 +584,13 @@ void detecting_mutations(const unsigned int *gene_seq, const unsigned int size_s
     //Read the sequence
     for (unsigned long i = 0; i < size_sequence; i += 2) {
 
-        // nitrogenous base = A, T/U, G, C
-        int nit_base1 = get_binary_value(gene_seq, i);
-        int nit_base2 = get_binary_value(gene_seq, i + 1);
+        // nucleotides = A, T/U, G, C
+        int nucl1 = get_binary_value(gene_seq, i);
+        int nucl2 = get_binary_value(gene_seq, i + 1);
 
         //Increment detect_mut if find a C or G nucl
-        if (((nit_base1 == 0) && (nit_base2 == 1)) ||
-            ((nit_base1 == 1) && (nit_base2 == 0))) {
+        if (((nucl1 == 0) && (nucl2 == 1)) ||
+            ((nucl1 == 1) && (nucl2 == 0))) {
             if(detect_mut == 0){tmp_start_mut = i;}
             detect_mut+=2;
         }
