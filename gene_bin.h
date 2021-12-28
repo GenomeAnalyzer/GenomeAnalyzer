@@ -33,6 +33,7 @@ typedef struct mutation_map {
 /********** BINARIES FUNCTION **********/
 
 int get_binary_value(const unsigned int *seq_bin, const int pos);
+unsigned int* change_binary_value(unsigned int *seq_bin, const int pos, const int value);
 
 
 /******** DNA & GENES FUNCTION *********/
