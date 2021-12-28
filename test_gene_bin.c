@@ -89,6 +89,17 @@ static void test_convert_to_binary(void ** state){
   assert_ptr_equal(NULL, res2[2]);
 }
 
+static void test_binary_to_dna(void ** state){
+  // Test binary to aa conversions
+
+  // --- Test all conversion
+  assert_string_equal("ATCG", binary_to_dna((unsigned int[]){156}, 8));
+
+  // Test whether the function correctly detects errors:
+  // --- Wrong size bin_dna_seq
+  assert_ptr_equal(NULL, binary_to_dna((unsigned int[]){0}, 3));
+}
+
 int main(void) {
   int result = 0;
   const struct CMUnitTest tests[] = {
@@ -100,6 +111,7 @@ int main(void) {
     cmocka_unit_test(test_popcount_binary_array),
     // DNA & GENES FUNCTIONS
     cmocka_unit_test(test_convert_to_binary),
+    cmocka_unit_test(test_binary_to_dna),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 

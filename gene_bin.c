@@ -178,7 +178,43 @@ unsigned int* convert_to_binary(const char* dna_seq, const unsigned size){
     return set_binary_array(dna_seq, size);
 }
 
+//////////////// Convert binary aa to codon
+/**
+ * in : bin_dna_seq : unsigned int array
+ * in : size : number total of used bits in bin_dna_seq
+ * out : dna_seq : array of binary
+ * Convert a binary sequence to its DNA bases
+ */
+char* binary_to_dna(unsigned int* bin_dna_seq, const unsigned size){
+    if (size % 2 != 0) {
+        printf("Error: binary_to_aa : wrong binary size (%d). Must be odd.\nExit.\n",size);
+        return NULL;
+    }
 
+    char* dna_seq = malloc(sizeof(*dna_seq) * (size / 2) + 1);
+
+    int j = 0;
+    for (unsigned i = 0; i < size; i += 2){
+        // nitrogenous base = A, T/U, G, C
+        int nit_base1 = get_binary_value(bin_dna_seq, i);
+        int nit_base2 = get_binary_value(bin_dna_seq, i + 1);
+
+        if (nit_base1 == 0 && nit_base2 == 0)
+            // 00 = A/N
+            dna_seq[j] = 'A';
+        else if (nit_base1 == 1 && nit_base2 == 1)
+            // 11 = T
+            dna_seq[j] = 'T';
+        else if (nit_base1 == 1 && nit_base2 == 0)
+            // 10 = C
+            dna_seq[j] = 'C';
+        else if (nit_base1 == 0 && nit_base2 == 1)
+            // 01 = G
+            dna_seq[j] = 'G';
+        j++;
+    }
+    return dna_seq;
+}
 
 
 
