@@ -25,11 +25,28 @@ static void test_change_binary_value(void ** state){
   assert_int_not_equal(bin_5, get_binary_value(&seq_bin, 5));
 }
 
+static void test_set_binary_array(void ** state){
+  // Test if the algorithm is OK
+  char *seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA";
+  unsigned seq_size = 45;
+
+  unsigned int *seq_bin = NULL;
+  seq_bin = set_binary_array(seq_char, seq_size);
+
+  unsigned int seq_sol[3] = {2101911378, 172292753, -265825143};
+
+  for (int i = 0; i < 3; ++i)
+    assert_int_equal(seq_bin[i], seq_sol[i]);
+
+  free(seq_bin);
+}
+
 int main(void) {
   int result = 0;
   const struct CMUnitTest tests[] = {
     cmocka_unit_test(test_get_binary_value),
     cmocka_unit_test(test_change_binary_value),
+    cmocka_unit_test(test_set_binary_array),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 
