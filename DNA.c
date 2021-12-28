@@ -62,7 +62,7 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
     }
 
     //Return the char* value as a Python string object
-	return Py_BuildValue("s#", generating_mRNA(view.buf, view.shape[0]));
+	return Py_BuildValue("y#", generating_mRNA(view.buf, view.shape[0]));
 }
 
 //////////////// Detecting genes
@@ -143,9 +143,10 @@ static PyObject *DNA_generating_amino_acid_chain(PyObject *self, PyObject *args)
     }
 
     //Return the char* value as a Python string object
-	return Py_BuildValue("s", generating_amino_acid_chain(view.buf, view.shape[0]));
+	return Py_BuildValue("y#", generating_amino_acid_chain(view.buf, view.shape[0]));
 }
 
+/*
 //////////////// Detecting probable mutation zones
 static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 {
@@ -177,7 +178,7 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
     //Return the boolean value as a Python boolean object
     return Py_BuildValue("O", detecting_mutations(view.buf, view.shape[0]) ? Py_True : Py_False);
 }
-
+*/
 //////////////// Calculating the matching score of two sequences
 static PyObject *DNA_calculating_matching_score(PyObject *self, PyObject *args)
 {
@@ -238,7 +239,7 @@ static PyMethodDef DNA_methods[] = {
 	{ "generating_mRNA", DNA_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a string mRNA sequence"},
 	{ "detecting_genes", DNA_detecting_genes, METH_VARARGS, "Detect genes"},
 	{ "generating_amino_acid_chain", DNA_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein)"},
-	{ "detecting_mutations", DNA_detecting_mutations, METH_VARARGS, "Detecte probable mutation zones"},
+	//{ "detecting_mutations", DNA_detecting_mutations, METH_VARARGS, "Detecte probable mutation zones"},
 	{ "calculating_matching_score", DNA_calculating_matching_score, METH_VARARGS, "Detecte probable mutation zones"},
 	{ "hamming", DNA_hamming, METH_VARARGS, "Hamming distance calculation"},
 	{ "version", (PyCFunction)DNA_version, METH_VARARGS, "Return the version of the DNA library."},

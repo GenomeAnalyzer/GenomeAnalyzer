@@ -224,7 +224,7 @@ char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsign
 
     // Create and check the output
     char* aa_seq = NULL;
-    aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) +1 );
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
@@ -439,6 +439,8 @@ char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsign
     
         temp++;
     }
+    aa_seq[temp] = '\0';
+    printf("result C = %s\n",aa_seq);
     return aa_seq;
 }
 
