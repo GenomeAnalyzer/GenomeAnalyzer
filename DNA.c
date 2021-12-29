@@ -39,7 +39,7 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 	Py_buffer view;
 	PyObject *obj = NULL;
 
-	//Get the parameter (1-dimensional arrays)
+	//Get the parameter (1-dimensional array of unsigned short)
 	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
@@ -54,15 +54,15 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 		return NULL;
     }
 
-    if (strcmp(view.format, "i"))
+    if (strcmp(view.format, "H"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of floats.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short.");
 		PyBuffer_Release(&view);
 		return NULL;     
     }
 
     //Return the char* value as a Python string object
-	return Py_BuildValue("y#", generating_mRNA(view.buf, view.shape[0]));
+	return Py_BuildValue("s", generating_mRNA(view.buf, view.shape[0]));
 }
 
 //////////////// Detecting genes

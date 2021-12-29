@@ -14,7 +14,7 @@ def test_DNA_module_read_file():
 	assert res == "AATTG"
 
 def test_DNA_generating_mRNA():
-	res = DNA.generating_mRNA(array.array('i', [0,1,0,0,1,1,0,0,0,1,1,0]))
+	res = DNA.generating_mRNA(array.array('H', [0,1,0,0,1,1,0,0,0,1,1,0]))
 	assert res == "GAUAGC"
 
 # def test_DNA_detecting_genes():
