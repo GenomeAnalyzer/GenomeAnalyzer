@@ -15,7 +15,7 @@ def test_DNA_module_read_file():
 
 def test_DNA_generating_mRNA():
 	res = DNA.generating_mRNA(array.array('H', [0,1,0,0,1,1,0,0,0,1,1,0]))
-	assert res == "GAUAGC"
+	assert res == b"GAUAGC"
 
 def test_DNA_detecting_genes():
 	a = DNA.detecting_genes(array.array('H', [0,0,1,1,0,1,0,0,1,1,0,1,1,1,0,0,0,0]))
@@ -31,9 +31,9 @@ def test_DNA_generating_amino_acid_chain():
 
 	res1 = DNA.generating_amino_acid_chain(bin_dna_seq)
 	res2 = DNA.generating_amino_acid_chain(bin_dna_seq_array)
-	
-	assert "NWP" == res1
-	assert "NWP" == res2
+
+	assert b"NWP" == res1
+	assert b"NWP" == res2
 
 def test_DNA_detecting_mutations():
 	dna_arr = array.array('H', [0,1,0,0,1,1,0,0,0,1,1,0])

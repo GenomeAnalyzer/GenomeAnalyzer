@@ -62,7 +62,7 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
     }
 
     //Return the char* value as a Python string object
-	return Py_BuildValue("s", generating_mRNA(view.buf, view.shape[0]));
+	return Py_BuildValue("y", generating_mRNA(view.buf, view.shape[0]));
 }
 
 //////////////// Detecting genes
@@ -143,7 +143,7 @@ static PyObject *DNA_generating_amino_acid_chain(PyObject *self, PyObject *args)
     }
 
     //Return the char* value as a Python string object
-	return Py_BuildValue("s", generating_amino_acid_chain(view.buf, view.shape[0]));
+	return Py_BuildValue("y", generating_amino_acid_chain(view.buf, view.shape[0]));
 }
 
 //////////////// Detecting probable mutation zones
