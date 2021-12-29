@@ -31,22 +31,31 @@ for file in glob.glob("fastas/*.fasta"):
     print(str(len(gene[i])))
 
 
-
+    f.write("\nMRNA\t\t\t\t\t\t\t\tCHAIN\t\t\t\t\t\t\t\tMUTATION\n")
     for j in range (len(gene[i])-1):
         res = (DNA.generating_mRNA(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1])])))
         if res:
             mrna.append(res.decode("cp1252", "replace"))
+            f.write(str(res.decode("cp1252", "replace")))
         res2 =  DNA.generating_amino_acid_chain(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1])]))
 
         if res2:
             chain.append(res2.decode("cp1252", "replace"))
+            f.write("\t\t\t\t\t\t\t\t"+str(res2.decode("cp1252", "replace")))
+
+        mutres = DNA.detecting_mutations(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1])]))
+        mutation.append(mutres)
+        f.write("\t\t\t\t\t\t\t\t"+str(mutres)+"\n")
 
 
 
-    f.write("\nMRNA:")
-    f.write(str(mrna))
-    f.write("\nCHAIN:")
-    f.write(str(chain))    
+
+    #f.write("\nMRNA:")
+    #f.write(str(mrna))
+    #f.write("\nCHAIN:")
+    #f.write(str(chain))    
+    #f.write("\nMUTATION:")
+    #f.write(str(mutation))
 
     f.write("\nMatching:")
     if (len(gene[i])-1 > 2):
