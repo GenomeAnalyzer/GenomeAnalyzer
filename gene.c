@@ -143,6 +143,7 @@ char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_s
         }
         j++;
     }
+    rna_seq[j] = '\0';
     return rna_seq;
 }
 
@@ -440,7 +441,6 @@ char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsign
         temp++;
     }
     aa_seq[temp] = '\0';
-    printf("result C = %s\n",aa_seq);
     return aa_seq;
 }
 
