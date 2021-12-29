@@ -22,7 +22,7 @@ def test_DNA_generating_mRNA():
 # 	assert a == [[6,12]]
 
 def test_DNA_generating_amino_acid_chain():
-	aa = "AATTGGCCA"
+	aa = "NWP"
 	# UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf6 in position 4: invalid start byte
 	# UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc5 in position 3: invalid continuation byte
 
