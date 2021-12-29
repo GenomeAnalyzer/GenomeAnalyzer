@@ -7,6 +7,6 @@ def read_file(name):
         if not char:
             f.close()
             break
-        gene= gene +char.replace(" ","").replace("\n","")
+        gene= gene +char.strip()
     f.close()
     return gene
