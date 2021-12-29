@@ -153,7 +153,7 @@ char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_s
 * out : void
 * Detect if a gene exists in the sequence and insert it in the structure
 */
-void detecting_genes(const unsigned int gene [], const unsigned int gene_size, gene_map_t* gene_map) {
+void detecting_genes(const unsigned short gene [], const unsigned int gene_size, gene_map_t* gene_map) {
     //struct gene_map_s gene_map;
     gene_map->genes_counter = 0;
 
@@ -169,9 +169,9 @@ void detecting_genes(const unsigned int gene [], const unsigned int gene_size, g
     }
 
 
-    int start_pos = -1;
+    unsigned long long start_pos = -1;
 
-    int i = 0;
+    unsigned long long i = 0;
 
     while ((i + 6) <= gene_size) {   
 

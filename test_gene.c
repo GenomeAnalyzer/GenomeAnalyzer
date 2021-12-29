@@ -28,7 +28,7 @@ static void test_detecting_genes(void ** state){
 
   // Test if the algorithm is OK in a basic case: xxxxAUGxxxxUAAxxx
   // The algorithm should detect one gene from the start codon to the stop codon
-  detecting_genes((unsigned int[])
+  detecting_genes((unsigned short[])
     {0,0,0,1,1,0,0,0,1,1,0,1,0,0,0,1,0,1,0,0,1,1,1,0,1,0,0,1,1,1,0,0,0,0,1,0,1,0,1,0},
                   40, gene_map);
   assert_int_equal(6, gene_map->gene_start[0]);
@@ -37,7 +37,7 @@ static void test_detecting_genes(void ** state){
 
   // Test if the algorithm is OK in a multiple "start" case: xxxxAUGxxxxAUGxxxUAAxxx
   // The algorithm should detect one gene from the 2nd start codon to the stop codon
-  detecting_genes((unsigned int[])
+  detecting_genes((unsigned short[])
     {1,1,0,1,0,1,1,1,0,1,0,1,0,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,1,1,0,0,0,0,1,0,1,0,1,1},
                   60, gene_map);
   assert_int_equal(30, gene_map->gene_start[0]);
@@ -46,7 +46,7 @@ static void test_detecting_genes(void ** state){
 
   // Test if the algorithm is OK in a multiple "stop" case: xxxxAUGxxxxUAAxxxUAAxxx
   // The algorithm should detect one gene from the start codon to the first stop codon
-  detecting_genes((unsigned int[])
+  detecting_genes((unsigned short[])
     {1,1,0,1,0,1,1,1,0,1,0,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,0,0,0,1,1,0,1,0,1,1,1,0,1,1,1,0,0,0,0,1,1,0,1,0,1,1,1,0,1,1,1},
                   60, gene_map);
   assert_int_equal(10, gene_map->gene_start[0]);
@@ -57,7 +57,7 @@ static void test_detecting_genes(void ** state){
   // The algorithm should not detect any genes
   gene_map->gene_start[0] = 0;
   gene_map->gene_end[0] = 0;
-  detecting_genes((unsigned int[])
+  detecting_genes((unsigned short[])
     {1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0},
                   26, gene_map);
   assert_int_equal(0, gene_map->gene_start[0]);
@@ -66,7 +66,7 @@ static void test_detecting_genes(void ** state){
 
   // Test if the algorithm is OK in a multiple gene case: xxxxAUGxxxxUAGxxxAUGxxxUAAxxx
   // The algorithm should detect two genes
-  detecting_genes((unsigned int[])
+  detecting_genes((unsigned short[])
     {1,1,1,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1},
                   66, gene_map);
   assert_int_equal(6, gene_map->gene_start[0]);

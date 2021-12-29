@@ -71,7 +71,7 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 	Py_buffer view;
   	PyObject *obj = NULL;
 
-  	//Get the parameter (1-dimensional arrays)
+  	//Get the parameter (1-dimensional arrays of unsigned short)
 	if (!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
@@ -86,9 +86,9 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 		return NULL;
     }
 
-    if (strcmp(view.format, "I"))
+    if (strcmp(view.format, "H"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short");
 		PyBuffer_Release(&view);
 		return NULL;     
     }
