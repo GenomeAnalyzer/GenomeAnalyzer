@@ -456,7 +456,7 @@ char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsign
 void detecting_mutations(const unsigned short gene_seq [], const unsigned long size_sequence,
     mutation_map mut_m) {
     unsigned long detect_mut = 0;  //Counting size of GC sequence
-    unsigned short tmp_start_mut = 0;   //stock start mutation
+    unsigned long tmp_start_mut = 0;   //stock start mutation
     unsigned cmp = 0;   //counter of all mutation zones
 
     //Read the sequence

@@ -146,14 +146,13 @@ static PyObject *DNA_generating_amino_acid_chain(PyObject *self, PyObject *args)
 	return Py_BuildValue("s", generating_amino_acid_chain(view.buf, view.shape[0]));
 }
 
-/*
 //////////////// Detecting probable mutation zones
 static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 {
 	Py_buffer view;
 	PyObject *obj = NULL;
 
-	//Get the parameter (1-dimensional arrays)
+	//Get the parameter (1-dimensional arrays of unsigned short)
 	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
@@ -168,17 +167,38 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 		return NULL;
     }
 
-    if (strcmp(view.format, "I"))
+    if (strcmp(view.format, "H"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short.");
 		PyBuffer_Release(&view);
 		return NULL;     
     }
 
-    //Return the boolean value as a Python boolean object
-    return Py_BuildValue("O", detecting_mutations(view.buf, view.shape[0]) ? Py_True : Py_False);
+	mutation_map m;
+
+	m.size = malloc(sizeof(unsigned long) * 5);
+	m.start_mut = malloc(sizeof(unsigned long) * 5);
+	m.end_mut = malloc(sizeof(unsigned long) * 5);
+	//Initializing to 0 
+	for(int i = 0; i < 5; i ++){
+		m.size[i]=0;
+    	m.start_mut[i]=0;
+    	m.end_mut[i]=0;   	
+    }
+    detecting_mutations(view.buf, view.shape[0], m);
+
+    PyObject* List = PyList_New(0);
+    for(short int i = 0; i < 5; i ++){
+		PyObject *l = PyList_New(3);
+		PyList_SET_ITEM(l, 0, PyLong_FromUnsignedLong(m.size[i]));
+    	PyList_SET_ITEM(l, 1, PyLong_FromUnsignedLong(m.start_mut[i]));
+    	PyList_SET_ITEM(l, 2, PyLong_FromUnsignedLong(m.end_mut[i]));
+    	PyList_Append(List, l);
+    }
+
+	return List;
 }
-*/
+
 //////////////// Calculating the matching score of two sequences
 static PyObject *DNA_calculating_matching_score(PyObject *self, PyObject *args)
 {
@@ -239,7 +259,7 @@ static PyMethodDef DNA_methods[] = {
 	{ "generating_mRNA", DNA_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a string mRNA sequence"},
 	{ "detecting_genes", DNA_detecting_genes, METH_VARARGS, "Detect genes"},
 	{ "generating_amino_acid_chain", DNA_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein)"},
-	//{ "detecting_mutations", DNA_detecting_mutations, METH_VARARGS, "Detecte probable mutation zones"},
+	{ "detecting_mutations", DNA_detecting_mutations, METH_VARARGS, "Detecte probable mutation zones"},
 	{ "calculating_matching_score", DNA_calculating_matching_score, METH_VARARGS, "Detecte probable mutation zones"},
 	{ "hamming", DNA_hamming, METH_VARARGS, "Hamming distance calculation"},
 	{ "version", (PyCFunction)DNA_version, METH_VARARGS, "Return the version of the DNA library."},

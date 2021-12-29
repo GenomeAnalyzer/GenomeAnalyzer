@@ -34,8 +34,25 @@ def test_DNA_generating_amino_acid_chain():
 	assert aa == res
 
 def test_DNA_detecting_mutations():
-	res = DNA.detecting_mutations(array.array('I', [0,1,0,0,1,1,0,0,0,1,1,0]))
-	assert res
+	dna_arr = array.array('H', [0,1,0,0,1,1,0,0,0,1,1,0])
+
+	#ar1 = array.array('I', [0 for i in range(3)])
+	#ar2 = array.array('I', [0 for i in range(3)])
+	#ar3 = array.array('I', [0 for i in range(3)])
+	#for i in range(5):
+	#	ar1[i] = 0
+	#	ar2[i] = 0
+	#	ar3[i] = 0
+	#res = list([ar1,ar2,ar3])
+	#res = list([[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]])
+
+	#res = DNA.detecting_mutations(dna_arr)
+	res = DNA.detecting_mutations(array.array('H', [0,1,0,1,1,0,0,0,0,0,0,0]))
+	assert res[0] == [5,0,5]
+	assert res[1] == [0,0,0]
+	assert res[2] == [0,0,0]
+	assert res[3] == [0,0,0]
+	assert res[4] == [0,0,0]
 
 def test_DNA_calculating_matching_score():
 	size = 20
