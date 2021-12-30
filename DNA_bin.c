@@ -329,6 +329,8 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 
 	detecting_genes(view.buf, view.shape[0], &g);
 
+	printf("count = %lli\n",g.genes_counter);
+
 	PyObject* List = PyList_New(0);
 	for (unsigned long long i = 0; i < g.genes_counter; i++) {
 		PyObject* l = PyList_New(2);
@@ -336,6 +338,9 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 		PyList_SET_ITEM(l, 1, PyLong_FromUnsignedLongLong(g.gene_end[i]));
 		PyList_Append(List, l);
 	}
+
+	free(g.gene_end);
+	free(g.gene_start);
 
 	return List;
 }
@@ -417,6 +422,10 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		PyList_SET_ITEM(l, 2, PyLong_FromUnsignedLong(m.end_mut[i]));
 		PyList_Append(List, l);
 	}
+
+	free(m.end_mut);
+	free(m.size);
+	free(m.start_mut);
 
 	return List;
 }
