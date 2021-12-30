@@ -87,6 +87,14 @@ static void test_popcount_binary_array(void ** state){
   assert_int_equal(1, popcount_binary_array((unsigned int[]){1}, 31));
       //9350764 = 001101100111010101110001
   assert_int_equal(13, popcount_binary_array((unsigned int[]){9350764}, 24));
+
+  // Test for all binaries from 00000 to 11111
+  int popc_expected_result = 0, popc_result = 0;
+  for (int i = 0; i < 32; i++){
+    popc_expected_result = i%2 + i/2%2 + i/4%2 + i/8%2 + i/16%2;
+    popc_result = popcount_binary_array((unsigned int []) { i }, 31);
+    assert_int_equal(popc_expected_result, popc_result);
+  }
 }
 
 static void test_convert_to_binary(void ** state){
