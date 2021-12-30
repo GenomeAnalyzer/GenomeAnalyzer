@@ -19,7 +19,7 @@ matching = [[]]
 #gene = [[]]
 
 f = open("rapport.txt", "w")
-fh = open('helloworld.html','w')
+fh = open('rapport.html','w')
 message = """<html>
 <head><style> 
 th, td {
