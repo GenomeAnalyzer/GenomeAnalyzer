@@ -15,22 +15,20 @@ static PyObject *DNAb_version(PyObject *self)
 static PyObject *DNAb_convert_to_binary(PyObject *self, PyObject *args)
 {
 	char *obj = NULL;
-
 	unsigned obj2 = 0;
+
 	//Get the parameter (char* value)
 	if(!PyArg_ParseTuple(args, "si", &obj,&obj2))
 	    return NULL;
 
 	obj2 *=2;
-	 short *test = convert_to_binary(obj,obj2);
-	 PyObject *pylist, *item;
-	pylist = PyList_New(obj2);
+	unsigned int *test = convert_to_binary(obj,obj2);
+	PyObject *pylist = PyList_New(obj2);
 
-	for (unsigned  i=0; i < obj2; i++) {
-		item = PyLong_FromLong(test[i]);
-		PyList_SetItem(pylist, i, item);
-	}
-return pylist;
+	for (unsigned  i=0; i < obj2; i++)
+		PyList_SetItem(pylist, i, PyLong_FromLong(test[i]));
+
+	return pylist;
 }
 
 //////////////// Generating mRNA
@@ -39,7 +37,7 @@ static PyObject *DNAb_generating_mRNA(PyObject *self, PyObject *args)
 	Py_buffer view;
 	PyObject *obj = NULL;
 
-	//Get the parameter (1-dimensional array of unsigned short)
+	//Get the parameter (1-dimensional array of unsigned int)
 	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
@@ -54,9 +52,9 @@ static PyObject *DNAb_generating_mRNA(PyObject *self, PyObject *args)
 		return NULL;
     }
 
-    if (strcmp(view.format, "H"))
+    if (strcmp(view.format, "I"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;     
     }
@@ -71,7 +69,7 @@ static PyObject *DNAb_detecting_genes(PyObject *self, PyObject *args)
 	Py_buffer view;
   	PyObject *obj = NULL;
 
-  	//Get the parameter (1-dimensional arrays of unsigned short)
+  	//Get the parameter (1-dimensional arrays of unsigned int)
 	if (!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
@@ -86,9 +84,9 @@ static PyObject *DNAb_detecting_genes(PyObject *self, PyObject *args)
 		return NULL;
     }
 
-    if (strcmp(view.format, "H"))
+    if (strcmp(view.format, "I"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int");
 		PyBuffer_Release(&view);
 		return NULL;     
     }
@@ -97,8 +95,6 @@ static PyObject *DNAb_detecting_genes(PyObject *self, PyObject *args)
 
     g.gene_start = malloc(sizeof(*g.gene_start) * view.shape[0]);
     g.gene_end = malloc(sizeof(*g.gene_end) * view.shape[0]);
-
-
 
 	detecting_genes(view.buf, view.shape[0], &g);
 
@@ -120,7 +116,7 @@ static PyObject *DNAb_generating_amino_acid_chain(PyObject *self, PyObject *args
     Py_buffer view;
 	PyObject *obj = NULL;
 
-	//Get the parameter (1-dimensional array of unsigned short)
+	//Get the parameter (1-dimensional array of unsigned int)
 	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
@@ -135,9 +131,9 @@ static PyObject *DNAb_generating_amino_acid_chain(PyObject *self, PyObject *args
 		return NULL;
     }
 
-    if (strcmp(view.format, "H"))
+    if (strcmp(view.format, "I"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
     }
@@ -152,7 +148,7 @@ static PyObject *DNAb_detecting_mutations(PyObject *self, PyObject *args)
 	Py_buffer view;
 	PyObject *obj = NULL;
 
-	//Get the parameter (1-dimensional arrays of unsigned short)
+	//Get the parameter (1-dimensional arrays of unsigned int)
 	if(!PyArg_ParseTuple(args, "O", &obj))
 	    return NULL;
 
@@ -167,9 +163,9 @@ static PyObject *DNAb_detecting_mutations(PyObject *self, PyObject *args)
 		return NULL;
     }
 
-    if (strcmp(view.format, "H"))
+    if (strcmp(view.format, "I"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;     
     }
@@ -179,12 +175,14 @@ static PyObject *DNAb_detecting_mutations(PyObject *self, PyObject *args)
 	m.size = malloc(sizeof(unsigned long) * 5);
 	m.start_mut = malloc(sizeof(unsigned long) * 5);
 	m.end_mut = malloc(sizeof(unsigned long) * 5);
+
 	//Initializing to 0 
 	for(int i = 0; i < 5; i ++){
 		m.size[i]=0;
     	m.start_mut[i]=0;
     	m.end_mut[i]=0;   	
     }
+
     detecting_mutations(view.buf, view.shape[0], m);
 
     PyObject* List = PyList_New(0);
@@ -226,8 +224,8 @@ static PyObject *DNAb_calculating_matching_score(PyObject *self, PyObject *args)
 		return NULL;
     }
 
-    if (strcmp(view1.format, "H") || strcmp(view2.format, "H")){
-		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of unsigned short.");
+    if (strcmp(view1.format, "I") || strcmp(view2.format, "I")){
+		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view1);
 		PyBuffer_Release(&view2);
 		return NULL;
