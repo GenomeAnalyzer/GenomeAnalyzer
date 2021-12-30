@@ -11,6 +11,121 @@ static PyObject *DNAb_version(PyObject *self)
 	return Py_BuildValue("s", "DNA version 2.0");
 }
 
+/********** BINARIES FUNCTION **********/
+
+static PyObject *DNAb_get_binary_value(PyObject *self, PyObject *args)
+{
+	Py_buffer view;
+	PyObject *obj = NULL;
+	int obj2 = 0;
+
+	//Get the parameter (1-dimensional array of unsigned int, int position)
+	if(!PyArg_ParseTuple(args, "Oi", &obj, &obj2))
+	    return NULL;
+
+	//Get the array memory view
+	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+    	return NULL;
+
+    if (view.ndim != 1)
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
+		PyBuffer_Release(&view);
+		return NULL;
+    }
+
+    if (strcmp(view.format, "I"))
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyBuffer_Release(&view);
+		return NULL;     
+    }
+
+	return Py_BuildValue("i", get_binary_value(view.buf, obj2));
+}
+
+static PyObject *DNAb_change_binary_value(PyObject *self, PyObject *args)
+{
+	Py_buffer view;
+	PyObject *obj = NULL;
+	int obj2 = 0;
+	int obj3 = 0;
+
+	//Get the parameter (1-dimensional array of unsigned int, int position, int value)
+	if(!PyArg_ParseTuple(args, "Oii", &obj, &obj2, &obj3))
+	    return NULL;
+
+	//Get the array memory view
+	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+    	return NULL;
+
+    if (view.ndim != 1)
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
+		PyBuffer_Release(&view);
+		return NULL;
+    }
+
+    if (strcmp(view.format, "I"))
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyBuffer_Release(&view);
+		return NULL;     
+    }
+
+	unsigned int *array = change_binary_value(view.buf, obj2, obj3);
+	PyObject *pylist = PyList_New(view.shape[0]);
+
+	for (int i = 0; i < view.shape[0]; i++)
+		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
+
+	return pylist;
+}
+
+static PyObject *DNAb_set_binary_array(PyObject *self, PyObject *args)
+{
+	
+}
+
+static PyObject *DNAb_xor_binary_array(PyObject *self, PyObject *args)
+{
+	
+}
+
+static PyObject *DNAb_popcount_binary_array(PyObject *self, PyObject *args)
+{
+	Py_buffer view;
+	PyObject *obj = NULL;
+
+	//Get the parameter (1-dimensional array of unsigned int)
+	if(!PyArg_ParseTuple(args, "O", &obj))
+	    return NULL;
+
+	//Get the array memory view
+	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+    	return NULL;
+
+    if (view.ndim != 1)
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
+		PyBuffer_Release(&view);
+		return NULL;
+    }
+
+    if (strcmp(view.format, "I"))
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyBuffer_Release(&view);
+		return NULL;     
+    }
+
+	return Py_BuildValue("i", get_binary_value(view.buf, view.shape[0]));
+}
+
+
+
+/******** DNA & GENES FUNCTION *********/
+
 //////////////// Convert to binary
 static PyObject *DNAb_convert_to_binary(PyObject *self, PyObject *args)
 {
@@ -29,6 +144,38 @@ static PyObject *DNAb_convert_to_binary(PyObject *self, PyObject *args)
 		PyList_SetItem(pylist, i, PyLong_FromLong(test[i]));
 
 	return pylist;
+}
+
+//////////////// Binary to DNA
+static PyObject *DNAb_binary_to_dna(PyObject *self, PyObject *args)
+{
+	Py_buffer view;
+	PyObject *obj = NULL;
+
+	//Get the parameter (1-dimensional array of unsigned int)
+	if(!PyArg_ParseTuple(args, "O", &obj))
+	    return NULL;
+
+	//Get the array memory view
+	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+    	return NULL;
+
+    if (view.ndim != 1)
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
+		PyBuffer_Release(&view);
+		return NULL;
+    }
+
+    if (strcmp(view.format, "I"))
+    {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyBuffer_Release(&view);
+		return NULL;     
+    }
+
+    //Return the char* value as a Python string object
+	return Py_BuildValue("y", generating_mRNA(view.buf, view.shape[0]));
 }
 
 //////////////// Generating mRNA
@@ -237,11 +384,15 @@ static PyObject *DNAb_calculating_matching_score(PyObject *self, PyObject *args)
 	return Py_BuildValue("f", calculating_matching_score(view1.buf, view1.shape[0], view2.buf, view2.shape[0]));
 }
 
-
-
 //Register the methods to be made available Python side
 static PyMethodDef DNAb_methods[] = {
+	{ "get_binary_value", DNAb_get_binary_value, METH_VARARGS, ""},	
+	{ "change_binary_value", DNAb_change_binary_value, METH_VARARGS, ""},	
+	{ "set_binary_array", DNAb_set_binary_array, METH_VARARGS, ""},	
+	{ "xor_binary_array", DNAb_xor_binary_array, METH_VARARGS, ""},	
+	{ "popcount_binary_array", DNAb_popcount_binary_array, METH_VARARGS, ""},	
 	{ "convert_to_binary", DNAb_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},	
+	{ "binary_to_dna", DNAb_binary_to_dna, METH_VARARGS, "Convert a binary sequence to a DNA sequence"},	
 	{ "generating_mRNA", DNAb_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a string mRNA sequence"},
 	{ "detecting_genes", DNAb_detecting_genes, METH_VARARGS, "Detect genes"},
 	{ "generating_amino_acid_chain", DNAb_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein)"},
