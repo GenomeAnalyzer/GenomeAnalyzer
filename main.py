@@ -23,13 +23,34 @@ fh = open('helloworld.html','w')
 message = """<html>
 <head><style> 
 th, td {
-  border-style: dotted;
   font-size: 10px; 
 }
 .title {
-  border-style: dotted;
   font-size: 15px; 
-} 
+}
+/*Style du tableau*/
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  border-style: dashed;
+}
+.title {
+  border-style : dashed dashed dashed solid;
+  padding-left: 1%;
+}
+table {
+  width:90%;
+  margin-left : 5%;
+}
+
+details > summary {
+  padding: 4px;
+  width: 200px;
+  background-color: #eeeeee;
+  border: none;
+  box-shadow: 1px 1px 2px #bbbbbb;
+  cursor: help;
+}
 </style>
 </head>
 
