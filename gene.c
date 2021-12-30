@@ -456,8 +456,16 @@ char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsign
 void detecting_mutations(const unsigned short gene_seq [], const unsigned long size_sequence,
     mutation_map mut_m) {
     unsigned long detect_mut = 0;  //Counting size of GC sequence
-    unsigned long tmp_start_mut = 0;   //stock start mutation
+    unsigned long long tmp_start_mut = 0;   //stock start mutation
     unsigned cmp = 0;   //counter of all mutation zones
+
+
+    //If problem in allocation
+    if(!mut_m.start_mut || !mut_m.end_mut || !mut_m.size){
+        mut_m.start_mut = malloc(5 * sizeof(mut_m.start_mut));
+        mut_m.start_mut = malloc(5 * sizeof(mut_m.end_mut));
+        mut_m.start_mut = malloc(5 * sizeof(mut_m.size));
+    }
 
     //Read the sequence
     for (unsigned long i = 0; i < size_sequence; i += 2) {

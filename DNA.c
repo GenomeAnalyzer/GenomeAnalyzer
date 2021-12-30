@@ -57,7 +57,7 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 
     if (strcmp(view.format, "H"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned long.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short.");
 		PyBuffer_Release(&view);
 		return NULL;     
     }
@@ -96,8 +96,8 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 
 	gene_map_t g;
 
-    g.gene_start = malloc(sizeof(*g.gene_start) * view.shape[0]);
-    g.gene_end = malloc(sizeof(*g.gene_end) * view.shape[0]);
+    g.gene_start = malloc(sizeof(*g.gene_start) * view.shape[0]+1);
+    g.gene_end = malloc(sizeof(*g.gene_end) * view.shape[0]+1);
 
 
 
@@ -111,6 +111,9 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
     	PyList_SET_ITEM(l, 1, PyLong_FromUnsignedLongLong(g.gene_end[i]));
     	PyList_Append(List, l);    	
     }
+
+	free(g.gene_end);
+	free(g.gene_start);
 
 	return List;
 }
@@ -177,11 +180,11 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 
 	mutation_map m;
 
-	m.size = malloc(sizeof(unsigned long) * 5);
-	m.start_mut = malloc(sizeof(unsigned long) * 5);
-	m.end_mut = malloc(sizeof(unsigned long) * 5);
+	m.size = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long)*5);
+	m.start_mut = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long)*5);
+	m.end_mut = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long)*5);
 	//Initializing to 0 
-	for(int i = 0; i < 5; i ++){
+	for(int i = 0; i < 5; i++){
 		m.size[i]=0;
     	m.start_mut[i]=0;
     	m.end_mut[i]=0;   	
@@ -196,6 +199,10 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
     	PyList_SET_ITEM(l, 2, PyLong_FromUnsignedLong(m.end_mut[i]));
     	PyList_Append(List, l);
     }
+
+    free(m.size);
+    free(m.start_mut);
+    free(m.end_mut);
 
 	return List;
 }

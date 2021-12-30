@@ -22,7 +22,7 @@ typedef struct codon {
 }codon;
 
 typedef struct mutation_map {
-    unsigned long* size;
+    unsigned long *size;
     unsigned long *start_mut;
     unsigned long *end_mut;
 }mutation_map;
