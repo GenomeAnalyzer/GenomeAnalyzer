@@ -1,8 +1,10 @@
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "gene_bin.h"
+
 
 static PyObject *DNAb_error = NULL;
 
@@ -84,7 +86,31 @@ static PyObject *DNAb_change_binary_value(PyObject *self, PyObject *args)
 
 static PyObject *DNAb_set_binary_array(PyObject *self, PyObject *args)
 {
-	
+	// unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
+	Py_buffer view;
+	PyObject* obj = NULL;
+	char *seq_char;
+	int seq_size;
+
+	//Get the parameter (1-dimensional array of char, and its length)
+	// if (!PyArg_ParseTuple(args, "y#", &seq_char, &seq_size))
+	if (!PyArg_ParseTuple(args, "s#", &seq_char, &seq_size))
+		return NULL;
+
+	printf("ok here\n");
+	printf("seq_size : %d\n", seq_size);
+	printf("seq_char : %p\n", (void*) seq_char);
+	// TODO : corriger le segfault sur seq_char
+	// printf("seq_char : %s\n", *seq_char);
+	// printf("seq_char size: %d\n", sizeof(seq_char));
+
+	unsigned int* array = set_binary_array(seq_char, seq_size);
+	PyObject* pylist = PyList_New(seq_size*2);
+
+	for (int i = 0; i < seq_size*2; i++)
+		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
+
+	return pylist;
 }
 
 static PyObject *DNAb_xor_binary_array(PyObject *self, PyObject *args)

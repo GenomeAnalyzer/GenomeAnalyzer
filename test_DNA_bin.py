@@ -34,6 +34,31 @@ def test_change_binary_value():
 	for i in range(0,7): DNA_bin.change_binary_value(seq_bin, i, int((i+1)%2))
 	assert 85 == seq_bin[0]
 
+def test_set_binary_array():
+	assert 0 == 0
+	# Test if the algorithm is OK
+
+	# seq_char = "ACGT" # for s# objects
+	# seq_char = "ACGT".encode('utf-8') # for y# objects
+	# seq_size = 4
+	
+	# TODO : corriger le segfault sur seq_char
+	# DNA_bin.set_binary_array(seq_char)
+
+	# char *seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA";
+	# unsigned seq_size = 45;
+
+	# unsigned int *seq_bin = NULL;
+	# seq_bin = set_binary_array(seq_char, seq_size);
+
+	# unsigned int seq_sol[3] = {2101911378, 172292753, -265825143};
+
+	# for (int i = 0; i < 3; ++i)
+	# 	assert_int_equal(seq_bin[i], seq_sol[i]);
+
+	# free(seq_bin);
+
+
 def test_popcount_binary_array():
 	# Test for all binaries from 00000 to 11111
 	for i in range(0,32):
