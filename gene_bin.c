@@ -50,7 +50,7 @@ unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
     if(seq_bin_size % int_SIZE != 0)
         nb++;
     unsigned int* seq_bin = NULL;
-    seq_bin = calloc(sizeof(unsigned int) ,nb);
+    seq_bin = calloc(nb, sizeof(unsigned int));
 
     int pos = 0;
     for (int i = 0; i < seq_size; ++i)
@@ -58,8 +58,8 @@ unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
         switch(seq_char[i]){
         case 'A':
             // A = 00
-            change_binary_value(seq_bin, pos, 0);
-            change_binary_value(seq_bin, pos + 1, 0);
+            // change_binary_value(seq_bin, pos, 0);
+            // change_binary_value(seq_bin, pos + 1, 0);
             break;
         case 'T':
             // T = 11
@@ -68,13 +68,13 @@ unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
             break;
         case 'G':
             // G = 01
-            change_binary_value(seq_bin, pos, 0);
+            // change_binary_value(seq_bin, pos, 0);
             change_binary_value(seq_bin, pos + 1, 1);
             break;
         case 'C':
             // C = 10
             change_binary_value(seq_bin, pos, 1);
-            change_binary_value(seq_bin, pos + 1, 0);
+            // change_binary_value(seq_bin, pos + 1, 0);
             break;
         }
         pos += 2;
