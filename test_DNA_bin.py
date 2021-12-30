@@ -33,3 +33,13 @@ def test_change_binary_value():
 	# Invert back values of seq_bin
 	for i in range(0,7): DNA_bin.change_binary_value(seq_bin, i, int((i+1)%2))
 	assert 85 == seq_bin[0]
+
+def test_popcount_binary_array():
+	# Test for all binaries from 00000 to 11111
+	for i in range(0,32):
+		popc_expected_result = int(i%2) + int(i/2%2) + int(i/4%2) + int(i/8%2) + int(i/16%2)
+		popc_result = DNA_bin.popcount_binary_array(array.array('I', [i]))
+		assert popc_expected_result == popc_result
+
+	# 9350764 = 001101100111010101110001
+	assert 13 == DNA_bin.popcount_binary_array(array.array('I', [9350764]))
