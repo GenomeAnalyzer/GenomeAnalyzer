@@ -26,7 +26,7 @@ unsigned short* convert_to_binary(char* dna_seq, unsigned size){
     unsigned i = 0;
     unsigned temp = 0;
 
-    short *seq = malloc(sizeof(short)*size); 
+    unsigned short *seq = calloc(sizeof(unsigned short),size); 
 
     for (unsigned i = 0;i < size/2; i ++){
         switch(dna_seq[i]){
@@ -64,7 +64,7 @@ unsigned short* convert_to_binary(char* dna_seq, unsigned size){
                 break;
             default:
                 printf("Error: wrong letter in the sequence(%c).\nExit.\n",dna_seq[i]);
-
+                seq[temp] = NULL;
                 return seq;
         }
     }
@@ -154,7 +154,7 @@ char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_s
 * out : void
 * Detect if a gene exists in the sequence and insert it in the structure
 */
-void detecting_genes(const unsigned short gene [], const unsigned int gene_size, gene_map_t* gene_map) {
+void detecting_genes(const unsigned long gene [], const unsigned int gene_size, gene_map_t* gene_map) {
     //struct gene_map_s gene_map;
     gene_map->genes_counter = 0;
 

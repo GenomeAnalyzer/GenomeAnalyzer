@@ -22,11 +22,12 @@ static PyObject *DNA_convert_to_binary(PyObject *self, PyObject *args)
 	    return NULL;
 
 	obj2 *=2;
-	 short *test = convert_to_binary(obj,obj2);
+	unsigned short *test = convert_to_binary(obj,obj2);
 	 PyObject *pylist, *item;
 	pylist = PyList_New(obj2);
 
 	for (unsigned  i=0; i < obj2; i++) {
+
 		item = PyLong_FromLong(test[i]);
 		PyList_SetItem(pylist, i, item);
 	}
@@ -56,7 +57,7 @@ static PyObject *DNA_generating_mRNA(PyObject *self, PyObject *args)
 
     if (strcmp(view.format, "H"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned long.");
 		PyBuffer_Release(&view);
 		return NULL;     
     }
@@ -86,7 +87,7 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 		return NULL;
     }
 
-    if (strcmp(view.format, "H"))
+    if (strcmp(view.format, "L"))
     {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short");
 		PyBuffer_Release(&view);

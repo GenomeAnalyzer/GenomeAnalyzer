@@ -28,8 +28,8 @@ for file in glob.glob("fastas/*.fasta"):
     sequence.append(DNA.convert_to_binary(read,len(read)))
     #print(str(sequence[i]))
 
-    #gene.append(DNA.detecting_genes(array.array('L',sequence[i])))
-    gene.append(DNA.detecting_genes(array.array('H',sequence[i])))
+    gene.append(DNA.detecting_genes(array.array('L',sequence[i])))
+    #gene.append(DNA.detecting_genes(array.array('H',sequence[i])))
 
     f.write("\nMRNA\t\t\t\t\t\t\t\tCHAIN\t\t\t\t\t\t\t\tMUTATION\n")
     for j in range (len(gene[i])-1):
