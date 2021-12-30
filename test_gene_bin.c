@@ -31,6 +31,17 @@ static void test_change_binary_value(void ** state){
   change_binary_value(&seq_bin, 5, 0);
   assert_int_equal(0, get_binary_value(&seq_bin, 5));
   assert_int_not_equal(bin_5, get_binary_value(&seq_bin, 5));
+
+  seq_bin = 21;
+  int bin;
+  // Double change values for 21 = 10101
+  for (int i = 0;i < 5;i++){
+    bin = get_binary_value(&seq_bin, i); // Get current value
+    change_binary_value(&seq_bin, i, (bin+1)%2); // Change value
+    assert_int_not_equal(bin, get_binary_value(&seq_bin, i)); // Check the change
+    change_binary_value(&seq_bin, i, bin); // Change value again
+    assert_int_equal(bin, get_binary_value(&seq_bin, i)); // Check its back to original
+  }
 }
 
 static void test_set_binary_array(void ** state){
