@@ -50,10 +50,7 @@ unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
     if(seq_bin_size % int_SIZE != 0)
         nb++;
     unsigned int* seq_bin = NULL;
-    seq_bin = malloc(sizeof(*seq_bin) * nb);
-
-    for (int i = 0; i < seq_bin_size * 2; ++i)
-        change_binary_value(seq_bin, i, 0);
+    seq_bin = calloc(sizeof(unsigned int) ,nb);
 
     int pos = 0;
     for (int i = 0; i < seq_size; ++i)
@@ -258,6 +255,7 @@ char* generating_mRNA(const unsigned int* gene_seq, const unsigned int seq_size)
             return printf("ERROR: generating_mRNA: invalid value in DNA sequence\n"), NULL;
         j++;
     }
+    rna_seq[j] = '\0';
     return rna_seq;
 }
 
@@ -562,6 +560,8 @@ char* generating_amino_acid_chain(const unsigned int *gene_seq, const unsigned i
     
         temp++;
     }
+
+    aa_seq[temp] = '\0';
     return aa_seq;
 }
 

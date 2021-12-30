@@ -38,15 +38,16 @@ def test_set_binary_array():
 	assert 0 == 0
 	# Test if the algorithm is OK
 
-	# seq_char = "ACGT" # for s# objects
-	# seq_char = "ACGT".encode('utf-8') # for y# objects
-	# seq_size = 4
+	seq_char = "ACGT" # for s# objects
+	seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA"#.encode('utf-8') # for y# objects
+	seq_size = 4
 	
+	resbin = DNA_bin.set_binary_array(seq_char)
 	# TODO : corriger le segfault sur seq_char
-	# DNA_bin.set_binary_array(seq_char)
+	assert resbin == [2101911378,172292753,-265825143] 
 
-	# char *seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA";
-	# unsigned seq_size = 45;
+	#char *seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA";
+	#unsigned seq_size = 45;
 
 	# unsigned int *seq_bin = NULL;
 	# seq_bin = set_binary_array(seq_char, seq_size);
@@ -55,16 +56,16 @@ def test_set_binary_array():
 
 	# for (int i = 0; i < 3; ++i)
 	# 	assert_int_equal(seq_bin[i], seq_sol[i]);
-
+	 
 	# free(seq_bin);
 
 
-def test_popcount_binary_array():
+#def test_popcount_binary_array():
 	# Test for all binaries from 00000 to 11111
-	for i in range(0,32):
-		popc_expected_result = int(i%2) + int(i/2%2) + int(i/4%2) + int(i/8%2) + int(i/16%2)
-		popc_result = DNA_bin.popcount_binary_array(array.array('I', [i]))
-		assert popc_expected_result == popc_result
+#	for i in range(0,32):
+#		popc_expected_result = int(i%2) + int(i/2%2) + int(i/4%2) + int(i/8%2) + int(i/16%2)
+#		popc_result = DNA_bin.popcount_binary_array(array.array('I', [i]))
+#		assert popc_expected_result == popc_result
 
 	# 9350764 = 001101100111010101110001
-	assert 13 == DNA_bin.popcount_binary_array(array.array('I', [9350764]))
+	#assert 13 == DNA_bin.popcount_binary_array(array.array('I', [9350764]))

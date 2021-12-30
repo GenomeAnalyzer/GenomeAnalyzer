@@ -94,7 +94,7 @@ static PyObject *DNAb_set_binary_array(PyObject *self, PyObject *args)
 
 	//Get the parameter (1-dimensional array of char, and its length)
 	// if (!PyArg_ParseTuple(args, "y#", &seq_char, &seq_size))
-	if (!PyArg_ParseTuple(args, "s#", &seq_char, &seq_size))
+	if (!PyArg_ParseTuple(args, "s", &seq_char, &seq_size))
 		return NULL;
 
 	printf("ok here\n");
