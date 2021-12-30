@@ -13,6 +13,14 @@ static void test_get_binary_value(void ** state){
   assert_int_equal(1, get_binary_value((unsigned int[]){1}, 0));
       //9350764 = 001101100111010101110001
   assert_int_equal(0, get_binary_value((unsigned int[]){1}, 17));
+  // Pour chaque binaire de 00000 à 11111, vérifier chaque bit.
+  for(int i =0; i<32;i++){
+    assert_int_equal(i%2, get_binary_value((unsigned int []){i}, 0));
+    assert_int_equal(i/2%2, get_binary_value((unsigned int []){i}, 1));
+    assert_int_equal(i/4%2, get_binary_value((unsigned int []){i}, 2));
+    assert_int_equal(i/8%2, get_binary_value((unsigned int []){i}, 3));
+    assert_int_equal(i/16%2, get_binary_value((unsigned int []){i}, 4));
+  }
 }
 
 static void test_change_binary_value(void ** state){
