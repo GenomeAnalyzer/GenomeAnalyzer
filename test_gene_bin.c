@@ -56,6 +56,10 @@ static void test_set_binary_array(void ** state){
 
 static void test_xor_binary_array(void ** state){
   // Test if the algorithm is OK
+  unsigned int*xor = NULL;
+  xor = xor_binary_array((unsigned int []) {42}, 7, (unsigned int []) {85}, 7);
+  assert_int_equal(xor[0], 127);
+
   char *seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA";
   unsigned seq_size = 45;
   unsigned int *seq_bin = NULL;
@@ -66,7 +70,7 @@ static void test_xor_binary_array(void ** state){
   unsigned int *seq_bin2 = NULL;
   seq_bin2 = set_binary_array(seq_char2, seq_size2);
 
-  unsigned int *xor = NULL;
+  // unsigned int *xor = NULL;
   xor = xor_binary_array(seq_bin, 2 * seq_size, seq_bin2, 2 * seq_size2);
   // xor_size = max size
   int xor_size = seq_size >= seq_size2 ? seq_size : seq_size2;

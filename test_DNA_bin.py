@@ -50,6 +50,15 @@ def test_set_binary_array():
 	resbin = DNA_bin.set_binary_array(seq_char, len(seq_char))
 	assert resbin == [2101911378, 172292753, 4029142153]
 
+def test_xor_binary_array():
+  	# Test if the algorithm is OK
+	# 00000 xor 11111
+	assert [0] == DNA_bin.xor_binary_array(array.array('I', [31]), array.array('I', [31]))
+	# 11111 xor 11111
+	assert [31] == DNA_bin.xor_binary_array(array.array('I', [0]), array.array('I', [31]))
+	# 1010101 xor 0101010
+	# res = DNA_bin.xor_binary_array(array.array('I', [42]), array.array('I', [85]))
+	# print(res)
 
 def test_popcount_binary_array():
 	# Test for all binaries from 00000 to 11111

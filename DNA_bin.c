@@ -102,6 +102,80 @@ static PyObject* DNAb_set_binary_array(PyObject* self, PyObject* args) {
 }
 
 static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
+	Py_buffer view_seq_bin1;
+	Py_buffer view_seq_bin2;
+	PyObject* obj_seq_bin1 = NULL;
+	PyObject* obj_seq_bin2 = NULL;
+
+	//Get the parameter (1-dimensional array of unsigned int, int position, int value)
+	if (!PyArg_ParseTuple(args, "OO", &obj_seq_bin1, &obj_seq_bin2))
+		return NULL;
+
+	//Get the array memory view_seq_bin1
+	if (PyObject_GetBuffer(obj_seq_bin1, &view_seq_bin1, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+		return NULL;
+
+	if (view_seq_bin1.ndim != 1) {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
+		PyBuffer_Release(&view_seq_bin1);
+		return NULL;
+	}
+
+	if (strcmp(view_seq_bin1.format, "I")) {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyBuffer_Release(&view_seq_bin1);
+		return NULL;
+	}
+
+	//Get the array memory view_seq_bin2
+	if (PyObject_GetBuffer(obj_seq_bin2, &view_seq_bin2, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+		return NULL;
+
+	if (view_seq_bin2.ndim != 1) {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
+		PyBuffer_Release(&view_seq_bin2);
+		return NULL;
+	}
+
+	if (strcmp(view_seq_bin2.format, "I")) {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyBuffer_Release(&view_seq_bin2);
+		return NULL;
+	}
+
+	unsigned int* res = view_seq_bin1.buf;
+	unsigned int res2;
+	memcpy(&res2, res, sizeof(res));
+	// printf("seq_bin1 : %d, %d\n", *res, res2);
+	unsigned int a1 = 0;
+	// Calculate binary size.
+	while (res2 > 0) {
+		res2 = res2 / 2;
+		a1 += 1;
+	}
+
+	res = view_seq_bin2.buf;
+	memcpy(&res2, res, sizeof(res));
+	// printf("seq_bin2 : %d, %d\n", *res, res2);
+	unsigned int a2 = 0;
+	while (res2 > 0) {
+		res2 = res2 / 2;
+		a2 += 1;
+	}
+
+	unsigned int* array = xor_binary_array(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2);
+
+	a1 = (a1 / int_SIZE) + (a1 % int_SIZE != 0);
+	a2 = (a2 / int_SIZE) + (a2 % int_SIZE != 0);
+	unsigned int array_size = a1 > a2 ? a1 : a2;
+	// printf("a1 : %d, a2 : %d, array_size : %d", a1, a2, array_size);
+
+	PyObject* pylist = PyList_New(array_size);
+
+	for (int i = 0; i < array_size; i++)
+		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
+
+	return pylist;
 }
 
 static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {

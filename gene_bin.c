@@ -106,7 +106,7 @@ unsigned int* xor_binary_array(const unsigned int *seq_bin1, const unsigned seq_
     int diff_size = max_size - min_size;
 
     unsigned int *xor = NULL;
-    xor = malloc(sizeof(*xor) * max_nb);
+    xor = calloc(max_nb, sizeof(*xor));
 
 
     // If the sequences don't have the same size, do (with x = 1 or 0):
