@@ -25,23 +25,17 @@ static void test_get_binary_value(void ** state){
 
 static void test_change_binary_value(void ** state){
   // Test if the algorithm is OK
-      //9350764 = 001101100111010101110001
-  unsigned int seq_bin = 9350764;
-  int bin_5 = get_binary_value(&seq_bin, 5);
-  change_binary_value(&seq_bin, 5, 0);
-  assert_int_equal(0, get_binary_value(&seq_bin, 5));
-  assert_int_not_equal(bin_5, get_binary_value(&seq_bin, 5));
 
-  seq_bin = 21;
+  // 85 = 1010101
+  unsigned int seq_bin = 85;
   int bin;
-  // Double change values for 21 = 10101
-  for (int i = 0;i < 5;i++){
-    bin = get_binary_value(&seq_bin, i); // Get current value
-    change_binary_value(&seq_bin, i, (bin+1)%2); // Change value
-    assert_int_not_equal(bin, get_binary_value(&seq_bin, i)); // Check the change
-    change_binary_value(&seq_bin, i, bin); // Change value again
-    assert_int_equal(bin, get_binary_value(&seq_bin, i)); // Check its back to original
-  }
+  // Invert values of seq_bin
+  for (int i = 0;i < 7;i++) change_binary_value(&seq_bin, i, i%2);
+  // 42 = 0101010
+  assert_int_equal(seq_bin, 42);
+  // Invert again values of seq_bin.
+  for (int i = 0;i < 7;i++) change_binary_value(&seq_bin, i, (i+1)%2);
+  assert_int_equal(seq_bin, 85);
 }
 
 static void test_set_binary_array(void ** state){
