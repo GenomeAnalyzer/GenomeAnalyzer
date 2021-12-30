@@ -119,7 +119,18 @@ static PyObject *DNAb_popcount_binary_array(PyObject *self, PyObject *args)
 		return NULL;     
     }
 
-	return Py_BuildValue("i", get_binary_value(view.buf, view.shape[0]));
+	// Copy buffer into var. memcpy needed otherwise it doesn't work.
+	unsigned int *res = view.buf;
+	unsigned int res2;
+	memcpy(&res2, res, sizeof(res));
+	unsigned int size = 0;
+	// Calculate binary size.
+	while (res2 > 0){
+		res2 = res2 / 2;
+		size += 1;
+	}
+
+	return Py_BuildValue("i", popcount_binary_array(view.buf, size));
 }
 
 
