@@ -21,12 +21,13 @@ static PyObject* DNAb_version(PyObject* self) {
 unsigned int DNAb_get_binary_size(Py_buffer view) {
 	unsigned int* res, res2;
 	unsigned int size = 0;
+	// Copy buffer into var. memcpy needed otherwise it doesn't work.
 	for (int i = 0; i < view.len / view.itemsize; i++) {
-		printf("len : %ld\n", view.len);
-		printf("itemsize : %ld\n", view.itemsize);
-		printf("shape[0] : %ld\n", view.shape[0]);
+		// printf("len : %ld\n", view.len);
+		// printf("itemsize : %ld\n", view.itemsize);
+		// printf("shape[0] : %ld\n", view.shape[0]);
 		res = view.buf + i * view.itemsize;
-		printf("sizeof(res) : %ld\n", sizeof(res));
+		// printf("sizeof(res) : %ld\n", sizeof(res));
 		memcpy(&res2, res, sizeof(res2));
 		while (res2 > 0) {
 			res2 = res2 / 2;
@@ -34,7 +35,7 @@ unsigned int DNAb_get_binary_size(Py_buffer view) {
 		}
 		if (size % 2 != 0) size++;
 	}
-	printf("size : %d\n", size);
+	// printf("size : %d\n", size);
 	return size;
 	// For some reasons, causes a *** stack smashing detected ***: terminated error.
 }
@@ -106,8 +107,6 @@ static PyObject* DNAb_change_binary_value(PyObject* self, PyObject* args) {
 }
 
 static PyObject* DNAb_set_binary_array(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
 	char* seq_char;
 	unsigned int seq_size = 0;
 
@@ -169,29 +168,8 @@ static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
 		return NULL;
 	}
 
-	// Copy buffer into var. memcpy needed otherwise it doesn't work.
-	unsigned int* res, res2;
-	unsigned int a1 = 0;
-	for (int i = 0; i < view_seq_bin1.len / view_seq_bin1.itemsize; i++) {
-		res = view_seq_bin1.buf + i * view_seq_bin1.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			a1 += 1;
-		}
-		if (a1 % 2 != 0) a1++;
-	}
-
-	unsigned int a2 = 0;
-	for (int i = 0; i < view_seq_bin2.len / view_seq_bin2.itemsize; i++) {
-		res = view_seq_bin2.buf + i * view_seq_bin2.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			a2 += 1;
-		}
-		if (a2 % 2 != 0) a2++;
-	}
+	unsigned int a1 = DNAb_get_binary_size(view_seq_bin1);
+	unsigned int a2 = DNAb_get_binary_size(view_seq_bin2);
 
 	unsigned int* array = xor_binary_array(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2);
 
@@ -202,7 +180,7 @@ static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
 
 	PyObject* pylist = PyList_New(array_size);
 
-	for (int i = 0; i < array_size; i++)
+	for (unsigned int i = 0; i < array_size; i++)
 		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
 
 	return pylist;
@@ -232,18 +210,7 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	// Copy buffer into var. memcpy needed otherwise it doesn't work.
-	unsigned int* res, res2;
-	unsigned int size = 0;
-	for (int i = 0; i < view.len / view.itemsize; i++) {
-		res = view.buf + i * view.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			size += 1;
-		}
-		if (size % 2 != 0) size++;
-	}
+	unsigned int size = DNAb_get_binary_size(view);
 
 	return Py_BuildValue("i", popcount_binary_array(view.buf, size));
 }
@@ -254,8 +221,6 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 
 //////////////// Convert to binary
 static PyObject* DNAb_convert_to_binary(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
 	char* seq_char;
 	unsigned int seq_size = 0;
 
@@ -300,18 +265,7 @@ static PyObject* DNAb_binary_to_dna(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	// Copy buffer into var. memcpy needed otherwise it doesn't work.
-	unsigned int* res, res2;
-	unsigned int size = 0;
-	for (int i = 0; i < view.len / view.itemsize; i++) {
-		res = view.buf + i * view.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			size += 1;
-		}
-		if (size % 2 != 0) size++;
-	}
+	unsigned int size = DNAb_get_binary_size(view);
 
 	//Return the char* value as a Python string object
 	return Py_BuildValue("y", binary_to_dna(view.buf, size));
@@ -342,18 +296,7 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	// Copy buffer into var. memcpy needed otherwise it doesn't work.
-	unsigned int* res, res2;
-	unsigned int size = 0;
-	for (int i = 0; i < view.len / view.itemsize; i++) {
-		res = view.buf + i * view.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			size += 1;
-		}
-		if (size % 2 != 0) size++;
-	}
+	unsigned int size = DNAb_get_binary_size(view);
 
 	//Return the char* value as a Python string object
 	return Py_BuildValue("y", generating_mRNA(view.buf, size));
@@ -384,21 +327,9 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
+	unsigned int size = DNAb_get_binary_size(view);
+
 	gene_map_t g;
-
-	unsigned int* res, res2;
-	unsigned int size = 0;
-	for (int i = 0; i < view.len / view.itemsize; i++) {
-		res = view.buf + i * view.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			size += 1;
-		}
-		if (size % 2 != 0) size++;
-	}
-
-
 	g.gene_start = malloc(sizeof(*g.gene_start) * size);
 	g.gene_end = malloc(sizeof(*g.gene_end) * size);
 
@@ -444,18 +375,7 @@ static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args
 		return NULL;
 	}
 
-	// Copy buffer into var. memcpy needed otherwise it doesn't work.
-	unsigned int* res, res2;
-	unsigned int size = 0;
-	for (int i = 0; i < view.len / view.itemsize; i++) {
-		res = view.buf + i * view.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			size += 1;
-		}
-		if (size % 2 != 0) size++;
-	}
+	unsigned int size = DNAb_get_binary_size(view);
 
 	//Return the char* value as a Python string object
 	return Py_BuildValue("y", generating_amino_acid_chain(view.buf, size));
@@ -498,17 +418,8 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		m.start_mut[i] = 0;
 		m.end_mut[i] = 0;
 	}
-	unsigned int* res, res2;
-	unsigned int size = 0;
-	for (int i = 0; i < view.len / view.itemsize; i++) {
-		res = view.buf + i * view.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			size += 1;
-		}
-		if (size % 2 != 0) size++;
-	}
+
+	unsigned int size = DNAb_get_binary_size(view);
 
 	detecting_mutations(view.buf, size, m);
 
@@ -561,29 +472,8 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 		return NULL;
 	}
 
-	// Copy buffer into var. memcpy needed otherwise it doesn't work.
-	unsigned int* res, res2;
-	unsigned int a1 = 0;
-	for (int i = 0; i < view_seq_bin1.len / view_seq_bin1.itemsize; i++) {
-		res = view_seq_bin1.buf + i * view_seq_bin1.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			a1 += 1;
-		}
-		if (a1 % 2 != 0) a1++;
-	}
-
-	unsigned int a2 = 0;
-	for (int i = 0; i < view_seq_bin2.len / view_seq_bin2.itemsize; i++) {
-		res = view_seq_bin2.buf + i * view_seq_bin2.itemsize;
-		memcpy(&res2, res, sizeof(res2));
-		while (res2 > 0) {
-			res2 = res2 / 2;
-			a2 += 1;
-		}
-		if (a2 % 2 != 0) a2++;
-	}
+	unsigned int a1 = DNAb_get_binary_size(view_seq_bin1);
+	unsigned int a2 = DNAb_get_binary_size(view_seq_bin2);
 
 	//Return the float value as a Python float object
 	return Py_BuildValue("f", calculating_matching_score(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2));

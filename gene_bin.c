@@ -53,7 +53,7 @@ unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
     seq_bin = calloc(nb, sizeof(unsigned int));
 
     int pos = 0;
-    for (int i = 0; i < seq_size; ++i)
+    for (unsigned int i = 0; i < seq_size; ++i)
     {
         switch(seq_char[i]){
         case 'A':
@@ -99,11 +99,11 @@ unsigned int* xor_binary_array(const unsigned int *seq_bin1, const unsigned seq_
     int nb_seq2 = seq_size2 / int_SIZE;
     if(seq_size2 % int_SIZE != 0)   nb_seq2++;
 
-    int max_nb = nb_seq1 >= nb_seq2 ? nb_seq1 : nb_seq2;
+    unsigned int max_nb = nb_seq1 >= nb_seq2 ? nb_seq1 : nb_seq2;
 
-    int max_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
-    int min_size = seq_size1 >= seq_size2 ? seq_size2 : seq_size1;
-    int diff_size = max_size - min_size;
+    unsigned int max_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
+    unsigned int min_size = seq_size1 >= seq_size2 ? seq_size2 : seq_size1;
+    unsigned int diff_size = max_size - min_size;
 
     unsigned int *xor = NULL;
     xor = calloc(max_nb, sizeof(*xor));
@@ -121,21 +121,21 @@ unsigned int* xor_binary_array(const unsigned int *seq_bin1, const unsigned seq_
 
     int bit = 0;
     if(max_size == seq_size1){
-        for (int i = 0; i < diff_size; ++i){
+        for (unsigned int i = 0; i < diff_size; ++i){
            bit = get_binary_value(seq_bin1, i);
            xor = change_binary_value(xor, i, bit);
         }
-        for (int i = diff_size; i < max_size; ++i){
+        for (unsigned int i = diff_size; i < max_size; ++i){
            bit = get_binary_value(seq_bin1, i) ^ get_binary_value(seq_bin2, i - diff_size);
            xor = change_binary_value(xor, i, bit);
         }
     }
     else{
-        for (int i = 0; i < diff_size; ++i){
+        for (unsigned int i = 0; i < diff_size; ++i){
            bit = get_binary_value(seq_bin2, i);
            xor = change_binary_value(xor, i, bit);
         }
-        for (int i = diff_size; i < max_size; ++i){
+        for (unsigned int i = diff_size; i < max_size; ++i){
            bit = get_binary_value(seq_bin1, i - diff_size) ^ get_binary_value(seq_bin2, i);
            xor = change_binary_value(xor, i, bit);
         }
@@ -233,7 +233,7 @@ char* generating_mRNA(const unsigned int* gene_seq, const unsigned int seq_size)
 
     int j = 0;
     // Parse the binary DNA sequence two by two
-    for (int i = 0; i < seq_size; i += 2) {
+    for (unsigned int i = 0; i < seq_size; i += 2) {
 
         // nucleotides = A, T/U, G, C
         int nucl1 = get_binary_value(gene_seq, i);
@@ -285,7 +285,7 @@ void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gen
 
     int start_pos = -1;
 
-    int i = 0;
+    unsigned int i = 0;
 
     while ((i + 6) <= gene_size) {
         // nucleotides = A, T/U, G, C
@@ -356,7 +356,7 @@ char* generating_amino_acid_chain(const unsigned int *gene_seq, const unsigned i
         // The hash functions, takes the 6 bits, and transform the array into an integer.
         // The integer first char is a 2, for hash generation purposes.
         int hash = 2;
-        for(int k = i; k < i + codon_size; k++){
+        for(unsigned int k = i; k < i + codon_size; k++){
             hash = 10 * hash + get_binary_value(gene_seq, k);
         }
 
