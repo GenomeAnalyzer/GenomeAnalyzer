@@ -111,3 +111,24 @@ def test_binary_to_dna():
 	with pytest.raises(TypeError):
 		DNA_bin.binary_to_dna(None) # no entry
 		DNA_bin.binary_to_dna(array.array('H', [12])) # array format double
+
+
+def test_calculating_matching_score():
+	# Test if the algorithm is OK
+	# --- With same size
+	#  GACCCGAC = 0100101010010010 = {18770}
+	#  GGCCAGGC = 0101101000010110 = {26714}
+	assert 81.25 == DNA_bin.calculating_matching_score(array.array('I', [18770]), array.array('I', [26714]))
+	# --- With different size
+	#  GACCCGAC = 0100101010010010 = {18770}
+	#  TTTCAGGCTC = 11111110000101101110 = {485503}
+	assert 25.0 == DNA_bin.calculating_matching_score(array.array('I', [18770]), array.array('I', [485503]))
+	#  TTTCAGGCTT = 11111110000101101111 = {1009791}
+	#  GACCTTCGA = 1001010111110010 = {40786}
+	assert 35.0 == DNA_bin.calculating_matching_score(array.array('I', [1009791]), array.array('I', [40786]))
+
+	# Test whether the function correctly detects errors:
+	# --- NULL error
+	with pytest.raises(TypeError):
+		DNA_bin.calculating_matching_score(None) # no entry
+		DNA_bin.calculating_matching_score(array.array('H', [12])) # array format double

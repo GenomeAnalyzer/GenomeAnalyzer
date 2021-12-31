@@ -301,6 +301,11 @@ static void test_calculating_matching_score(void ** state){
                       (unsigned int[]){1009791}, 20,
                       (unsigned int[]){40786}, 18),
                     0);
+  assert_float_equal(35.000000,
+                    calculating_matching_score(
+                      (unsigned int[]){1009791}, 20,
+                      (unsigned int[]){40786}, 16),
+                    0);
 
   // Test whether the function correctly detects errors:
   // --- NULL error
