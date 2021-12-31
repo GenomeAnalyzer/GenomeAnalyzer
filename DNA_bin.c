@@ -6,11 +6,39 @@
 #include "gene_bin.h"
 
 
+/********** C-PYTHON INTERFACE DEFINTIONS **********/
+
 static PyObject* DNAb_error = NULL;
 
 static PyObject* DNAb_version(PyObject* self) {
 	return Py_BuildValue("s", "DNA version 2.0");
 }
+
+
+/********** C-PYTHON INTERFACE RELATED FUNCTIONS **********/
+
+// Returns the binary array size for unsigned int arrays in Py_buffer.
+unsigned int DNAb_get_binary_size(Py_buffer view) {
+	unsigned int* res, res2;
+	unsigned int size = 0;
+	for (int i = 0; i < view.len / view.itemsize; i++) {
+		printf("len : %ld\n", view.len);
+		printf("itemsize : %ld\n", view.itemsize);
+		printf("shape[0] : %ld\n", view.shape[0]);
+		res = view.buf + i * view.itemsize;
+		printf("sizeof(res) : %ld\n", sizeof(res));
+		memcpy(&res2, res, sizeof(res));
+		while (res2 > 0) {
+			res2 = res2 / 2;
+			size += 1;
+		}
+		if (size % 2 != 0) size++;
+	}
+	printf("size : %d\n", size);
+	return size;
+	// For some reasons, causes a *** stack smashing detected ***: terminated error.
+}
+
 
 /********** BINARIES FUNCTION **********/
 
@@ -216,7 +244,7 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 
 
 
-/******** DNA & GENES FUNCTION *********/
+/******** DNA & GENES FUNCTIONS *********/
 
 //////////////// Convert to binary
 static PyObject* DNAb_convert_to_binary(PyObject* self, PyObject* args) {
@@ -471,6 +499,9 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 	return Py_BuildValue("f", calculating_matching_score(view1.buf, view1.shape[0], view2.buf, view2.shape[0]));
 }
 
+
+/********** C-PYTHON INTERFACE SETUP FUNCTIONS **********/
+
 //Register the methods to be made available Python side
 static PyMethodDef DNAb_methods [] = {
 	{ "get_binary_value", DNAb_get_binary_value, METH_VARARGS, ""},
@@ -489,6 +520,7 @@ static PyMethodDef DNAb_methods [] = {
 	{NULL, NULL, 0, NULL}
 };
 
+// Define the python module
 static PyModuleDef DNAb_module = {
 	PyModuleDef_HEAD_INIT,
 	"DNA_bin",
