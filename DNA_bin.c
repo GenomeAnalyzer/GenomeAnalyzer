@@ -78,14 +78,12 @@ static PyObject* DNAb_change_binary_value(PyObject* self, PyObject* args) {
 }
 
 static PyObject* DNAb_set_binary_array(PyObject* self, PyObject* args) {
-	// unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
 	Py_buffer view;
 	PyObject* obj = NULL;
 	char* seq_char;
 	unsigned int seq_size = 0;
 
 	//Get the parameter (1-dimensional array of char, and its length)
-	// if (!PyArg_ParseTuple(args, "y#", &seq_char, &seq_size))
 	if (!PyArg_ParseTuple(args, "si", &seq_char, &seq_size))
 		return NULL;
 
@@ -222,19 +220,23 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 
 //////////////// Convert to binary
 static PyObject* DNAb_convert_to_binary(PyObject* self, PyObject* args) {
-	char* obj = NULL;
-	unsigned obj2 = 0;
+	Py_buffer view;
+	PyObject* obj = NULL;
+	char* seq_char;
+	unsigned int seq_size = 0;
 
-	//Get the parameter (char* value)
-	if (!PyArg_ParseTuple(args, "si", &obj, &obj2))
+	//Get the parameter (1-dimensional array of char, and its length)
+	if (!PyArg_ParseTuple(args, "si", &seq_char, &seq_size))
 		return NULL;
 
-	obj2 *= 2;
-	unsigned int* test = convert_to_binary(obj, obj2);
-	PyObject* pylist = PyList_New(obj2);
+	unsigned int* array = set_binary_array(seq_char, seq_size);
+	unsigned int array_size = 2 * seq_size / int_SIZE;
+	array_size += (2 * seq_size % int_SIZE != 0);
 
-	for (unsigned i = 0; i < obj2; i++)
-		PyList_SetItem(pylist, i, PyLong_FromLong(test[i]));
+	PyObject* pylist = PyList_New(array_size);
+
+	for (unsigned int i = 0; i < array_size; i++)
+		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
 
 	return pylist;
 }

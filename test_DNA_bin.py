@@ -35,7 +35,6 @@ def test_change_binary_value():
 	assert 85 == seq_bin[0]
 
 def test_set_binary_array():
-	assert 0 == 0
 	# Test if the algorithm is OK
 
 	assert [85] == DNA_bin.set_binary_array("CCCC", 4)
@@ -69,3 +68,19 @@ def test_popcount_binary_array():
 
 	# 9350764 = 001101100111010101110001
 	assert 13 == DNA_bin.popcount_binary_array(array.array('I', [9350764]))
+
+
+def test_convert_to_binary():
+	# Test if the algorithm is OK
+
+	assert [85] == DNA_bin.convert_to_binary("CCCC", 4)
+	assert [170] == DNA_bin.convert_to_binary("GGGG", 4)
+
+	assert [255] == DNA_bin.convert_to_binary("TTTT", 4)
+	assert [0] == DNA_bin.convert_to_binary("AAAA", 4)
+	assert [0] == DNA_bin.convert_to_binary("AAAA", 4)
+
+	seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA"
+
+	resbin = DNA_bin.convert_to_binary(seq_char, len(seq_char))
+	assert resbin == [2101911378, 172292753, 4029142153]
