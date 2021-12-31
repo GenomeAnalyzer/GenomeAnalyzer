@@ -97,3 +97,17 @@ def test_generating_mRNA():
 	with pytest.raises(TypeError):
 		DNA_bin.generating_mRNA(None) # no entry
 		DNA_bin.generating_mRNA(array.array('H', [12])) # array format double
+
+def test_binary_to_dna():
+	assert 0 == 0
+	# Test binary to aa conversions
+
+	# --- Test all conversion
+	assert b'ATCG' == DNA_bin.binary_to_dna(array.array('I', [156]))
+	assert b'ATGCGTGGGTAG' == DNA_bin.binary_to_dna(array.array('I', [9350764]))
+	assert b'ATGCGTGGGTAGATGCGTGGGTAG' == DNA_bin.binary_to_dna(array.array('I', [1821290092, 18263]))
+
+	# Test whether the function correctly detects errors:
+	with pytest.raises(TypeError):
+		DNA_bin.binary_to_dna(None) # no entry
+		DNA_bin.binary_to_dna(array.array('H', [12])) # array format double
