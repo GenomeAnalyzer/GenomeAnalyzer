@@ -112,7 +112,6 @@ def test_binary_to_dna():
 		DNA_bin.binary_to_dna(None) # no entry
 		DNA_bin.binary_to_dna(array.array('H', [12])) # array format double
 
-
 def test_calculating_matching_score():
 	# Test if the algorithm is OK
 	# --- With same size
@@ -132,3 +131,30 @@ def test_calculating_matching_score():
 	with pytest.raises(TypeError):
 		DNA_bin.calculating_matching_score(None) # no entry
 		DNA_bin.calculating_matching_score(array.array('H', [12])) # array format double
+
+def test_generating_amino_acid_chain():
+	assert 0 == 0
+	# # Test if the algorithm is OK
+	assert b'KKNNR' == DNA_bin.generating_amino_acid_chain(array.array('I', [146868224]))
+	assert b'RSSTT' == DNA_bin.generating_amino_acid_chain(array.array('I', [605259304]))
+	assert b'TTIMI' == DNA_bin.generating_amino_acid_chain(array.array('I', [481348884]))
+	assert b'IEEDD' == DNA_bin.generating_amino_acid_chain(array.array('I', [843718844]))
+	assert b'GGGGA' == DNA_bin.generating_amino_acid_chain(array.array('I', [115976842]))
+	assert b'AAAVV' == DNA_bin.generating_amino_acid_chain(array.array('I', [775644582]))
+	assert b'VVQQH' == DNA_bin.generating_amino_acid_chain(array.array('I', [293871518]))
+	assert b'HRRRR' == DNA_bin.generating_amino_acid_chain(array.array('I', [963023473]))
+	assert b'PPPPL' == DNA_bin.generating_amino_acid_chain(array.array('I', [232085829]))
+	assert b'LLLOO' == DNA_bin.generating_amino_acid_chain(array.array('I', [588240749]))
+	assert b'YYOWC' == DNA_bin.generating_amino_acid_chain(array.array('I', [464305363]))
+	assert b'CSSSS' == DNA_bin.generating_amino_acid_chain(array.array('I', [928936443]))
+	assert b'LLFF' == DNA_bin.generating_amino_acid_chain(array.array('I', [16645071]))
+	assert b'MRGOMRGO' == DNA_bin.generating_amino_acid_chain(array.array('I', [1821290092, 18263]))
+	# --- Test all the amino acid
+	# assert b'KKNNRRSSTTTTIMIIEEDDGGGGAAAAVVVVQQHHRRRRPPPPLLLLOOYYOWCCSSSSLLFF' == DNA_bin.generating_amino_acid_chain(array.array('I', [146868224, 605259304, 481348884, 843718844, 115976842, 775644582, 293871518, 963023473, 232085829, 588240749, 464305363, 928936443, 16645071]))
+	# assert b'KNKNTTTTRSRSIIIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYYSSSSCWCLFLFMOOO' == DNA_bin.generating_amino_acid_chain(array.array('I', [79823872, -2096862942,
+	# 	-1577991368, 547545866, -1792699787, -1126245655, 1210084514, -752012202, 1001024414, -106443080, -1380064261, -1612777443, 189184]))
+
+	# Test whether the function correctly detects errors:
+	with pytest.raises(TypeError):
+		DNA_bin.generating_amino_acid_chain(None) # no entry
+		DNA_bin.generating_amino_acid_chain(array.array('H', [12])) # array format double
