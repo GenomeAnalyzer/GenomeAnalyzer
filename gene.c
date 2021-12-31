@@ -87,12 +87,36 @@ unsigned short* convert_to_binary(char* dna_seq, unsigned size){
 
             break;
             case 'S': // S = C or G, here S = C
-            seq[temp] = 0;
+            seq[temp] = 1;
             seq[temp+1] = 0; 
             temp += 2;
 
             break;
             case 'W': // W = T or A, here W = T
+            seq[temp] = 1;
+            seq[temp+1] = 1; 
+            temp += 2;
+
+            break;
+            case 'B': // B = not A, here B = C
+            seq[temp] = 1;
+            seq[temp+1] = 0; 
+            temp += 2;
+
+            break;
+            case 'D': // D = not C, here D = A
+            seq[temp] = 0;
+            seq[temp+1] = 0; 
+            temp += 2;
+
+            break;
+            case 'H': // H = not G, here H = A
+            seq[temp] = 0;
+            seq[temp+1] = 0; 
+            temp += 2;
+
+            break;
+            case 'V': // V = not T, here V = A
             seq[temp] = 0;
             seq[temp+1] = 0; 
             temp += 2;
