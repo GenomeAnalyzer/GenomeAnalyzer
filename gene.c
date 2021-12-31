@@ -62,6 +62,42 @@ unsigned short* convert_to_binary(char* dna_seq, unsigned size){
                 temp += 2;
 
                 break;
+            case 'R': // R = A or G, here R = A
+                seq[temp] = 0;
+                seq[temp+1] = 0; 
+                temp += 2;
+
+                break;
+            case 'Y': // Y = C or T, here Y = C
+                seq[temp] = 1;
+                seq[temp+1] = 0; 
+                temp += 2;
+
+                break;
+            case 'K': // K = G or T, here K = G
+                seq[temp] = 0;
+                seq[temp+1] = 1; 
+                temp += 2;
+
+                break;
+            case 'M': // M = A or C, here M = A
+            seq[temp] = 0;
+            seq[temp+1] = 0; 
+            temp += 2;
+
+            break;
+            case 'S': // S = C or G, here S = C
+            seq[temp] = 0;
+            seq[temp+1] = 0; 
+            temp += 2;
+
+            break;
+            case 'W': // W = T or A, here W = T
+            seq[temp] = 0;
+            seq[temp+1] = 0; 
+            temp += 2;
+
+            break;
             default:
                 printf("Error: wrong letter in the sequence(%c).\nExit.\n",dna_seq[i]);
                 seq[temp] = NULL;
