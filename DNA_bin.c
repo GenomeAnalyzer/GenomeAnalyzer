@@ -321,7 +321,7 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "I")) {
+	if (strcmp(view.format, "i")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -400,7 +400,7 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "I")) {
+	if (strcmp(view.format, "i")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
