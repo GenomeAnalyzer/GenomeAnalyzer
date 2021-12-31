@@ -494,41 +494,63 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 
 //////////////// Calculating the matching score of two sequences
 static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args) {
-	Py_buffer view1;
-	Py_buffer view2;
-	PyObject* obj1 = NULL;
-	PyObject* obj2 = NULL;
+	Py_buffer view_seq_bin1;
+	Py_buffer view_seq_bin2;
+	PyObject* obj_seq_bin1 = NULL;
+	PyObject* obj_seq_bin2 = NULL;
 
 	//Get the parameter (2 1-dimensional arrays)
-	if (!PyArg_ParseTuple(args, "OO", &obj1, &obj2))
+	if (!PyArg_ParseTuple(args, "OO", &obj_seq_bin1, &obj_seq_bin2))
 		return NULL;
 
 	//Get the first array memory view
-	if (PyObject_GetBuffer(obj1, &view1, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_seq_bin1, &view_seq_bin1, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
 	//Get the second array memory view
-	if (PyObject_GetBuffer(obj2, &view2, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_seq_bin2, &view_seq_bin2, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
-	if (view1.ndim != 1 || view2.ndim != 1) {
+	if (view_seq_bin1.ndim != 1 || view_seq_bin2.ndim != 1) {
 		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array.");
-		PyBuffer_Release(&view1);
-		PyBuffer_Release(&view2);
+		PyBuffer_Release(&view_seq_bin1);
+		PyBuffer_Release(&view_seq_bin2);
 		return NULL;
 	}
 
-	if (strcmp(view1.format, "I") || strcmp(view2.format, "I")) {
+	if (strcmp(view_seq_bin1.format, "I") || strcmp(view_seq_bin2.format, "I")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of unsigned int.");
-		PyBuffer_Release(&view1);
-		PyBuffer_Release(&view2);
+		PyBuffer_Release(&view_seq_bin1);
+		PyBuffer_Release(&view_seq_bin2);
 		return NULL;
 	}
 
-	// printf("%ld\n", view1.shape[0]);
+	// Copy buffer into var. memcpy needed otherwise it doesn't work.
+	unsigned int* res, res2;
+	unsigned int a1 = 0;
+	for (int i = 0; i < view_seq_bin1.len / view_seq_bin1.itemsize; i++) {
+		res = view_seq_bin1.buf + i * view_seq_bin1.itemsize;
+		memcpy(&res2, res, sizeof(res));
+		while (res2 > 0) {
+			res2 = res2 / 2;
+			a1 += 1;
+		}
+		if (a1 % 2 != 0) a1++;
+	}
+
+	unsigned int a2 = 0;
+	for (int i = 0; i < view_seq_bin2.len / view_seq_bin2.itemsize; i++) {
+		res = view_seq_bin2.buf + i * view_seq_bin2.itemsize;
+		memcpy(&res2, res, sizeof(res));
+		while (res2 > 0) {
+			res2 = res2 / 2;
+			a2 += 1;
+		}
+		if (a2 % 2 != 0) a2++;
+	}
 
 	//Return the float value as a Python float object
-	return Py_BuildValue("f", calculating_matching_score(view1.buf, view1.shape[0], view2.buf, view2.shape[0]));
+	return Py_BuildValue("f", calculating_matching_score(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2));
 }
 
 
