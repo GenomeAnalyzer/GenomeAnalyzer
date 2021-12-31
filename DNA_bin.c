@@ -300,8 +300,21 @@ static PyObject* DNAb_binary_to_dna(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
+	// Copy buffer into var. memcpy needed otherwise it doesn't work.
+	unsigned int* res, res2;
+	unsigned int size = 0;
+	for (int i = 0; i < view.len / view.itemsize; i++) {
+		res = view.buf + i * view.itemsize;
+		memcpy(&res2, res, sizeof(res));
+		while (res2 > 0) {
+			res2 = res2 / 2;
+			size += 1;
+		}
+		if (size % 2 != 0) size++;
+	}
+
 	//Return the char* value as a Python string object
-	return Py_BuildValue("y", generating_mRNA(view.buf, view.shape[0]));
+	return Py_BuildValue("y", binary_to_dna(view.buf, size));
 }
 
 //////////////// Generating mRNA

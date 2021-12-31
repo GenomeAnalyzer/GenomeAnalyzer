@@ -188,7 +188,7 @@ char* binary_to_dna(unsigned int* bin_dna_seq, const unsigned size){
         return NULL;
     }
 
-    char* dna_seq = malloc(sizeof(*dna_seq) * (size / 2) + 1);
+    char* dna_seq = calloc((size / 2) + 1, sizeof(*dna_seq));
 
     int j = 0;
     for (unsigned i = 0; i < size; i += 2){
