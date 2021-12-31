@@ -58,8 +58,6 @@ unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
         switch(seq_char[i]){
         case 'A':
             // A = 00
-            // change_binary_value(seq_bin, pos, 0);
-            // change_binary_value(seq_bin, pos + 1, 0);
             break;
         case 'T':
             // T = 11
@@ -68,13 +66,49 @@ unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
             break;
         case 'G':
             // G = 01
-            // change_binary_value(seq_bin, pos, 0);
             change_binary_value(seq_bin, pos + 1, 1);
             break;
         case 'C':
             // C = 10
             change_binary_value(seq_bin, pos, 1);
-            // change_binary_value(seq_bin, pos + 1, 0);
+            break;
+        case 'N':
+            // N = A = 00
+            break;
+        case 'R':
+            // R = A = 00
+            break;
+        case 'Y':
+            // Y = C = 10
+            change_binary_value(seq_bin, pos, 1);
+            break;
+        case 'K':
+            // K = G = 01
+            change_binary_value(seq_bin, pos + 1, 1);
+            break;
+        case 'M':
+            // M = A = 00
+            break;
+        case 'S':
+            // S = C = 10
+            change_binary_value(seq_bin, pos, 1);
+            break;
+        case 'W':
+            // W = A = 00
+            break;
+        case 'B':
+            // B = C = 10
+            change_binary_value(seq_bin, pos, 1);
+            break;
+        case 'D':
+            // D = A = 00
+            break;
+        case 'H':
+            // H = G = 01
+            change_binary_value(seq_bin, pos + 1, 1);
+            break;
+        case 'V':
+            // V = A = 00
             break;
         }
         pos += 2;
