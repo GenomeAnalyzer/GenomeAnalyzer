@@ -386,12 +386,25 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 
 	gene_map_t g;
 
-	g.gene_start = malloc(sizeof(*g.gene_start) * view.shape[0]);
-	g.gene_end = malloc(sizeof(*g.gene_end) * view.shape[0]);
+	unsigned int* res, res2;
+	unsigned int size = 0;
+	for (int i = 0; i < view.len / view.itemsize; i++) {
+		res = view.buf + i * view.itemsize;
+		res2 = res;
+		//memcpy(&res2, res, sizeof(res));
+		while (res2 > 0) {
+			res2 = res2 / 2;
+			size += 1;
+		}
+		if (size % 2 != 0) size++;
+	}
 
-	detecting_genes(view.buf, view.shape[0], &g);
 
-	printf("count = %lli\n",g.genes_counter);
+	g.gene_start = malloc(sizeof(*g.gene_start) * size);
+	g.gene_end = malloc(sizeof(*g.gene_end) * size);
+
+	detecting_genes(view.buf, size, &g);
+
 
 	PyObject* List = PyList_New(0);
 	for (unsigned long long i = 0; i < g.genes_counter; i++) {

@@ -5,6 +5,7 @@ import moduleDNA as m
 
 ###### Verify if C extension in Python is working #####
 
+
 def test_get_binary_value():
 	# Test if the algorithm is OK
 	# 1 = 0000000000000000000000000000001
@@ -154,7 +155,45 @@ def test_generating_amino_acid_chain():
 	# assert b'KNKNTTTTRSRSIIIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYYSSSSCWCLFLFMOOO' == DNA_bin.generating_amino_acid_chain(array.array('I', [79823872, -2096862942,
 	# 	-1577991368, 547545866, -1792699787, -1126245655, 1210084514, -752012202, 1001024414, -106443080, -1380064261, -1612777443, 189184]))
 
+
 	# Test whether the function correctly detects errors:
 	with pytest.raises(TypeError):
 		DNA_bin.generating_amino_acid_chain(None) # no entry
 		DNA_bin.generating_amino_acid_chain(array.array('H', [12])) # array format double
+
+def test_detecting_genes():
+
+
+   #Test if the algorithm is OK in a basic case: xxxxAUGxxxxUAAxxx
+   #The algorithm should detect one gene from the start codon to the stop codon
+
+	assert 6 == DNA_bin.detecting_genes(array.array('I',[963808024, 42]))[0][0]
+	assert 28 == DNA_bin.detecting_genes(array.array('I',[963808024, 42]))[0][1]
+	assert 1 == len(DNA_bin.detecting_genes(array.array('I',[963808024, 42])))
+
+  	#Test if the algorithm is OK in a non presence of "start/stop" case: xxxxxxxxx
+  	#The algorithm should not detect any genes
+	assert 0 == len(DNA_bin.detecting_genes(array.array('I',[22369621])))
+
+	
+	'''
+	#Test if the algorithm is OK in a multiple "start" case: xxxxAUGxxxxAUGxxxUAAxxx
+  	#The algorithm should detect one gene from the 2nd start codon to the stop codon
+	assert 30 == DNA_bin.detecting_genes(array.array('I',[732875499, 2036213923]))[0][0]
+	assert 48 == DNA_bin.detecting_genes(array.array('I',[732875499, 2036213923]))[0][1]
+	assert 1 == len(DNA_bin.detecting_genes(array.array('I',[732875499, 2036213923]))[0])
+
+  	#Test if the algorithm is OK in a multiple "stop" case: xxxxAUGxxxxUAAxxxUAAxxx
+  	#The algorithm should detect one gene from the start codon to the first stop codon	
+	assert 10 == DNA_bin.detecting_genes(array.array('I',[250327787, 2022340747]))[0][0]
+	assert 26 == DNA_bin.detecting_genes(array.array('I',[250327787, 2022340747]))[0][1]
+	assert 1 == len(DNA_bin.detecting_genes(array.array('I',[250327787, 2022340747]))[0])
+
+  	#Test if the algorithm is OK in a multiple gene case: xxxxAUGxxxxUAGxxxAUGxxxUAAxxx
+  	#The algorithm should detect two genes
+	assert 6 == DNA_bin.detecting_genes(array.array('I',[469763265, 1612578969, 268435456]))[0][0]
+	assert 24 == DNA_bin.detecting_genes(array.array('I',[469763265, 1612578969, 268435456]))[0][1]
+	assert 36 == DNA_bin.detecting_genes(array.array('I',[469763265, 1612578969, 268435456]))[1][0]
+	assert 48 == DNA_bin.detecting_genes(array.array('I',[469763265, 1612578969, 268435456]))[1][1]
+	assert 2 == len(DNA_bin.detecting_genes(array.array('I',[469763265, 1612578969, 268435456])))
+	'''

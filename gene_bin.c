@@ -329,6 +329,7 @@ void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gen
                 i += 2;
         }
     }
+
 }
 
 /**
