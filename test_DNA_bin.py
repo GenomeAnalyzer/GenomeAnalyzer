@@ -69,7 +69,6 @@ def test_popcount_binary_array():
 	# 9350764 = 001101100111010101110001
 	assert 13 == DNA_bin.popcount_binary_array(array.array('I', [9350764]))
 
-
 def test_convert_to_binary():
 	# Test if the algorithm is OK
 
@@ -84,3 +83,17 @@ def test_convert_to_binary():
 
 	resbin = DNA_bin.convert_to_binary(seq_char, len(seq_char))
 	assert resbin == [2101911378, 172292753, 4029142153]
+
+def test_generating_mRNA():
+	# Test if the algorithm is OK
+
+	# assert empty
+	assert b'' == DNA_bin.generating_mRNA(array.array('I', [0]))
+	# 9350764 = 001101100111010101110001 - array size : 1
+	assert b'AUGCGUGGGUAG' == DNA_bin.generating_mRNA(array.array('I', [9350764]))
+	# 913666358 = 00110110011101010111000100110110, 30065 = 0111010101110001 - array size : 2
+	assert b'AUGCGUGGGUAGAUGCGUGGGUAG' == DNA_bin.generating_mRNA(array.array('I', [1821290092, 18263]))
+	# assert TypeError for not supported format entries
+	with pytest.raises(TypeError):
+		DNA_bin.generating_mRNA(None) # no entry
+		DNA_bin.generating_mRNA(array.array('H', [12])) # array format double
