@@ -2,6 +2,7 @@ import pytest
 import DNA_bin
 import array
 import moduleDNA as m
+import ctypes
 
 ###### Verify if C extension in Python is working #####
 
@@ -197,3 +198,50 @@ def test_detecting_genes():
 	assert 48 == DNA_bin.detecting_genes(array.array('I',[469763265, 1612578969, 268435456]))[1][1]
 	assert 2 == len(DNA_bin.detecting_genes(array.array('I',[469763265, 1612578969, 268435456])))
 	'''
+
+def test_detecting_mutations():
+  	#GGGTTGCGCGCGTTAAAGGTTTGAAAGGTG = {261725162, 97523700}
+  	#Test if sequence 10 to 23 is a mutation zone and no other mutation zone
+	assert 13 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[0][0]
+	assert 10 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[0][1]
+	assert 23 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[0][2]
+  	#No other mutations, should not be updated
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[1][0]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[1][1]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[1][2]	  
+
+  	#GTTTTGCAAACGTTAAAGGTTTGAAAGGTG = {261102590, 97523700}
+  	#Test if no mutation in this sequence
+  	 #No possible mutation zones detected, should not be updated	  
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261102590, 97523700]))[0][0]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261102590, 97523700]))[0][1]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261102590, 97523700]))[0][2]
+  	
+	#GGGCCGTTCCGCCCATAGGCCCGGCTAAGA = {-983172758, 17224372}
+  	#Test with 3 mutation zones in this sequence
+  	#First mutation is updated with right values
+	'''
+	assert 11 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[0][0]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[0][1]
+	assert 11 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[0][2]
+  	
+	#First mutation is updated with right values
+
+	assert 11 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[1][0]
+	assert 16 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[1][1]
+	assert 27 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[1][2]
+  
+   #First mutation is updated with right values
+
+	assert 15 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[2][0]
+	assert 34 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[2][1]
+	assert 49 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[2][2]
+
+
+   #No other mutations, should not be updated
+
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[3][0]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[3][1]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[3][2]
+  
+'''

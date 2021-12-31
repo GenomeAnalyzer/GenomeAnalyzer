@@ -499,8 +499,20 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		m.start_mut[i] = 0;
 		m.end_mut[i] = 0;
 	}
+	unsigned int* res, res2;
+	unsigned int size = 0;
+	for (int i = 0; i < view.len / view.itemsize; i++) {
+		res = view.buf + i * view.itemsize;
+		res2 = res;
+		//memcpy(&res2, res, sizeof(res));
+		while (res2 > 0) {
+			res2 = res2 / 2;
+			size += 1;
+		}
+		if (size % 2 != 0) size++;
+	}
 
-	detecting_mutations(view.buf, view.shape[0], m);
+	detecting_mutations(view.buf, size, m);
 
 	PyObject* List = PyList_New(0);
 	for (short int i = 0; i < 5; i++) {
