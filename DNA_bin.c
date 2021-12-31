@@ -169,24 +169,28 @@ static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
 		return NULL;
 	}
 
-	unsigned int* res = view_seq_bin1.buf;
-	unsigned int res2;
-	memcpy(&res2, res, sizeof(res));
-	// printf("seq_bin1 : %d, %d\n", *res, res2);
+	// Copy buffer into var. memcpy needed otherwise it doesn't work.
+	unsigned int* res, res2;
 	unsigned int a1 = 0;
-	// Calculate binary size.
-	while (res2 > 0) {
-		res2 = res2 / 2;
-		a1 += 1;
+	for (int i = 0; i < view_seq_bin1.len / view_seq_bin1.itemsize; i++) {
+		res = view_seq_bin1.buf + i * view_seq_bin1.itemsize;
+		memcpy(&res2, res, sizeof(res));
+		while (res2 > 0) {
+			res2 = res2 / 2;
+			a1 += 1;
+		}
+		if (a1 % 2 != 0) a1++;
 	}
 
-	res = view_seq_bin2.buf;
-	memcpy(&res2, res, sizeof(res));
-	// printf("seq_bin2 : %d, %d\n", *res, res2);
 	unsigned int a2 = 0;
-	while (res2 > 0) {
-		res2 = res2 / 2;
-		a2 += 1;
+	for (int i = 0; i < view_seq_bin2.len / view_seq_bin2.itemsize; i++) {
+		res = view_seq_bin2.buf + i * view_seq_bin2.itemsize;
+		memcpy(&res2, res, sizeof(res));
+		while (res2 > 0) {
+			res2 = res2 / 2;
+			a2 += 1;
+		}
+		if (a2 % 2 != 0) a2++;
 	}
 
 	unsigned int* array = xor_binary_array(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2);
@@ -229,14 +233,16 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 	}
 
 	// Copy buffer into var. memcpy needed otherwise it doesn't work.
-	unsigned int* res = view.buf;
-	unsigned int res2;
-	memcpy(&res2, res, sizeof(res));
+	unsigned int* res, res2;
 	unsigned int size = 0;
-	// Calculate binary size.
-	while (res2 > 0) {
-		res2 = res2 / 2;
-		size += 1;
+	for (int i = 0; i < view.len / view.itemsize; i++) {
+		res = view.buf + i * view.itemsize;
+		memcpy(&res2, res, sizeof(res));
+		while (res2 > 0) {
+			res2 = res2 / 2;
+			size += 1;
+		}
+		if (size % 2 != 0) size++;
 	}
 
 	return Py_BuildValue("i", popcount_binary_array(view.buf, size));
@@ -323,6 +329,7 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
+	// Copy buffer into var. memcpy needed otherwise it doesn't work.
 	unsigned int* res, res2;
 	unsigned int size = 0;
 	for (int i = 0; i < view.len / view.itemsize; i++) {
