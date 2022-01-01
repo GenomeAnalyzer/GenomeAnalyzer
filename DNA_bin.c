@@ -248,7 +248,7 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view_seq_bin.format, "I")) {
+	if (strcmp(view_seq_bin.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view_seq_bin);
 		return NULL;
@@ -342,7 +342,7 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "I")) {
+	if (strcmp(view.format, "i")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -373,7 +373,7 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "I")) {
+	if (strcmp(view.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -421,7 +421,7 @@ static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args
 		return NULL;
 	}
 
-	if (strcmp(view.format, "I")) {
+	if (strcmp(view.format, "i")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -452,7 +452,7 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "I")) {
+	if (strcmp(view.format, "i")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -519,7 +519,7 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 		return NULL;
 	}
 
-	if (strcmp(view_seq_bin1.format, "I") || strcmp(view_seq_bin2.format, "I")) {
+	if (strcmp(view_seq_bin1.format, "i") || strcmp(view_seq_bin2.format, "i")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view_seq_bin1);
 		PyBuffer_Release(&view_seq_bin2);
