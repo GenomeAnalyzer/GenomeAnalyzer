@@ -137,8 +137,8 @@ for file in glob.glob("fastas/*.fasta"):
     if (len(gene[i])-1 > 2):
         for j in range((int((len(gene[i]))/2)), -1, -1):
             for k in range((int((len(gene[i]))/2))):     
-                seq1 = DNA_bin.get_piece_binary_array(array.array('i',sequence[i]),gene[i][j][0],gene[i][j][1]- gene[i][j][0])
-                seq2 = DNA_bin.get_piece_binary_array(array.array('i',sequence[i]),gene[i][k][0],gene[i][k][1]- gene[i][k][0])
+                seq1 = DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]- gene[i][j][0])
+                seq2 = DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene[i][k][0],gene[i][k][1]- gene[i][k][0])
 
 
                 message+="<tr><td>"+str(seq1)+" , "+str(seq2)+ "</td>\n"
@@ -168,8 +168,8 @@ for i in range((int((len(gene))/2)), -1, -1):
     for c in range((int((len(gene))/2))):     
         for j in range(int((len(gene[i])))):
             for k in range(int((len(gene[c])))):
-                seq1 = DNA_bin.get_piece_binary_array(array.array('i',sequence[i]),gene[i][j][0],gene[i][j][1]- gene[i][j][0])
-                seq2 = DNA_bin.get_piece_binary_array(array.array('i',sequence[c]),gene[c][k][0],gene[c][k][1]- gene[c][k][0])              
+                seq1 = DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]- gene[i][j][0])
+                seq2 = DNA_bin.get_piece_binary_array(array.array('l',sequence[c]),gene[c][k][0],gene[c][k][1]- gene[c][k][0])              
                 message+="<tr><td>"+str(seq1)+" , "+str(seq2)+ "</td>\n"
                 f.write("["+str(seq1)+","+str(seq2)+"]=")
                 res = (DNA_bin.calculating_matching_score(array.array('i',seq1),array.array('i',seq2)))
