@@ -15,7 +15,7 @@
  * in : pos : position of the wanted bit (0 <= pos < size_seq * 2)
  * out : int : the wanted bit
  */
-int get_binary_value(const unsigned int *seq_bin, const int pos){
+int get_binary_value(const long int *seq_bin, const int pos){
     int new_pos = pos > int_SIZE ? pos / int_SIZE : 0;
     return seq_bin[new_pos] & (1 << (pos - new_pos)) ? 1 : 0;
 }
@@ -26,7 +26,7 @@ int get_binary_value(const unsigned int *seq_bin, const int pos){
  * in : value : the bit to replace
  * out : seq_bin : "binary array" modified
  */
-unsigned int* change_binary_value(unsigned int *seq_bin, const int pos, const int value){
+long int* change_binary_value(long int *seq_bin, const int pos, const int value){
     // value = 1 or 0
     // ~(1000) = (0001)
     int new_pos = pos > int_SIZE ? pos / int_SIZE : 0;
@@ -43,17 +43,17 @@ unsigned int* change_binary_value(unsigned int *seq_bin, const int pos, const in
  * in : seq_size : size of the array 'seq_char' = number of nucleotides
  * out : seq_bin : "binary array" filled
  */
-unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
+long int* set_binary_array(const char *seq_char, const unsigned seq_size){
     int seq_bin_size = 2 * seq_size;
     int nb = seq_bin_size / int_SIZE;
 
     if(seq_bin_size % int_SIZE != 0)
         nb++;
-    unsigned int* seq_bin = NULL;
-    seq_bin = calloc(nb, sizeof(unsigned int));
+    long int* seq_bin = NULL;
+    seq_bin = calloc(nb, sizeof(long int));
 
     int pos = 0;
-    for (unsigned int i = 0; i < seq_size; ++i)
+    for (long int i = 0; i < seq_size; ++i)
     {
         switch(seq_char[i]){
         case 'A':
@@ -123,23 +123,23 @@ unsigned int* set_binary_array(const char *seq_char, const unsigned seq_size){
  * in : seq_size2 : number total of used bits in the sequence seq_bin2
  * out : xor : "binary array" which is the result of the xor operation beteween seq1 and seq2
  */
-unsigned int* xor_binary_array(const unsigned int *seq_bin1, const unsigned seq_size1,
-                                const unsigned int *seq_bin2, const unsigned seq_size2){
+long int* xor_binary_array(const long int *seq_bin1, const unsigned seq_size1,
+                                const long int *seq_bin2, const unsigned seq_size2){
 
     // "nb" = number of 'int' in the arrays 'seq1' and 'seq2' 
-    //      = size of the 'unsigned int*' arrays
+    //      = size of the 'long int*' arrays
     int nb_seq1 = seq_size1 / int_SIZE;
     if(seq_size1 % int_SIZE != 0)   nb_seq1++;
     int nb_seq2 = seq_size2 / int_SIZE;
     if(seq_size2 % int_SIZE != 0)   nb_seq2++;
 
-    unsigned int max_nb = nb_seq1 >= nb_seq2 ? nb_seq1 : nb_seq2;
+    long int max_nb = nb_seq1 >= nb_seq2 ? nb_seq1 : nb_seq2;
 
-    unsigned int max_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
-    unsigned int min_size = seq_size1 >= seq_size2 ? seq_size2 : seq_size1;
-    unsigned int diff_size = max_size - min_size;
+    long int max_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
+    long int min_size = seq_size1 >= seq_size2 ? seq_size2 : seq_size1;
+    long int diff_size = max_size - min_size;
 
-    unsigned int *xor = NULL;
+    long int *xor = NULL;
     xor = calloc(max_nb, sizeof(*xor));
 
 
@@ -155,21 +155,21 @@ unsigned int* xor_binary_array(const unsigned int *seq_bin1, const unsigned seq_
 
     int bit = 0;
     if(max_size == seq_size1){
-        for (unsigned int i = 0; i < diff_size; ++i){
+        for (long int i = 0; i < diff_size; ++i){
            bit = get_binary_value(seq_bin1, i);
            xor = change_binary_value(xor, i, bit);
         }
-        for (unsigned int i = diff_size; i < max_size; ++i){
+        for (long int i = diff_size; i < max_size; ++i){
            bit = get_binary_value(seq_bin1, i) ^ get_binary_value(seq_bin2, i - diff_size);
            xor = change_binary_value(xor, i, bit);
         }
     }
     else{
-        for (unsigned int i = 0; i < diff_size; ++i){
+        for (long int i = 0; i < diff_size; ++i){
            bit = get_binary_value(seq_bin2, i);
            xor = change_binary_value(xor, i, bit);
         }
-        for (unsigned int i = diff_size; i < max_size; ++i){
+        for (long int i = diff_size; i < max_size; ++i){
            bit = get_binary_value(seq_bin1, i - diff_size) ^ get_binary_value(seq_bin2, i);
            xor = change_binary_value(xor, i, bit);
         }
@@ -182,7 +182,7 @@ unsigned int* xor_binary_array(const unsigned int *seq_bin1, const unsigned seq_
  * in : seq_size : number total of used bits in the sequence
  * out : s : popcount of the seq : number of '1'
  */
-int popcount_binary_array(const unsigned int *seq_bin, const unsigned int seq_size){
+int popcount_binary_array(const long int *seq_bin, const long int seq_size){
     int s = 0;
 
     int nb = seq_size / int_SIZE;
@@ -194,49 +194,55 @@ int popcount_binary_array(const unsigned int *seq_bin, const unsigned int seq_si
     return s;
 }
 
-unsigned int mask_binary_array(const unsigned int seq_bin, const unsigned pos_start, const unsigned size) {
+long int mask_binary_array(const long int seq_bin, const long int pos_start, const long int size) {
     // printf("seq_bin : %d, start : %d, size : %d\n", seq_bin, pos_start, size);
-    unsigned int res;
+    long int res;
 
-    res = seq_bin << (int_SIZE - size - pos_start);
-    res = res & 0b1111111111111111111111111111111;
-    res = res >> (int_SIZE - size);
+    res = seq_bin << ((int_SIZE+1) - size - pos_start);
+    res = res & 0b11111111111111111111111111111111;
+    res = res >> ((int_SIZE+1) - size);
     res = res << pos_start;
 
     // printf("return %d\n", res);
     return res;
 }
 
-unsigned int* get_piece_binary_array(const unsigned int* seq_bin, const unsigned int seq_size, const unsigned pos_start, const unsigned size){
-    unsigned int *res;
+long int* get_piece_binary_array(const long int* seq_bin, const long int seq_size, const long int pos_start, const long int size){
+    long int *res;
 
-    unsigned int seq_start = seq_size - 1 - pos_start/int_SIZE;
-    unsigned int seq_stop = seq_size - 1 - (pos_start+size)/int_SIZE;
+    long int intsize = int_SIZE + 1;
 
-    unsigned int nb = seq_start - seq_stop + 1;
+    long int seq_start = seq_size - 1 - pos_start/(intsize);
+    long int seq_stop = seq_size - 1 - (pos_start+size)/(intsize);
+
+    long int nb = seq_start - seq_stop + 1;
 
     res = calloc(nb, sizeof(*seq_bin));
 
-    unsigned int relative_start;
-    unsigned int relative_size;
+    long int relative_start;
+    long int relative_size;
 
-    unsigned int it = 0;
-    unsigned int i = seq_start;
+    long int it = 0;
+    long int i = seq_start;
+
+    printf("seq_size : %ld, pos_start : %ld, size : %ld\n", seq_size, pos_start, size);
+    printf("seq_start : %ld, seq_stop : %ld\n", seq_start, seq_stop);
 
     while(i != seq_stop-1){
-        printf("FOR : %d, %d, %d\n", i, seq_start, seq_stop);
-        relative_start = i == seq_start ? pos_start % int_SIZE : 0;
-        relative_size = size - it * int_SIZE + pos_start % int_SIZE;
-        relative_size = relative_size > int_SIZE ? int_SIZE - relative_start : relative_size;
+        printf("FOR : %ld, %ld, %ld\n", i, seq_start, seq_stop);
+        relative_start = i == seq_start ? pos_start % (intsize) : 0;
+        relative_size = size - it * (intsize) + pos_start % (intsize);
+        relative_size = relative_size > (intsize) ? (intsize) - relative_start : relative_size;
         *(res+nb-it-1) = mask_binary_array(*(seq_bin + i), relative_start, relative_size);
-        // printf("i : %d, it : %d, rstart : %d, rsize : %d, *(res+it) : %d\n", i, it, relative_start, relative_size, *(res+nb-it-1));
+        printf("i : %ld, it : %ld, *(seq_bin + i) : %ld, r_start : %ld, r_size : %ld, *(res+it) : %ld\n", i, it, *(seq_bin + i), relative_start, relative_size, *(res + nb - it - 1));
         it++;
         i--;
     }
-    printf("OK RETURN \n");
+    // printf("OK RETURN \n");
+    // for(long int i = 0; i < nb; i++) printf("res[%ld] = %ld\n", i, res[i]);
     return res;
 
-    // for(unsigned int i = seq_start; i >= seq_stop; i--){
+    // for(long int i = seq_start; i >= seq_stop; i--){
     //     printf("HEHO INLINE\n");
     //     it = i - (nb-seq_stop+seq_start);
     //     res[it] = *(seq_bin+i);
@@ -268,18 +274,18 @@ unsigned int* get_piece_binary_array(const unsigned int* seq_bin, const unsigned
  * out : seq : array of int
  * Convert a char DNA sequence to its binary sequence
  */
-unsigned int* convert_to_binary(const char* dna_seq, const unsigned size){
+long int* convert_to_binary(const char* dna_seq, const unsigned size){
     return set_binary_array(dna_seq, size);
 }
 
 //////////////// Convert binary aa to codon
 /**
- * in : bin_dna_seq : unsigned int array
+ * in : bin_dna_seq : long int array
  * in : size : number total of used bits in bin_dna_seq
  * out : dna_seq : array of binary
  * Convert a binary sequence to its DNA bases
  */
-char* binary_to_dna(unsigned int* bin_dna_seq, const unsigned size){
+char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
     if (size % 2 != 0) {
         printf("Error: binary_to_aa : wrong binary size (%d). Must be odd.\nExit.\n",size);
         return NULL;
@@ -312,12 +318,12 @@ char* binary_to_dna(unsigned int* bin_dna_seq, const unsigned size){
 
 //////////////// Generating mRNA
 /**
- * in : gene_seq : unsigned int array : "binary array"
+ * in : gene_seq : long int array : "binary array"
  * in : seq_size : size of gene_seq : number of used bits in gene_seq
  * out : rna_seq : array of char
  * Convert a binary DNA sequence to a string mRNA sequence
  */
-char* generating_mRNA(const unsigned int* gene_seq, const unsigned int seq_size) {
+char* generating_mRNA(const long int* gene_seq, const long int seq_size) {
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
@@ -330,7 +336,7 @@ char* generating_mRNA(const unsigned int* gene_seq, const unsigned int seq_size)
 
     int j = 0;
     // Parse the binary DNA sequence two by two
-    for (unsigned int i = 0; i < seq_size; i += 2) {
+    for (long int i = 0; i < seq_size; i += 2) {
 
         // nucleotides = A, T/U, G, C
         int nucl1 = get_binary_value(gene_seq, i);
@@ -358,13 +364,13 @@ char* generating_mRNA(const unsigned int* gene_seq, const unsigned int seq_size)
 
 //////////////// Detecting genes 
 /**
-* in : gene : unsigned int array : "binary array"
+* in : gene : long int array : "binary array"
 * in : gene_size : size of gene : number of used bits in gene
 * in : gene_map : struct to map the genes
 * out : void
 * Detect if a gene exists in the sequence and insert it in the structure
 */
-void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gene_map_t* gene_map) {
+void detecting_genes(const long int *gene, const long int gene_size, gene_map_t* gene_map) {
     //struct gene_map_s gene_map;
     gene_map->genes_counter = 0;
 
@@ -382,7 +388,7 @@ void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gen
 
     int start_pos = -1;
 
-    unsigned int i = 0;
+    long int i = 0;
 
     while ((i + 6) <= gene_size) {
         // nucleotides = A, T/U, G, C
@@ -430,12 +436,12 @@ void detecting_genes(const unsigned int *gene, const unsigned int gene_size, gen
 }
 
 /**
- * in : gene_seq : unsigned int array : "binary array"
+ * in : gene_seq : long int array : "binary array"
  * in : seq_size : size of gene_seq : number of used bits in gene_seq
  * out : char* : protein in symbols
  * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
 */
-char* generating_amino_acid_chain(const unsigned int *gene_seq, const unsigned int seq_size) {
+char* generating_amino_acid_chain(const long int *gene_seq, const long int seq_size) {
     short codon_size = 6;
     // Check the input argument
     if (!gene_seq)
@@ -451,11 +457,11 @@ char* generating_amino_acid_chain(const unsigned int *gene_seq, const unsigned i
 
     unsigned temp = 0;
 
-    for (unsigned int i = 0; i < seq_size; i += codon_size) {
+    for (long int i = 0; i < seq_size; i += codon_size) {
         // The hash functions, takes the 6 bits, and transform the array into an integer.
         // The integer first char is a 2, for hash generation purposes.
         int hash = 2;
-        for(unsigned int k = i; k < i + codon_size; k++){
+        for(long int k = i; k < i + codon_size; k++){
             hash = 10 * hash + get_binary_value(gene_seq, k);
         }
 
@@ -675,7 +681,7 @@ char* generating_amino_acid_chain(const unsigned int *gene_seq, const unsigned i
 * (at least 1/5th of the gene sequence's size) it returns true, else it returns false.
 * Precondition: gene_seq is of size size_sequence.
 */
-void detecting_mutations(const unsigned int *gene_seq, const unsigned int size_sequence,
+void detecting_mutations(const long int *gene_seq, const long int size_sequence,
                          mutation_map mut_m) {
     unsigned long detect_mut = 0;  //Counting size of GC sequence
     unsigned short tmp_start_mut = 0;   //stock start mutation
@@ -722,13 +728,13 @@ void detecting_mutations(const unsigned int *gene_seq, const unsigned int size_s
  * out : float : matching score in %
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
 */
-float calculating_matching_score(const unsigned int *seq1, const int seq_size1,
-                                 const unsigned int *seq2, const int seq_size2) {
+float calculating_matching_score(const long int *seq1, const int seq_size1,
+                                 const long int *seq2, const int seq_size2) {
     // Check the input argument
     if (!seq1 || !seq2)
         return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
 
-    unsigned int *xor = NULL;
+    long int *xor = NULL;
     xor = xor_binary_array(seq1, seq_size1, seq2, seq_size2);
 
     // xor_size = max size
