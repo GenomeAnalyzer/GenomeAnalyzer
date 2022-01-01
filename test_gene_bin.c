@@ -313,6 +313,19 @@ static void test_calculating_matching_score(void ** state){
 
 }
 
+static void test_get_piece_binary_array(){
+  // Test if the algorithm is OK
+  //   7  ,       568   ,     511    ,     455
+  // 0b1 11, 0b1000111000, 0b1111111 11, 0b111000111
+  // 0b0|11, 0b1000111000, 0b1111111|00, 0b111000111
+  //   3  ,       568   ,     508    ,
+  unsigned int* res = get_piece_binary_array((unsigned int []) { 0b111, 0b1000111000, 0b111111111, 0b111000111 }, 4, int_SIZE+2, 2 * int_SIZE);
+  unsigned int* expected_res = (unsigned int []){ 0b011, 0b1000111000, 0b111111100 };
+  for(int i = 0; i <3; i++){
+    assert_int_equal(expected_res[i], res[i]);
+  }
+}
+
 static void test_mask_binary_array(){
   assert_int_equal(10, mask_binary_array(203, 1, 4));
 }
@@ -327,6 +340,7 @@ int main(void) {
     cmocka_unit_test(test_xor_binary_array),
     cmocka_unit_test(test_popcount_binary_array),
     cmocka_unit_test(test_mask_binary_array),
+    cmocka_unit_test(test_get_piece_binary_array),
     // DNA & GENES FUNCTIONS
     cmocka_unit_test(test_convert_to_binary),
     cmocka_unit_test(test_binary_to_dna),

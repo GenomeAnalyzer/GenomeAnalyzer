@@ -40,6 +40,7 @@ unsigned int* xor_binary_array(const unsigned int *seq1, const unsigned array_si
                                 const unsigned int *seq2, const unsigned array_size2);
 int popcount_binary_array(const unsigned int *seq, const unsigned int size);
 unsigned int mask_binary_array(const unsigned int seq_bin, const unsigned pos_start, const unsigned size);
+unsigned int* get_piece_binary_array(const unsigned int* seq_bin, const unsigned int seq_size, const unsigned pos_start, const unsigned size);
 
 
 /******** DNA & GENES FUNCTION *********/

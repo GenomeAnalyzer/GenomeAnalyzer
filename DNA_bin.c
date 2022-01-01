@@ -228,6 +228,44 @@ static PyObject* DNAb_mask_binary_array(PyObject* self, PyObject* args) {
 	return Py_BuildValue("i", mask_binary_array(seq_bin, pos_start, size));
 }
 
+static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
+	Py_buffer view_seq_bin;
+	PyObject* obj_seq_bin = NULL;
+	int pos_start = 0;
+	int size = 0;
+
+	//Get the parameter (1-dimensional array of unsigned int, int position, int value)
+	if (!PyArg_ParseTuple(args, "Oii", &obj_seq_bin, &pos_start, &size))
+		return NULL;
+
+	//Get the array memory view
+	if (PyObject_GetBuffer(obj_seq_bin, &view_seq_bin, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+		return NULL;
+
+	if (view_seq_bin.ndim != 1) {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
+		PyBuffer_Release(&view_seq_bin);
+		return NULL;
+	}
+
+	if (strcmp(view_seq_bin.format, "I")) {
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyBuffer_Release(&view_seq_bin);
+		return NULL;
+	}
+
+	unsigned int* array = get_piece_binary_array(view_seq_bin.buf, view_seq_bin.shape[0], pos_start, size);
+
+	unsigned int array_size = (pos_start + size) / int_SIZE;
+	printf("array_size : %d\n", array_size);
+	PyObject* pylist = PyList_New(array_size);
+
+	for (unsigned int i = 0; i < array_size; i++)
+		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
+
+	return pylist;
+}
+
 
 
 /******** DNA & GENES FUNCTIONS *********/
@@ -505,6 +543,7 @@ static PyMethodDef DNAb_methods [] = {
 	{ "xor_binary_array", DNAb_xor_binary_array, METH_VARARGS, ""},
 	{ "popcount_binary_array", DNAb_popcount_binary_array, METH_VARARGS, ""},
 	{ "mask_binary_array", DNAb_mask_binary_array, METH_VARARGS, ""},
+	{ "get_piece_binary_array", DNAb_get_piece_binary_array, METH_VARARGS, ""},
 	{ "convert_to_binary", DNAb_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},
 	{ "binary_to_dna", DNAb_binary_to_dna, METH_VARARGS, "Convert a binary sequence to a DNA sequence"},
 	{ "generating_mRNA", DNAb_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a string mRNA sequence"},

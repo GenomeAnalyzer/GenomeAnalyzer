@@ -207,6 +207,56 @@ unsigned int mask_binary_array(const unsigned int seq_bin, const unsigned pos_st
     return res;
 }
 
+unsigned int* get_piece_binary_array(const unsigned int* seq_bin, const unsigned int seq_size, const unsigned pos_start, const unsigned size){
+    unsigned int *res;
+
+    unsigned int seq_start = seq_size - 1 - pos_start/int_SIZE;
+    unsigned int seq_stop = seq_size - 1 - (pos_start+size)/int_SIZE;
+
+    unsigned int nb = seq_start - seq_stop + 1;
+
+    res = calloc(nb, sizeof(*seq_bin));
+
+    unsigned int relative_start;
+    unsigned int relative_size;
+
+    unsigned int it = 0;
+    unsigned int i = seq_start;
+
+    while(i != seq_stop-1){
+        printf("FOR : %d, %d, %d\n", i, seq_start, seq_stop);
+        relative_start = i == seq_start ? pos_start % int_SIZE : 0;
+        relative_size = size - it * int_SIZE + pos_start % int_SIZE;
+        relative_size = relative_size > int_SIZE ? int_SIZE - relative_start : relative_size;
+        *(res+nb-it-1) = mask_binary_array(*(seq_bin + i), relative_start, relative_size);
+        // printf("i : %d, it : %d, rstart : %d, rsize : %d, *(res+it) : %d\n", i, it, relative_start, relative_size, *(res+nb-it-1));
+        it++;
+        i--;
+    }
+    printf("OK RETURN \n");
+    return res;
+
+    // for(unsigned int i = seq_start; i >= seq_stop; i--){
+    //     printf("HEHO INLINE\n");
+    //     it = i - (nb-seq_stop+seq_start);
+    //     res[it] = *(seq_bin+i);
+    //     printf("res[%d] (i) : %d\n", it, i, res[it]);
+    //     if (i == seq_start){
+    //         res[it] = res[it] >> pos_start%intsize;
+    //         res[it] = res[it] & 0b111;
+    //         res[it] = res[it] << pos_start%intsize;
+    //     }
+    //     temp = pos_start + size - (intsize * (pos_start / intsize));
+    //     temp = temp > intsize ? intsize : temp;
+    //     res[it] = res[it] << temp;
+    //     res[it] = res[it] & 0b111;
+    //     res[it] = res[it] >> temp;
+    // }
+}
+
+
+
+
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
 /***************************************/

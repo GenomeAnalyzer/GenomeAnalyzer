@@ -76,6 +76,11 @@ def test_popcount_binary_array():
 def test_mask_binary_array():
 	assert 10 == DNA_bin.mask_binary_array(203, 1, 4)
 
+def test_get_piece_binary_array():
+	expected_res = array.array('I', [3,568,508])
+	res = DNA_bin.get_piece_binary_array(array.array('I', [7,568,511, 455]), int_SIZE+2, 2 * int_SIZE)
+	for i in range(len(res)):
+		assert expected_res[i] == res[i]
 
 def test_convert_to_binary():
 	# Test if the algorithm is OK
