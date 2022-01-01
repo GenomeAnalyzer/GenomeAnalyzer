@@ -194,6 +194,19 @@ int popcount_binary_array(const unsigned int *seq_bin, const unsigned int seq_si
     return s;
 }
 
+unsigned int mask_binary_array(const unsigned int seq_bin, const unsigned pos_start, const unsigned size) {
+    // printf("seq_bin : %d, start : %d, size : %d\n", seq_bin, pos_start, size);
+    unsigned int res;
+
+    res = seq_bin << (int_SIZE - size - pos_start);
+    res = res & 0b1111111111111111111111111111111;
+    res = res >> (int_SIZE - size);
+    res = res << pos_start;
+
+    // printf("return %d\n", res);
+    return res;
+}
+
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
 /***************************************/

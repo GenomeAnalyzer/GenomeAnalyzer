@@ -313,6 +313,10 @@ static void test_calculating_matching_score(void ** state){
 
 }
 
+static void test_mask_binary_array(){
+  assert_int_equal(10, mask_binary_array(203, 1, 4));
+}
+
 int main(void) {
   int result = 0;
   const struct CMUnitTest tests[] = {
@@ -322,6 +326,7 @@ int main(void) {
     cmocka_unit_test(test_set_binary_array),
     cmocka_unit_test(test_xor_binary_array),
     cmocka_unit_test(test_popcount_binary_array),
+    cmocka_unit_test(test_mask_binary_array),
     // DNA & GENES FUNCTIONS
     cmocka_unit_test(test_convert_to_binary),
     cmocka_unit_test(test_binary_to_dna),

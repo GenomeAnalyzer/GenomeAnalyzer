@@ -215,6 +215,19 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 	return Py_BuildValue("i", popcount_binary_array(view.buf, size));
 }
 
+static PyObject* DNAb_mask_binary_array(PyObject* self, PyObject* args) {
+
+	unsigned int seq_bin;
+	unsigned int pos_start;
+	unsigned int size;
+
+	//Get the parameter (1-dimensional array of unsigned int)
+	if (!PyArg_ParseTuple(args, "iii", &seq_bin, &pos_start, &size))
+		return NULL;
+
+	return Py_BuildValue("i", mask_binary_array(seq_bin, pos_start, size));
+}
+
 
 
 /******** DNA & GENES FUNCTIONS *********/
@@ -491,6 +504,7 @@ static PyMethodDef DNAb_methods [] = {
 	{ "set_binary_array", DNAb_set_binary_array, METH_VARARGS, ""},
 	{ "xor_binary_array", DNAb_xor_binary_array, METH_VARARGS, ""},
 	{ "popcount_binary_array", DNAb_popcount_binary_array, METH_VARARGS, ""},
+	{ "mask_binary_array", DNAb_mask_binary_array, METH_VARARGS, ""},
 	{ "convert_to_binary", DNAb_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},
 	{ "binary_to_dna", DNAb_binary_to_dna, METH_VARARGS, "Convert a binary sequence to a DNA sequence"},
 	{ "generating_mRNA", DNAb_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a string mRNA sequence"},

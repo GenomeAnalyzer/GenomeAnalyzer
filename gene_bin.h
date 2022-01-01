@@ -39,6 +39,7 @@ unsigned int* set_binary_array(const char *array, const unsigned size);
 unsigned int* xor_binary_array(const unsigned int *seq1, const unsigned array_size1,
                                 const unsigned int *seq2, const unsigned array_size2);
 int popcount_binary_array(const unsigned int *seq, const unsigned int size);
+unsigned int mask_binary_array(const unsigned int seq_bin, const unsigned pos_start, const unsigned size);
 
 
 /******** DNA & GENES FUNCTION *********/

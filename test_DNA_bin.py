@@ -4,6 +4,8 @@ import array
 import moduleDNA as m
 import ctypes
 
+int_SIZE = 31
+
 ###### Verify if C extension in Python is working #####
 
 
@@ -70,6 +72,10 @@ def test_popcount_binary_array():
 
 	# 9350764 = 001101100111010101110001
 	assert 13 == DNA_bin.popcount_binary_array(array.array('I', [9350764]))
+
+def test_mask_binary_array():
+	assert 10 == DNA_bin.mask_binary_array(203, 1, 4)
+
 
 def test_convert_to_binary():
 	# Test if the algorithm is OK
