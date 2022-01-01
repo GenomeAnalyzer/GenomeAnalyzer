@@ -256,7 +256,8 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 
 	unsigned int* array = get_piece_binary_array(view_seq_bin.buf, view_seq_bin.shape[0], pos_start, size);
 
-	unsigned int array_size = (pos_start + size) / int_SIZE;
+
+	unsigned int array_size = (size) / int_SIZE + (pos_start%int_SIZE != 0);
 	printf("array_size : %d\n", array_size);
 	PyObject* pylist = PyList_New(array_size);
 
