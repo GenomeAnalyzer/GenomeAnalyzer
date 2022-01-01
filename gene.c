@@ -229,6 +229,7 @@ void detecting_genes(const unsigned long gene [], const unsigned int gene_size, 
         }
     }
 
+    bool find = false;
 
     unsigned long long start_pos = -1;
 
@@ -243,10 +244,11 @@ void detecting_genes(const unsigned long gene [], const unsigned int gene_size, 
             //if atc, it's the start of a gene
                 start_pos = i;
                 i += 6;
+                find = true;
             }
             else{
 
-            if (start_pos != -1 ) {
+            if (find ) {
                 //if a start pos exists , search for UAA / UAG / UGA
                 if ((gene[i] == 1 && gene[i + 1] == 1 && gene[i + 2] == 0) 
                     && ((gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 0)
@@ -261,6 +263,7 @@ void detecting_genes(const unsigned long gene [], const unsigned int gene_size, 
 
                     start_pos = -1;
                     i += 6;
+                    find = false;
                 }
                 else
                     i += 2;
