@@ -179,80 +179,80 @@ def test_detecting_genes():
    #Test if the algorithm is OK in a basic case: xxxxAUGxxxxUAAxxx
    #The algorithm should detect one gene from the start codon to the stop codon
 
-	assert 6 == DNA_bin.detecting_genes(array.array('i',[963808024, 42]))[0][0]
-	assert 28 == DNA_bin.detecting_genes(array.array('i',[963808024, 42]))[0][1]
-	assert 1 == len(DNA_bin.detecting_genes(array.array('i',[963808024, 42])))
+	assert 6 == DNA_bin.detecting_genes(array.array('I',[963808024, 42]))[0][0]
+	assert 28 == DNA_bin.detecting_genes(array.array('I',[963808024, 42]))[0][1]
+	assert 1 == len(DNA_bin.detecting_genes(array.array('I',[963808024, 42])))
 
   	#Test if the algorithm is OK in a non presence of "start/stop" case: xxxxxxxxx
   	#The algorithm should not detect any genes
-	assert 0 == len(DNA_bin.detecting_genes(array.array('i',[22369621])))
+	assert 0 == len(DNA_bin.detecting_genes(array.array('I',[22369621])))
 
 	
 	
 	#Test if the algorithm is OK in a multiple "start" case: xxxxAUGxxxxAUGxxxUAAxxx
   	#The algorithm should detect one gene from the 2nd start codon to the stop codon
-	assert 30 == DNA_bin.detecting_genes(array.array('i',[732875499, -2036213923]))[0][0]
-	assert 48 == DNA_bin.detecting_genes(array.array('i',[732875499, -2036213923]))[0][1]
-	assert 1 == len(DNA_bin.detecting_genes(array.array('i',[732875499, -2036213923])))
+	assert 30 == DNA_bin.detecting_genes(array.array('I',[732875499, -2036213923]))[0][0]
+	assert 48 == DNA_bin.detecting_genes(array.array('I',[732875499, -2036213923]))[0][1]
+	assert 1 == len(DNA_bin.detecting_genes(array.array('I',[732875499, -2036213923])))
 	
   	#Test if the algorithm is OK in a multiple "stop" case: xxxxAUGxxxxUAAxxxUAAxxx
   	#The algorithm should detect one gene from the start codon to the first stop codon	
-	assert 10 == DNA_bin.detecting_genes(array.array('i',[250327787, -2022340747]))[0][0]
-	assert 26 == DNA_bin.detecting_genes(array.array('i',[250327787, -2022340747]))[0][1]
-	assert 1 == len(DNA_bin.detecting_genes(array.array('i',[250327787, -2022340747])))
+	assert 10 == DNA_bin.detecting_genes(array.array('I',[250327787, -2022340747]))[0][0]
+	assert 26 == DNA_bin.detecting_genes(array.array('I',[250327787, -2022340747]))[0][1]
+	assert 1 == len(DNA_bin.detecting_genes(array.array('I',[250327787, -2022340747])))
 	
   	#Test if the algorithm is OK in a multiple gene case: xxxxAUGxxxxUAGxxxAUGxxxUAAxxx
   	#The algorithm should detect two genes
-	assert 6 == DNA_bin.detecting_genes(array.array('i',[-469763265, -1612578969, -268435456]))[0][0]
-	assert 24 == DNA_bin.detecting_genes(array.array('i',[-469763265, -1612578969, -268435456]))[0][1]
-	assert 36 == DNA_bin.detecting_genes(array.array('i',[-469763265, -1612578969, -268435456]))[1][0]
-	assert 48 == DNA_bin.detecting_genes(array.array('i',[-469763265, -1612578969, -268435456]))[1][1]
-	assert 2 == len(DNA_bin.detecting_genes(array.array('i',[-469763265, -1612578969, -268435456])))
+	assert 6 == DNA_bin.detecting_genes(array.array('I',[-469763265, -1612578969, -268435456]))[0][0]
+	assert 24 == DNA_bin.detecting_genes(array.array('I',[-469763265, -1612578969, -268435456]))[0][1]
+	assert 36 == DNA_bin.detecting_genes(array.array('I',[-469763265, -1612578969, -268435456]))[1][0]
+	assert 48 == DNA_bin.detecting_genes(array.array('I',[-469763265, -1612578969, -268435456]))[1][1]
+	assert 2 == len(DNA_bin.detecting_genes(array.array('I',[-469763265, -1612578969, -268435456])))
 
 	
 def test_detecting_mutations():
   	#GGGTTGCGCGCGTTAAAGGTTTGAAAGGTG = {261725162, 97523700}
   	#Test if sequence 10 to 23 is a mutation zone and no other mutation zone
-	assert 13 == DNA_bin.detecting_mutations(array.array('i',[261725162, 97523700]))[0][0]
-	assert 10 == DNA_bin.detecting_mutations(array.array('i',[261725162, 97523700]))[0][1]
-	assert 23 == DNA_bin.detecting_mutations(array.array('i',[261725162, 97523700]))[0][2]
+	assert 13 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[0][0]
+	assert 10 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[0][1]
+	assert 23 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[0][2]
   	#No other mutations, should not be updated
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[261725162, 97523700]))[1][0]
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[261725162, 97523700]))[1][1]
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[261725162, 97523700]))[1][2]	  
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[1][0]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[1][1]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261725162, 97523700]))[1][2]	  
 
   	#GTTTTGCAAACGTTAAAGGTTTGAAAGGTG = {261102590, 97523700}
   	#Test if no mutation in this sequence
   	 #No possible mutation zones detected, should not be updated	  
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[261102590, 97523700]))[0][0]
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[261102590, 97523700]))[0][1]
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[261102590, 97523700]))[0][2]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261102590, 97523700]))[0][0]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261102590, 97523700]))[0][1]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[261102590, 97523700]))[0][2]
   	
 	#GGGCCGTTCCGCCCATAGGCCCGGCTAAGA = {-983172758, 17224372}
   	#Test with 3 mutation zones in this sequence
   	#First mutation is updated with right values
 
-	assert 11 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[0][0]
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[0][1]
-	assert 11 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[0][2]
+	assert 11 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[0][0]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[0][1]
+	assert 11 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[0][2]
   	
 	#First mutation is updated with right values
 
-	assert 11 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[1][0]
-	assert 16 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[1][1]
-	assert 27 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[1][2]
+	assert 11 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[1][0]
+	assert 16 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[1][1]
+	assert 27 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[1][2]
   
    #First mutation is updated with right values
 
-	assert 15 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[2][0]
-	assert 34 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[2][1]
-	assert 49 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[2][2]
+	assert 15 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[2][0]
+	assert 34 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[2][1]
+	assert 49 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[2][2]
 
 
    #No other mutations, should not be updated
 
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[3][0]
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[3][1]
-	assert 0 == DNA_bin.detecting_mutations(array.array('i',[-983172758, 17224372]))[3][2]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[3][0]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[3][1]
+	assert 0 == DNA_bin.detecting_mutations(array.array('I',[-983172758, 17224372]))[3][2]
   
 

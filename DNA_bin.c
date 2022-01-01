@@ -68,7 +68,7 @@ static PyObject* DNAb_get_binary_value(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	return Py_BuildValue("i", get_binary_value(view.buf, obj2));
+	return Py_BuildValue("I", get_binary_value(view.buf, obj2));
 }
 
 static PyObject* DNAb_change_binary_value(PyObject* self, PyObject* args) {
@@ -212,7 +212,7 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 
 	unsigned int size = DNAb_get_binary_size(view);
 
-	return Py_BuildValue("i", popcount_binary_array(view.buf, size));
+	return Py_BuildValue("I", popcount_binary_array(view.buf, size));
 }
 
 static PyObject* DNAb_mask_binary_array(PyObject* self, PyObject* args) {
@@ -225,7 +225,7 @@ static PyObject* DNAb_mask_binary_array(PyObject* self, PyObject* args) {
 	if (!PyArg_ParseTuple(args, "iii", &seq_bin, &pos_start, &size))
 		return NULL;
 
-	return Py_BuildValue("i", mask_binary_array(seq_bin, pos_start, size));
+	return Py_BuildValue("I", mask_binary_array(seq_bin, pos_start, size));
 }
 
 static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
@@ -341,7 +341,7 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view.format, "I")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -372,7 +372,7 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view.format, "I")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -420,7 +420,7 @@ static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view.format, "I")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -451,7 +451,7 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view.format, "I")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -518,7 +518,7 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 		return NULL;
 	}
 
-	if (strcmp(view_seq_bin1.format, "l") || strcmp(view_seq_bin2.format, "l")) {
+	if (strcmp(view_seq_bin1.format, "I") || strcmp(view_seq_bin2.format, "I")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view_seq_bin1);
 		PyBuffer_Release(&view_seq_bin2);
