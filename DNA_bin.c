@@ -290,7 +290,7 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "I")) {
+	if (strcmp(view.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -321,7 +321,7 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "i")) {
+	if (strcmp(view.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -369,7 +369,7 @@ static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args
 		return NULL;
 	}
 
-	if (strcmp(view.format, "I")) {
+	if (strcmp(view.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -400,7 +400,7 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view.format, "i")) {
+	if (strcmp(view.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view);
 		return NULL;
@@ -413,7 +413,7 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 	m.end_mut = malloc(sizeof(unsigned long) * 5);
 
 	//Initializing to 0 
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 5; i++) {		
 		m.size[i] = 0;
 		m.start_mut[i] = 0;
 		m.end_mut[i] = 0;
@@ -425,6 +425,8 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 
 	PyObject* List = PyList_New(0);
 	for (short int i = 0; i < 5; i++) {
+		if (m.size[i] == 0 )
+			continue;		
 		PyObject* l = PyList_New(3);
 		PyList_SET_ITEM(l, 0, PyLong_FromUnsignedLong(m.size[i]));
 		PyList_SET_ITEM(l, 1, PyLong_FromUnsignedLong(m.start_mut[i]));
@@ -465,7 +467,7 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 		return NULL;
 	}
 
-	if (strcmp(view_seq_bin1.format, "I") || strcmp(view_seq_bin2.format, "I")) {
+	if (strcmp(view_seq_bin1.format, "l") || strcmp(view_seq_bin2.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of unsigned int.");
 		PyBuffer_Release(&view_seq_bin1);
 		PyBuffer_Release(&view_seq_bin2);

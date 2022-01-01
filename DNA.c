@@ -27,7 +27,6 @@ static PyObject *DNA_convert_to_binary(PyObject *self, PyObject *args)
 	pylist = PyList_New(obj2);
 
 	for (unsigned  i=0; i < obj2; i++) {
-
 		item = PyLong_FromLong(test[i]);
 		PyList_SetItem(pylist, i, item);
 	}
@@ -89,7 +88,7 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
 
     if (strcmp(view.format, "L"))
     {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned short");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned long");
 		PyBuffer_Release(&view);
 		return NULL;     
     }
@@ -100,13 +99,14 @@ static PyObject *DNA_detecting_genes(PyObject *self, PyObject *args)
     g.gene_end = malloc(sizeof(*g.gene_end) * view.shape[0]+1);
 
 
-
 	detecting_genes(view.buf, view.shape[0], &g);
+
 
 	PyObject *List = PyList_New(0);
 	for(unsigned long long i = 0; i < g.genes_counter; i ++)
     {
 		PyObject *l = PyList_New(2);
+		//printf("%llu truc la \n",g.gene_start[i]);
     	PyList_SET_ITEM(l, 0, PyLong_FromUnsignedLongLong(g.gene_start[i]));
     	PyList_SET_ITEM(l, 1, PyLong_FromUnsignedLongLong(g.gene_end[i]));
     	PyList_Append(List, l);    	
@@ -193,6 +193,8 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 
     PyObject* List = PyList_New(0);
     for(short int i = 0; i < 5; i ++){
+		if (m.size[i] == 0 )
+			continue;
 		PyObject *l = PyList_New(3);
 		PyList_SET_ITEM(l, 0, PyLong_FromUnsignedLong(m.size[i]));
     	PyList_SET_ITEM(l, 1, PyLong_FromUnsignedLong(m.start_mut[i]));
