@@ -80,9 +80,11 @@ for file in glob.glob("fastas/*.fasta"):
                 for k in range((int((len(gene1[i]))/2))):     
                     res = (DNA.calculating_matching_score(array.array('H',sequence2[i][gene2[i][j][0]:gene2[i][j][1]]),array.array('H',sequence2[i][gene2[i][k][0]:gene2[i][k][1]])))
                     print(" matching = "+str(res))
-                    res2 = DNA_bin.calculating_matching_score(array.array('l',DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene1[i][j][0],gene1[i][j][1]- gene1[i][j][0])),array.array('l',DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene1[i][j][0],gene1[i][k][1]- gene1[i][k][0])))
+                    res2 = DNA_bin.calculating_matching_score(array.array('l',sequence[i]),gene1[i][j][0],gene1[i][j][1]- gene1[i][j][0],array.array('l',sequence[i]),gene1[i][k][0],gene1[i][k][1]- gene1[i][k][0])
 
                     print(" matching 2 ="+str(res2))
+
+                    print('#####')
 
 
     i = i+1

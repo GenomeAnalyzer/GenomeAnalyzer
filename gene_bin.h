@@ -40,7 +40,7 @@ long int* xor_binary_array(const long int *seq1, const unsigned array_size1,
                                 const long int *seq2, const unsigned array_size2);
 int popcount_binary_array(const long int *seq, const long int size);
 long int mask_binary_array(const long int seq_bin, const long int pos_start, const long int size);
-long int* get_piece_binary_array(const long int* seq_bin, const long int seq_size, const long int pos_start, const long int size);
+long int* get_piece_binary_array(const long int* seq_bin,  const long int pos_start, const long int size);
 
 
 /******** DNA & GENES FUNCTION *********/
@@ -53,7 +53,7 @@ void detecting_genes(const long int *gene, const long int gene_size,
 char* generating_amino_acid_chain(const long int *gene_seq,const long int start_pos, const long int seq_size);
 void detecting_mutationsdetecting_mutations(const long int *gene_seq,const long int start_pos, const long int size_sequence,
                          mutation_map mut_m);
-float calculating_matching_score(const long int *seq1, const int sequence_size1,
-                                 const long int *seq2, const int sequence_size2);
+float calculating_matching_score(const long int *seq1, long int start_pos1,const int seq_size1,
+                                 const long int *seq2, long int start_pos2,const int seq_size2);
 
 

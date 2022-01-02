@@ -259,7 +259,7 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 	// 	printf("*(view_seq_bin.buf+%d) = %d\n", i, *(res+i));
 	// }
 
-	long int* array = get_piece_binary_array(view_seq_bin.buf, view_seq_bin.shape[0], pos_start, size);
+	long int* array = get_piece_binary_array(view_seq_bin.buf,  pos_start, size);
 
 	long int intsize = int_SIZE +1;
 
@@ -515,8 +515,10 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 	PyObject* obj_seq_bin1 = NULL;
 	PyObject* obj_seq_bin2 = NULL;
 
+	long start_pos1 =0, start_pos2 = 0, size1 = 0 , size2 = 0; 
+
 	//Get the parameter (2 1-dimensional arrays)
-	if (!PyArg_ParseTuple(args, "OO", &obj_seq_bin1, &obj_seq_bin2))
+	if (!PyArg_ParseTuple(args, "OiiOii", &obj_seq_bin1, &start_pos1, &size1 ,&obj_seq_bin2 , &start_pos2, &size2))
 		return NULL;
 
 	//Get the first array memory view
@@ -541,11 +543,11 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 		return NULL;
 	}
 
-	long int a1 = DNAb_get_binary_size(view_seq_bin1);
-	long int a2 = DNAb_get_binary_size(view_seq_bin2);
+	//long int a1 = DNAb_get_binary_size(view_seq_bin1);
+	//long int a2 = DNAb_get_binary_size(view_seq_bin2);
 
 	//Return the float value as a Python float object
-	return Py_BuildValue("f", calculating_matching_score(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2));
+	return Py_BuildValue("f", calculating_matching_score(view_seq_bin1.buf, start_pos1,size1, view_seq_bin2.buf, start_pos2,size2));
 }
 
 

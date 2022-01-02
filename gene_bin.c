@@ -207,7 +207,7 @@ long int mask_binary_array(const long int seq_bin, const long int pos_start, con
     return res;
 }
 
-long int* get_piece_binary_array(const long int* seq_bin, const long int seq_size, const long int pos_start, const long int size){
+long int* get_piece_binary_array(const long int* seq_bin,  const long int pos_start, const long int size){
 
     long int array_size = (size) / int_SIZE + (size % int_SIZE != 0);
     long int *res;
@@ -766,14 +766,22 @@ void detecting_mutations(const long int *gene_seq,const long int start_pos, cons
  * out : float : matching score in %
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
 */
-float calculating_matching_score(const long int *seq1, const int seq_size1,
-                                 const long int *seq2, const int seq_size2) {
+float calculating_matching_score(const long int *seq1, long int start_pos1,const int seq_size1,
+                                 const long int *seq2, long int start_pos2,const int seq_size2) {
     // Check the input argument
     if (!seq1 || !seq2)
         return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
 
+    long int *seq1tmp;
+
+    seq1tmp = get_piece_binary_array(seq1,start_pos1,seq_size1);
+
+    long int *seq2tmp;
+
+    seq2tmp = get_piece_binary_array(seq2,start_pos2,seq_size2);    
+
     long int *xor = NULL;
-    xor = xor_binary_array(seq1, seq_size1, seq2, seq_size2);
+    xor = xor_binary_array(seq1tmp, seq_size1, seq2tmp, seq_size2);
 
     // xor_size = max size
     int xor_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
