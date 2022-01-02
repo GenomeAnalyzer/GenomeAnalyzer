@@ -362,7 +362,7 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos,const long 
 
     // Create and check the output
     char* rna_seq = NULL;
-    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 1);
+    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 2);
     if (!rna_seq)
         return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
 
