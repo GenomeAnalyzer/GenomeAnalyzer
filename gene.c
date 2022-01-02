@@ -257,7 +257,7 @@ void detecting_genes(const unsigned long gene [], const unsigned int gene_size, 
                    //It's the end of a gene          
                    //If a start pos and an stop pos has been found, a gene exists so we save it in the struc
                     gene_map->gene_start[gene_map->genes_counter] = start_pos;
-                    gene_map->gene_end[gene_map->genes_counter] = i;
+                    gene_map->gene_end[gene_map->genes_counter] = i+5;
 
                     gene_map->genes_counter++;
 
