@@ -49,6 +49,9 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
 
     if(seq_bin_size % int_SIZE != 0)
         nb++;
+
+    // printf("nb : %d\n", nb);
+
     long int* seq_bin = NULL;
     seq_bin = calloc(nb, sizeof(long int));
 
@@ -261,10 +264,12 @@ long int* get_piece_binary_array(const long int* seq_bin, const long int seq_siz
                 writen_so_far += relative_space_left;
                 // printf("writen_so_far / relative_size : %ld\n", writen_so_far);
             }
-            *(res + res_p) = val >> relative_space_left;
-            // printf("*(res + res_p(%ld)) : %ld\n", res_p, *(res + res_p));
-            // relative_space_left = intsize - relative_size;
-            writen_so_far += relative_size - relative_space_left;
+            if(size > writen_so_far){
+                *(res + res_p) = val >> relative_space_left;
+                // printf("*(res + res_p(%ld)) : %ld\n", res_p, *(res + res_p));
+                // relative_space_left = intsize - relative_size;
+                writen_so_far += relative_size - relative_space_left;
+            }
         }
         it++;
         i--;
