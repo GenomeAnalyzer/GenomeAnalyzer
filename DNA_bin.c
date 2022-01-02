@@ -259,7 +259,7 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 	// 	printf("*(view_seq_bin.buf+%d) = %d\n", i, *(res+i));
 	// }
 
-	long int* array = get_piece_binary_array(view_seq_bin.buf, view_seq_bin.shape[0], pos_start, size);
+	long int* array = get_piece_binary_array(view_seq_bin.buf,  pos_start, size);
 
 	long int intsize = int_SIZE +1;
 
@@ -334,8 +334,11 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 	Py_buffer view;
 	PyObject* obj = NULL;
 
+	int start =0;
+	int length = 0;
+
 	//Get the parameter (1-dimensional array of long int)
-	if (!PyArg_ParseTuple(args, "O", &obj))
+	if (!PyArg_ParseTuple(args, "Oii", &obj,&start,&length))
 		return NULL;
 
 	//Get the array memory view
@@ -354,10 +357,12 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	long int size = DNAb_get_binary_size(view);
+	//long int size = DNAb_get_binary_size(view);
+
+	//long int size = view.shape[0]*int_SIZE;
 
 	//Return the char* value as a Python string object
-	return Py_BuildValue("y", generating_mRNA(view.buf, size));
+	return Py_BuildValue("y", generating_mRNA(view.buf, start,length));
 }
 
 //////////////// Detecting genes
@@ -385,7 +390,7 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	long int size = DNAb_get_binary_size(view);
+	unsigned long size = view.shape[0]*int_SIZE;
 
 	gene_map_t g;
 	g.gene_start = malloc(sizeof(*g.gene_start) * size);
@@ -413,8 +418,10 @@ static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args
 	Py_buffer view;
 	PyObject* obj = NULL;
 
+	int start =0, length = 0;
+
 	//Get the parameter (1-dimensional array of long int)
-	if (!PyArg_ParseTuple(args, "O", &obj))
+	if (!PyArg_ParseTuple(args, "Oii", &obj,&start,&length))
 		return NULL;
 
 	//Get the array memory view
@@ -433,10 +440,10 @@ static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args
 		return NULL;
 	}
 
-	long int size = DNAb_get_binary_size(view);
+	//long int size = DNAb_get_binary_size(view);
 
 	//Return the char* value as a Python string object
-	return Py_BuildValue("y", generating_amino_acid_chain(view.buf, size));
+	return Py_BuildValue("y", generating_amino_acid_chain(view.buf, start,length));
 }
 
 //////////////// Detecting probable mutation zones
@@ -444,8 +451,10 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 	Py_buffer view;
 	PyObject* obj = NULL;
 
+	long start =0 , length = 0;
+
 	//Get the parameter (1-dimensional arrays of long int)
-	if (!PyArg_ParseTuple(args, "O", &obj))
+	if (!PyArg_ParseTuple(args, "Oii", &obj,&start,&length))
 		return NULL;
 
 	//Get the array memory view
@@ -477,9 +486,9 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		m.end_mut[i] = 0;
 	}
 
-	long int size = DNAb_get_binary_size(view);
+	//long int size = DNAb_get_binary_size(view);
 
-	detecting_mutations(view.buf, size, m);
+	detecting_mutations(view.buf, start,length, m);
 
 	PyObject* List = PyList_New(0);
 	for (short int i = 0; i < 5; i++) {
@@ -506,8 +515,10 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 	PyObject* obj_seq_bin1 = NULL;
 	PyObject* obj_seq_bin2 = NULL;
 
+	long start_pos1 =0, start_pos2 = 0, size1 = 0 , size2 = 0; 
+
 	//Get the parameter (2 1-dimensional arrays)
-	if (!PyArg_ParseTuple(args, "OO", &obj_seq_bin1, &obj_seq_bin2))
+	if (!PyArg_ParseTuple(args, "OiiOii", &obj_seq_bin1, &start_pos1, &size1 ,&obj_seq_bin2 , &start_pos2, &size2))
 		return NULL;
 
 	//Get the first array memory view
@@ -532,11 +543,11 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 		return NULL;
 	}
 
-	long int a1 = DNAb_get_binary_size(view_seq_bin1);
-	long int a2 = DNAb_get_binary_size(view_seq_bin2);
+	//long int a1 = DNAb_get_binary_size(view_seq_bin1);
+	//long int a2 = DNAb_get_binary_size(view_seq_bin2);
 
 	//Return the float value as a Python float object
-	return Py_BuildValue("f", calculating_matching_score(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2));
+	return Py_BuildValue("f", calculating_matching_score(view_seq_bin1.buf, start_pos1,size1, view_seq_bin2.buf, start_pos2,size2));
 }
 
 

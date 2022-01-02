@@ -49,9 +49,6 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
 
     if(seq_bin_size % int_SIZE != 0)
         nb++;
-
-    // printf("nb : %d\n", nb);
-
     long int* seq_bin = NULL;
     seq_bin = calloc(nb, sizeof(long int));
 
@@ -210,8 +207,28 @@ long int mask_binary_array(const long int seq_bin, const long int pos_start, con
     return res;
 }
 
-long int* get_piece_binary_array(const long int* seq_bin, const long int seq_size, const long int pos_start, const long int size){
+long int* get_piece_binary_array(const long int* seq_bin,  const long int pos_start, const long int size){
+
+    long int array_size = (size) / int_SIZE + (size % int_SIZE != 0);
     long int *res;
+
+    res = calloc(array_size, sizeof(*seq_bin));
+
+    long int stop_pos = pos_start+size;
+
+    long j = 0;
+
+    for(long i = pos_start ; i < stop_pos; i++)
+    {
+           //bit = get_binary_value(seq_bin2, i);
+           change_binary_value(res, j, get_binary_value(seq_bin,i));
+           j++;
+    }
+
+    return res;
+}
+
+   /* long int *res;
 
     long int intsize = int_SIZE + 1;
 
@@ -264,18 +281,16 @@ long int* get_piece_binary_array(const long int* seq_bin, const long int seq_siz
                 writen_so_far += relative_space_left;
                 // printf("writen_so_far / relative_size : %ld\n", writen_so_far);
             }
-            if(size > writen_so_far){
-                *(res + res_p) = val >> relative_space_left;
-                // printf("*(res + res_p(%ld)) : %ld\n", res_p, *(res + res_p));
-                // relative_space_left = intsize - relative_size;
-                writen_so_far += relative_size - relative_space_left;
-            }
+            *(res + res_p) = val >> relative_space_left;
+            // printf("*(res + res_p(%ld)) : %ld\n", res_p, *(res + res_p));
+            // relative_space_left = intsize - relative_size;
+            writen_so_far += relative_size - relative_space_left;
         }
         it++;
         i--;
     }
     return res;
-}
+}*/
 
 
 
@@ -340,7 +355,7 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
  * out : rna_seq : array of char
  * Convert a binary DNA sequence to a string mRNA sequence
  */
-char* generating_mRNA(const long int* gene_seq, const long int seq_size) {
+char* generating_mRNA(const long int* gene_seq, const long start_pos,const long int seq_size) {
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
@@ -352,8 +367,10 @@ char* generating_mRNA(const long int* gene_seq, const long int seq_size) {
         return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
 
     int j = 0;
+
+    long stop = seq_size+start_pos;
     // Parse the binary DNA sequence two by two
-    for (long int i = 0; i < seq_size; i += 2) {
+    for (long int i = start_pos; i < stop; i += 2) {
 
         // nucleotides = A, T/U, G, C
         int nucl1 = get_binary_value(gene_seq, i);
@@ -458,7 +475,7 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t*
  * out : char* : protein in symbols
  * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
 */
-char* generating_amino_acid_chain(const long int *gene_seq, const long int seq_size) {
+char* generating_amino_acid_chain(const long int *gene_seq,const long int start_pos, const long int seq_size) {
     short codon_size = 6;
     // Check the input argument
     if (!gene_seq)
@@ -468,14 +485,16 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int seq_s
 
     // Create and check the output
     char* aa_seq = NULL;
-    // aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
-    aa_seq = calloc((seq_size / codon_size) + 1, sizeof(*aa_seq));
+     aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    //aa_seq = calloc((seq_size ) + 1, sizeof(*aa_seq));
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
     unsigned temp = 0;
 
-    for (long int i = 0; i < seq_size; i += codon_size) {
+    long size = start_pos+seq_size;
+
+    for (long int i = start_pos; i < size; i += codon_size) {
         // The hash functions, takes the 6 bits, and transform the array into an integer.
         // The integer first char is a 2, for hash generation purposes.
         int hash = 2;
@@ -699,14 +718,15 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int seq_s
 * (at least 1/5th of the gene sequence's size) it returns true, else it returns false.
 * Precondition: gene_seq is of size size_sequence.
 */
-void detecting_mutations(const long int *gene_seq, const long int size_sequence,
+void detecting_mutations(const long int *gene_seq,const long int start_pos, const long int size_sequence,
                          mutation_map mut_m) {
     long int detect_mut = 0;  //Counting size of GC sequence
     unsigned short tmp_start_mut = 0;   //stock start mutation
     unsigned cmp = 0;   //counter of all mutation zones
 
+    long size = start_pos + size_sequence;
     //Read the sequence
-    for (long int i = 0; i < size_sequence; i += 2) {
+    for (long int i = start_pos; i < size; i += 2) {
 
         // nucleotides = A, T/U, G, C
         int nucl1 = get_binary_value(gene_seq, i);
@@ -715,7 +735,7 @@ void detecting_mutations(const long int *gene_seq, const long int size_sequence,
         //Increment detect_mut if find a C or G nucl
         if (((nucl1 == 0) && (nucl2 == 1)) ||
             ((nucl1 == 1) && (nucl2 == 0))) {
-            if(detect_mut == 0){tmp_start_mut = i;}
+            if(detect_mut == 0){tmp_start_mut = i-start_pos;}
             detect_mut+=2;
         }
         //Put detect_mut to 0 if find a A or T nucl
@@ -723,7 +743,7 @@ void detecting_mutations(const long int *gene_seq, const long int size_sequence,
             //Check if previous GC sequence is a probable mutation zone
             if (detect_mut >= (size_sequence / 5)) {
                 mut_m.start_mut[cmp] = tmp_start_mut;
-                mut_m.end_mut[cmp] = i-1;
+                mut_m.end_mut[cmp] = (i-1)-start_pos;
                 mut_m.size[cmp] = detect_mut-1;
                 cmp++;
             }
@@ -733,7 +753,7 @@ void detecting_mutations(const long int *gene_seq, const long int size_sequence,
     //Check if ending sequence is a probable mutation zone
     if (detect_mut >= (size_sequence / 5)) {
         mut_m.start_mut[cmp] = tmp_start_mut;
-        mut_m.end_mut[cmp] = size_sequence-1;
+        mut_m.end_mut[cmp] = (size_sequence-1)-start_pos;
         mut_m.size[cmp] = detect_mut-1;
     }
 }
@@ -746,14 +766,22 @@ void detecting_mutations(const long int *gene_seq, const long int size_sequence,
  * out : float : matching score in %
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
 */
-float calculating_matching_score(const long int *seq1, const int seq_size1,
-                                 const long int *seq2, const int seq_size2) {
+float calculating_matching_score(const long int *seq1, long int start_pos1,const int seq_size1,
+                                 const long int *seq2, long int start_pos2,const int seq_size2) {
     // Check the input argument
     if (!seq1 || !seq2)
         return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
 
+    long int *seq1tmp;
+
+    seq1tmp = get_piece_binary_array(seq1,start_pos1,seq_size1);
+
+    long int *seq2tmp;
+
+    seq2tmp = get_piece_binary_array(seq2,start_pos2,seq_size2);    
+
     long int *xor = NULL;
-    xor = xor_binary_array(seq1, seq_size1, seq2, seq_size2);
+    xor = xor_binary_array(seq1tmp, seq_size1, seq2tmp, seq_size2);
 
     // xor_size = max size
     int xor_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
