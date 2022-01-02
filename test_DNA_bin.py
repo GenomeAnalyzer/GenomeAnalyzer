@@ -51,7 +51,8 @@ def test_set_binary_array():
 	seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA"
 
 	resbin = DNA_bin.set_binary_array(seq_char, len(seq_char))
-	assert resbin == [2101911378, 172292753, 4029142153]
+	# assert resbin == [2101911378, 172292753, 4029142153] # unsigned int
+	assert resbin == [2101911378, 172292753, -265825143] # long int
 
 def test_xor_binary_array():
   	# Test if the algorithm is OK
@@ -140,8 +141,8 @@ def test_get_piece_binary_array():
 
 	for it in range(0,size):
 		pos = size - it
-		print("")
-		print("it : ", it, "pos : ", pos, "arr[pos] : ", arr[pos])
+		# print("")
+		# print("it : ", it, "pos : ", pos, "arr[pos] : ", arr[pos])
 
 		# retourner le Xième bit
 		assert [it%2] == DNA_bin.get_piece_binary_array(arr, it*intsize + 0,1)
