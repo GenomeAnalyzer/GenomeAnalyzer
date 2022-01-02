@@ -47,11 +47,11 @@ long int* get_piece_binary_array(const long int* seq_bin, const long int seq_siz
 
 long int* convert_to_binary(const char* dna_seq, const unsigned size);
 char* binary_to_dna(long int* bin_dna_seq, const unsigned size);
-char* generating_mRNA(const long int* gene_seq, const long int seq_size);
+char* generating_mRNA(const long int* gene_seq, const long start_pos,const long int seq_size);
 void detecting_genes(const long int *gene, const long int gene_size,
                      gene_map_t* gene_map);
-char* generating_amino_acid_chain(const long int *gene_seq, const long int seq_size);
-void detecting_mutations(const long int *gene_seq, const long int size_sequence,
+char* generating_amino_acid_chain(const long int *gene_seq,const long int start_pos, const long int seq_size);
+void detecting_mutationsdetecting_mutations(const long int *gene_seq,const long int start_pos, const long int size_sequence,
                          mutation_map mut_m);
 float calculating_matching_score(const long int *seq1, const int sequence_size1,
                                  const long int *seq2, const int sequence_size2);
