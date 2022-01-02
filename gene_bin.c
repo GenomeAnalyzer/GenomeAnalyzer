@@ -201,7 +201,7 @@ long int mask_binary_array(const long int seq_bin, const long int pos_start, con
     res = seq_bin << ((int_SIZE+1) - size - pos_start);
     res = res & 0b11111111111111111111111111111111;
     res = res >> ((int_SIZE+1) - size);
-    res = res << pos_start;
+    // res = res << pos_start;
 
     // printf("return %d\n", res);
     return res;
@@ -215,49 +215,61 @@ long int* get_piece_binary_array(const long int* seq_bin, const long int seq_siz
     long int seq_start = seq_size - 1 - pos_start/(intsize);
     long int seq_stop = seq_size - 1 - (pos_start+size)/(intsize);
 
-    long int nb = seq_start - seq_stop + 1;
+    long int array_size = (size) / intsize + (size % intsize != 0);
+    // printf("array_size : %ld\n", array_size);
 
-    res = calloc(nb, sizeof(*seq_bin));
+    res = calloc(array_size, sizeof(*seq_bin));
 
     long int relative_start;
     long int relative_size;
 
     long int it = 0;
     long int i = seq_start;
+    long int val = 0;
+    long int res_p = 0;
+    long int relative_space_left = 0;
+    long int writen_so_far = 0;
 
-    printf("seq_size : %ld, pos_start : %ld, size : %ld\n", seq_size, pos_start, size);
-    printf("seq_start : %ld, seq_stop : %ld\n", seq_start, seq_stop);
+    // printf("seq_size : %ld, pos_start : %ld, size : %ld\n", seq_size, pos_start, size);
+    // printf("seq_start : %ld, seq_stop : %ld\n", seq_start, seq_stop);
 
     while(i != seq_stop-1){
-        printf("FOR : %ld, %ld, %ld\n", i, seq_start, seq_stop);
+        // printf("FOR : %ld, %ld, %ld\n", i, seq_start, seq_stop);
         relative_start = i == seq_start ? pos_start % (intsize) : 0;
-        relative_size = size - it * (intsize) + pos_start % (intsize);
+        // relative_size = size - it * (intsize) + relative_start % (intsize) + pos_start % (intsize);
+        relative_size = size - writen_so_far;
         relative_size = relative_size > (intsize) ? (intsize) - relative_start : relative_size;
-        *(res+nb-it-1) = mask_binary_array(*(seq_bin + i), relative_start, relative_size);
-        printf("i : %ld, it : %ld, *(seq_bin + i) : %ld, r_start : %ld, r_size : %ld, *(res+it) : %ld\n", i, it, *(seq_bin + i), relative_start, relative_size, *(res + nb - it - 1));
+        val = mask_binary_array(*(seq_bin + i), relative_start, relative_size);
+        // printf("i : %ld, it : %ld, *(seq_bin + i) : %ld, r_start : %ld, r_size : %ld, val : %ld\n", i, it, *(seq_bin + i), relative_start, relative_size, val);
+
+        res_p = array_size - it - 1;
+        // printf("res_p : %ld\n", res_p);
+        if (i == seq_start){
+            *(res + res_p) = val; // Première itération
+            // printf("première it : res+res_p = %ld (%ld)\n", *(res + res_p), val);
+            writen_so_far += relative_size;
+            // printf("writen_so_far / relative_size : %ld\n", writen_so_far);
+        }
+        else{
+            // printf("relative_space_left : %ld", relative_space_left);
+            relative_space_left = intsize - (writen_so_far % intsize == 0 ? intsize : writen_so_far % intsize);
+            if (relative_space_left) {
+                // *(res + res_p+1) = *(res + res_p+1) | ((mask_binary_array(val, 0, relative_space_left) << intsize - relative_space_left));
+                *(res + res_p + 1) = *(res + res_p + 1) | (mask_binary_array(val, 0, relative_space_left) << (intsize-relative_space_left));
+                // printf("val : %ld, mask : %ld, << %ld\n", val, mask_binary_array(val, 0, relative_space_left), writen_so_far % intsize);
+                // printf("mask << : %ld, res+%ld : %ld\n", mask_binary_array(val, 0, relative_space_left) << (intsize - relative_space_left), res_p+1, *(res + res_p + 1));
+                writen_so_far += relative_space_left;
+                // printf("writen_so_far / relative_size : %ld\n", writen_so_far);
+            }
+            *(res + res_p) = val >> relative_space_left;
+            // printf("*(res + res_p(%ld)) : %ld\n", res_p, *(res + res_p));
+            // relative_space_left = intsize - relative_size;
+            writen_so_far += relative_size - relative_space_left;
+        }
         it++;
         i--;
     }
-    // printf("OK RETURN \n");
-    // for(long int i = 0; i < nb; i++) printf("res[%ld] = %ld\n", i, res[i]);
     return res;
-
-    // for(long int i = seq_start; i >= seq_stop; i--){
-    //     printf("HEHO INLINE\n");
-    //     it = i - (nb-seq_stop+seq_start);
-    //     res[it] = *(seq_bin+i);
-    //     printf("res[%d] (i) : %d\n", it, i, res[it]);
-    //     if (i == seq_start){
-    //         res[it] = res[it] >> pos_start%intsize;
-    //         res[it] = res[it] & 0b111;
-    //         res[it] = res[it] << pos_start%intsize;
-    //     }
-    //     temp = pos_start + size - (intsize * (pos_start / intsize));
-    //     temp = temp > intsize ? intsize : temp;
-    //     res[it] = res[it] << temp;
-    //     res[it] = res[it] & 0b111;
-    //     res[it] = res[it] >> temp;
-    // }
 }
 
 
@@ -451,7 +463,8 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int seq_s
 
     // Create and check the output
     char* aa_seq = NULL;
-    aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    // aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    aa_seq = calloc((seq_size / codon_size) + 1, sizeof(*aa_seq));
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
