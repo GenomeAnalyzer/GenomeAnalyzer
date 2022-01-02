@@ -17,10 +17,10 @@ static PyObject* DNAb_version(PyObject* self) {
 
 /********** C-PYTHON INTERFACE RELATED FUNCTIONS **********/
 
-// Returns the binary array size for unsigned int arrays in Py_buffer.
-unsigned int DNAb_get_binary_size(Py_buffer view) {
-	unsigned int* res, res2;
-	unsigned int size = 0;
+// Returns the binary array size for long int arrays in Py_buffer.
+long int DNAb_get_binary_size(Py_buffer view) {
+	long int* res, res2;
+	long int size = 0;
 	// Copy buffer into var. memcpy needed otherwise it doesn't work.
 	for (int i = 0; i < view.len / view.itemsize; i++) {
 		// printf("len : %ld\n", view.len);
@@ -48,7 +48,7 @@ static PyObject* DNAb_get_binary_value(PyObject* self, PyObject* args) {
 	PyObject* obj = NULL;
 	int obj2 = 0;
 
-	//Get the parameter (1-dimensional array of unsigned int, int position)
+	//Get the parameter (1-dimensional array of long int, int position)
 	if (!PyArg_ParseTuple(args, "Oi", &obj, &obj2))
 		return NULL;
 
@@ -63,7 +63,7 @@ static PyObject* DNAb_get_binary_value(PyObject* self, PyObject* args) {
 	}
 
 	if (strcmp(view.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view);
 		return NULL;
 	}
@@ -77,7 +77,7 @@ static PyObject* DNAb_change_binary_value(PyObject* self, PyObject* args) {
 	int obj2 = 0;
 	int obj3 = 0;
 
-	//Get the parameter (1-dimensional array of unsigned int, int position, int value)
+	//Get the parameter (1-dimensional array of long int, int position, int value)
 	if (!PyArg_ParseTuple(args, "Oii", &obj, &obj2, &obj3))
 		return NULL;
 
@@ -92,12 +92,12 @@ static PyObject* DNAb_change_binary_value(PyObject* self, PyObject* args) {
 	}
 
 	if (strcmp(view.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view);
 		return NULL;
 	}
 
-	unsigned int* array = change_binary_value(view.buf, obj2, obj3);
+	long int* array = change_binary_value(view.buf, obj2, obj3);
 	PyObject* pylist = PyList_New(view.shape[0]);
 
 	for (int i = 0; i < view.shape[0]; i++)
@@ -108,19 +108,19 @@ static PyObject* DNAb_change_binary_value(PyObject* self, PyObject* args) {
 
 static PyObject* DNAb_set_binary_array(PyObject* self, PyObject* args) {
 	char* seq_char;
-	unsigned int seq_size = 0;
+	long int seq_size = 0;
 
 	//Get the parameter (1-dimensional array of char, and its length)
 	if (!PyArg_ParseTuple(args, "si", &seq_char, &seq_size))
 		return NULL;
 
-	unsigned int* array = set_binary_array(seq_char, seq_size);
-	unsigned int array_size = 2 * seq_size / int_SIZE;
+	long int* array = set_binary_array(seq_char, seq_size);
+	long int array_size = 2 * seq_size / int_SIZE;
 	array_size += (2 * seq_size % int_SIZE != 0);
 
 	PyObject* pylist = PyList_New(array_size);
 
-	for (unsigned int i = 0; i < array_size; i++)
+	for (long int i = 0; i < array_size; i++)
 		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
 
 	return pylist;
@@ -132,7 +132,7 @@ static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
 	PyObject* obj_seq_bin1 = NULL;
 	PyObject* obj_seq_bin2 = NULL;
 
-	//Get the parameter (1-dimensional array of unsigned int, int position, int value)
+	//Get the parameter (1-dimensional array of long int, int position, int value)
 	if (!PyArg_ParseTuple(args, "OO", &obj_seq_bin1, &obj_seq_bin2))
 		return NULL;
 
@@ -147,7 +147,7 @@ static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
 	}
 
 	if (strcmp(view_seq_bin1.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view_seq_bin1);
 		return NULL;
 	}
@@ -163,24 +163,24 @@ static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
 	}
 
 	if (strcmp(view_seq_bin2.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view_seq_bin2);
 		return NULL;
 	}
 
-	unsigned int a1 = DNAb_get_binary_size(view_seq_bin1);
-	unsigned int a2 = DNAb_get_binary_size(view_seq_bin2);
+	long int a1 = DNAb_get_binary_size(view_seq_bin1);
+	long int a2 = DNAb_get_binary_size(view_seq_bin2);
 
-	unsigned int* array = xor_binary_array(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2);
+	long int* array = xor_binary_array(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2);
 
 	a1 = (a1 / int_SIZE) + (a1 % int_SIZE != 0);
 	a2 = (a2 / int_SIZE) + (a2 % int_SIZE != 0);
-	unsigned int array_size = a1 > a2 ? a1 : a2;
+	long int array_size = a1 > a2 ? a1 : a2;
 	// printf("a1 : %d, a2 : %d, array_size : %d", a1, a2, array_size);
 
 	PyObject* pylist = PyList_New(array_size);
 
-	for (unsigned int i = 0; i < array_size; i++)
+	for (long int i = 0; i < array_size; i++)
 		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
 
 	return pylist;
@@ -190,7 +190,7 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 	Py_buffer view;
 	PyObject* obj = NULL;
 
-	//Get the parameter (1-dimensional array of unsigned int)
+	//Get the parameter (1-dimensional array of long int)
 	if (!PyArg_ParseTuple(args, "O", &obj))
 		return NULL;
 
@@ -205,23 +205,23 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 	}
 
 	if (strcmp(view.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view);
 		return NULL;
 	}
 
-	unsigned int size = DNAb_get_binary_size(view);
+	long int size = DNAb_get_binary_size(view);
 
 	return Py_BuildValue("l", popcount_binary_array(view.buf, size));
 }
 
 static PyObject* DNAb_mask_binary_array(PyObject* self, PyObject* args) {
 
-	unsigned int seq_bin;
-	unsigned int pos_start;
-	unsigned int size;
+	long int seq_bin;
+	long int pos_start;
+	long int size;
 
-	//Get the parameter (1-dimensional array of unsigned int)
+	//Get the parameter (1-dimensional array of long int)
 	if (!PyArg_ParseTuple(args, "iii", &seq_bin, &pos_start, &size))
 		return NULL;
 
@@ -234,7 +234,7 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 	int pos_start = 0;
 	int size = 0;
 
-	//Get the parameter (1-dimensional array of unsigned int, int position, int value)
+	//Get the parameter (1-dimensional array of long int, int position, int value)
 	if (!PyArg_ParseTuple(args, "Oii", &obj_seq_bin, &pos_start, &size))
 		return NULL;
 
@@ -249,7 +249,7 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 	}
 
 	if (strcmp(view_seq_bin.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view_seq_bin);
 		return NULL;
 	}
@@ -263,8 +263,8 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 
 	long int intsize = int_SIZE +1;
 
-	long int array_size = (size) / intsize + (pos_start%intsize != 0);
-	// printf("array_size : %ld\n", array_size);
+	long int array_size = (size) / intsize + (size%intsize != 0);
+	printf("array_size : %ld\n", array_size);
 	PyObject* pylist = PyList_New(array_size);
 
 	for (long int i = 0; i < array_size; i++)
@@ -280,19 +280,19 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 //////////////// Convert to binary
 static PyObject* DNAb_convert_to_binary(PyObject* self, PyObject* args) {
 	char* seq_char;
-	unsigned int seq_size = 0;
+	long int seq_size = 0;
 
 	//Get the parameter (1-dimensional array of char, and its length)
 	if (!PyArg_ParseTuple(args, "si", &seq_char, &seq_size))
 		return NULL;
 
-	unsigned int* array = set_binary_array(seq_char, seq_size);
-	unsigned int array_size = 2 * seq_size / int_SIZE;
+	long int* array = set_binary_array(seq_char, seq_size);
+	long int array_size = 2 * seq_size / int_SIZE;
 	array_size += (2 * seq_size % int_SIZE != 0);
 
 	PyObject* pylist = PyList_New(array_size);
 
-	for (unsigned int i = 0; i < array_size; i++)
+	for (long int i = 0; i < array_size; i++)
 		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
 
 	return pylist;
@@ -303,7 +303,7 @@ static PyObject* DNAb_binary_to_dna(PyObject* self, PyObject* args) {
 	Py_buffer view;
 	PyObject* obj = NULL;
 
-	//Get the parameter (1-dimensional array of unsigned int)
+	//Get the parameter (1-dimensional array of long int)
 	if (!PyArg_ParseTuple(args, "O", &obj))
 		return NULL;
 
@@ -318,12 +318,12 @@ static PyObject* DNAb_binary_to_dna(PyObject* self, PyObject* args) {
 	}
 
 	if (strcmp(view.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view);
 		return NULL;
 	}
 
-	unsigned int size = DNAb_get_binary_size(view);
+	long int size = DNAb_get_binary_size(view);
 
 	//Return the char* value as a Python string object
 	return Py_BuildValue("y", binary_to_dna(view.buf, size));
@@ -334,7 +334,7 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 	Py_buffer view;
 	PyObject* obj = NULL;
 
-	//Get the parameter (1-dimensional array of unsigned int)
+	//Get the parameter (1-dimensional array of long int)
 	if (!PyArg_ParseTuple(args, "O", &obj))
 		return NULL;
 
@@ -349,12 +349,12 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 	}
 
 	if (strcmp(view.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view);
 		return NULL;
 	}
 
-	unsigned int size = DNAb_get_binary_size(view);
+	long int size = DNAb_get_binary_size(view);
 
 	//Return the char* value as a Python string object
 	return Py_BuildValue("y", generating_mRNA(view.buf, size));
@@ -365,7 +365,7 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 	Py_buffer view;
 	PyObject* obj = NULL;
 
-	//Get the parameter (1-dimensional arrays of unsigned int)
+	//Get the parameter (1-dimensional arrays of long int)
 	if (!PyArg_ParseTuple(args, "O", &obj))
 		return NULL;
 
@@ -380,12 +380,12 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 	}
 
 	if (strcmp(view.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int");
 		PyBuffer_Release(&view);
 		return NULL;
 	}
 
-	unsigned int size = DNAb_get_binary_size(view);
+	long int size = DNAb_get_binary_size(view);
 
 	gene_map_t g;
 	g.gene_start = malloc(sizeof(*g.gene_start) * size);
@@ -413,7 +413,7 @@ static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args
 	Py_buffer view;
 	PyObject* obj = NULL;
 
-	//Get the parameter (1-dimensional array of unsigned int)
+	//Get the parameter (1-dimensional array of long int)
 	if (!PyArg_ParseTuple(args, "O", &obj))
 		return NULL;
 
@@ -428,12 +428,12 @@ static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args
 	}
 
 	if (strcmp(view.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view);
 		return NULL;
 	}
 
-	unsigned int size = DNAb_get_binary_size(view);
+	long int size = DNAb_get_binary_size(view);
 
 	//Return the char* value as a Python string object
 	return Py_BuildValue("y", generating_amino_acid_chain(view.buf, size));
@@ -444,7 +444,7 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 	Py_buffer view;
 	PyObject* obj = NULL;
 
-	//Get the parameter (1-dimensional arrays of unsigned int)
+	//Get the parameter (1-dimensional arrays of long int)
 	if (!PyArg_ParseTuple(args, "O", &obj))
 		return NULL;
 
@@ -459,7 +459,7 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 	}
 
 	if (strcmp(view.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view);
 		return NULL;
 	}
@@ -477,7 +477,7 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		m.end_mut[i] = 0;
 	}
 
-	unsigned int size = DNAb_get_binary_size(view);
+	long int size = DNAb_get_binary_size(view);
 
 	detecting_mutations(view.buf, size, m);
 
@@ -526,14 +526,14 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 	}
 
 	if (strcmp(view_seq_bin1.format, "l") || strcmp(view_seq_bin2.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of unsigned int.");
+		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of long int.");
 		PyBuffer_Release(&view_seq_bin1);
 		PyBuffer_Release(&view_seq_bin2);
 		return NULL;
 	}
 
-	unsigned int a1 = DNAb_get_binary_size(view_seq_bin1);
-	unsigned int a2 = DNAb_get_binary_size(view_seq_bin2);
+	long int a1 = DNAb_get_binary_size(view_seq_bin1);
+	long int a2 = DNAb_get_binary_size(view_seq_bin2);
 
 	//Return the float value as a Python float object
 	return Py_BuildValue("f", calculating_matching_score(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2));

@@ -683,12 +683,12 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int seq_s
 */
 void detecting_mutations(const long int *gene_seq, const long int size_sequence,
                          mutation_map mut_m) {
-    unsigned long detect_mut = 0;  //Counting size of GC sequence
+    long int detect_mut = 0;  //Counting size of GC sequence
     unsigned short tmp_start_mut = 0;   //stock start mutation
     unsigned cmp = 0;   //counter of all mutation zones
 
     //Read the sequence
-    for (unsigned long i = 0; i < size_sequence; i += 2) {
+    for (long int i = 0; i < size_sequence; i += 2) {
 
         // nucleotides = A, T/U, G, C
         int nucl1 = get_binary_value(gene_seq, i);

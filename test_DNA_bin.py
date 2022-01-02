@@ -122,7 +122,8 @@ def test_convert_to_binary():
 	seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA"
 
 	resbin = DNA_bin.convert_to_binary(seq_char, len(seq_char))
-	assert resbin == [2101911378, 172292753, 4029142153]
+	# assert resbin == [2101911378, 172292753, 4029142153] # if unsigned int
+	assert resbin == [2101911378, 172292753, -265825143] # if long int
 
 def test_generating_mRNA():
 	# Test if the algorithm is OK
