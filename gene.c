@@ -174,7 +174,7 @@ char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_s
 
     // Create and check the output
     char* rna_seq = NULL;
-    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 1);
+    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 2);
     if (!rna_seq)
         return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
 
