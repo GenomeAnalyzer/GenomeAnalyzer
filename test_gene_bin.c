@@ -315,20 +315,96 @@ static void test_calculating_matching_score(void ** state){
 
 static void test_get_piece_binary_array(){
   // Test if the algorithm is OK
-  //   7  ,       568   ,     511    ,     455
-  // 0b1 11, 0b1000111000, 0b1111111 11, 0b111000111
-  // 0b0|11, 0b1000111000, 0b1111111|00, 0b111000111
-  //   3  ,       568   ,     508    ,
-  long int * res = get_piece_binary_array((long int  []) { 0b111, 0b1000111000, 0b111111111, 0b111000111 }, 4, int_SIZE+1+2, 2 * (int_SIZE+1));
-  long int * expected_res = (long int  []){ 0b011, 0b1000111000, 0b111111100 };
-  for(int i = 0; i <3; i++){
-    printf("expected : %d, res : %d\n", expected_res[i], res[i]);
-    assert_int_equal(expected_res[i], res[i]);
-  }
+  long int intsize = int_SIZE + 1;
+
+  long int *arr = (long int []){0b11111111111111111111111111111111, 0b101000111000101, 0b101000111000101, 0b101000111000101, 0b101000111000101, 31, 31};
+  long int* res = get_piece_binary_array(arr, 7, 2 * intsize + 1, 2 * intsize + 2);
+  assert_int_equal(2, res[0]);
+  assert_int_equal(2147494114, res[1]);
+  assert_int_equal(2147494114, res[2]);
+
+  res = get_piece_binary_array(arr, 7, 2 * intsize, 2 * intsize + 2);
+  assert_int_equal(1, res[0]);
+  assert_int_equal(20933, res[1]);
+  assert_int_equal(20933, res[2]);
+
+  res = get_piece_binary_array(arr, 7, 2, 3 * intsize + 5);
+  assert_int_equal(17, res[0]);
+  assert_int_equal(1073747057, res[1]);
+  assert_int_equal(1073741831, res[2]);
+  assert_int_equal(3221225479, res[3]);
+
+  // Tests récupérations premiers entiers
+  assert_int_equal(15, get_piece_binary_array(arr, 7, 0, 4)[0]);
+  assert_int_equal(31, get_piece_binary_array(arr, 7, 0, intsize)[0]);
+
+  assert_int_equal(0b101000111000101, get_piece_binary_array(arr, 7, 2 * intsize, intsize)[0]);
+
+  res = get_piece_binary_array(arr, 7, 2 * intsize, intsize);
+  assert_int_equal(0b101000111000101, res[0]);
+  // assert_int_equal(31, res[1]);
+
+  assert_int_equal(0b11111111111111111111111111111111, get_piece_binary_array(arr, 7, 6 * intsize, intsize)[0]);
+
+  // SURCHARGE DES TESTS AVEC LES TESTS DE mask_binary_array
+
+  // long int size = 511;
+  // long int pos;
+
+  // arr = calloc(size + 1, sizeof(arr));
+  // for (long int i = 0; i <= size; i++) {
+  //   arr[i] = size - i;
+  // }
+
+  // for (long int it = 0; it <= size; it++) {
+  //   pos = size - it;
+  //   // retourner le Xième bit
+  //   assert_int_equal(it % 2, get_piece_binary_array(arr, size+1, 0, 1)[0]);
+  //   assert_int_equal(it / 2 % 2, get_piece_binary_array(arr, size+1, 1, 1)[0]);
+  //   assert_int_equal(it / 4 % 2, get_piece_binary_array(arr, size+1, 2, 1)[0]);
+  //   assert_int_equal(it / 8 % 2, get_piece_binary_array(arr, size+1, 3, 1)[0]);
+  //   assert_int_equal(it / 16 % 2, get_piece_binary_array(arr, size+1, 4, 1)[0]);
+  //   // Retourner tout le nombre
+  //   assert_int_equal(it, get_piece_binary_array(arr, size+1, 0, intsize)[0]);
+  //   // retourner plusieurs bits
+  //   assert_int_equal(it / 2 % 2 * 2 + it % 2, get_piece_binary_array(arr, size+1, 0, 2)[0]);
+  //   assert_int_equal(it / 4 % 2 * 4 + it / 2 % 2 * 2 + it % 2, get_piece_binary_array(arr, size+1, 0, 3)[0]);
+  //   assert_int_equal(it / 4 % 2 * 2 + it / 2 % 2, get_piece_binary_array(arr, size+1, 1, 2)[0]);
+  //   assert_int_equal(it / 16 % 2 * 4 + it / 8 % 2 * 2 + it / 4 % 2, get_piece_binary_array(arr, size+1, 2, 3)[0]);
+  // }
+  // free(arr);
 }
 
 static void test_mask_binary_array(){
-  assert_int_equal(10, mask_binary_array(203, 1, 4));
+  assert_int_equal(5, mask_binary_array(203, 1, 4));
+
+  long int intsize = int_SIZE + 1;
+  long int size = 511;
+  long int pos;
+
+  long int *arr;
+  arr = calloc(size+1, sizeof(arr));
+  for (long int i =0 ; i <= size; i++){
+    arr[i] = size-i;
+  }
+
+  for (long int it = 0; it <= size; it++){
+    pos = size - it;
+    // retourner le Xième bit
+    assert_int_equal(it % 2, mask_binary_array(arr[pos], 0, 1));
+    assert_int_equal(it / 2 % 2, mask_binary_array(arr[pos], 1, 1));
+    assert_int_equal(it / 4 % 2, mask_binary_array(arr[pos], 2, 1));
+    assert_int_equal(it / 8 % 2, mask_binary_array(arr[pos], 3, 1));
+    assert_int_equal(it / 16 % 2, mask_binary_array(arr[pos], 4, 1));
+    // Retourner tout le nombre
+    assert_int_equal(it, mask_binary_array(arr[pos], 0, intsize));
+    // retourner plusieurs bits
+    assert_int_equal(it / 2 % 2 * 2 + it % 2, mask_binary_array(arr[pos], 0, 2));
+    assert_int_equal(it/4%2 * 4 + it/2%2 * 2 + it % 2, mask_binary_array(arr[pos], 0, 3));
+    assert_int_equal(it/4%2 * 2 + it/2%2, mask_binary_array(arr[pos], 1, 2));
+    assert_int_equal(it/16%2 * 4 + it/8%2 * 2 + it/4%2, mask_binary_array(arr[pos], 2, 3));
+  }
+  free(arr);
 }
 
 int main(void) {
