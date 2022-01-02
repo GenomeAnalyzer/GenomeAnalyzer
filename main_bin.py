@@ -89,8 +89,8 @@ for file in glob.glob("fastas/*.fasta"):
 
     #f.write("\nMRNA\t\t\t\t\t\t\t\tCHAIN\t\t\t\t\t\t\t\tMUTATION\n")
     for j in range (len(gene[i])-1):
-        print(str(file))
-        print(str(sequence[i])+" "+str(gene[i][j][0])+" "+str(gene[i][j][1])+" "+str(gene[i][j][1]- gene[i][j][0]))
+        #print(str(file))
+        #print(str(sequence[i])+" "+str(gene[i][j][0])+" "+str(gene[i][j][1])+" "+str(gene[i][j][1]- gene[i][j][0]))
         #seq = DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]- gene[i][j][0])
         #print("sequence = "+str(seq))
 
@@ -98,7 +98,7 @@ for file in glob.glob("fastas/*.fasta"):
         res = (DNA_bin.generating_mRNA(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]-gene[i][j][0]))
         if res:
             mrna.append(res.decode("cp1252", "replace"))
-            #f.write(str(res.decode("cp1252", "replace")))
+            f.write(str(res.decode("cp1252", "replace")))
             message+="<td>"+str(res.decode("cp1252", "replace"))+ "</td>\n"
             #print(res.decode("cp1252", "replace"))
         else:
@@ -106,18 +106,18 @@ for file in glob.glob("fastas/*.fasta"):
           
 
         #print('aminoacid ='+str(sequence[i][gene[i][j][0]:(gene[i][j][1])]))
-        #res2 =  DNA_bin.generating_amino_acid_chain(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]-gene[i][j][0])
+        res2 =  DNA_bin.generating_amino_acid_chain(array.array('l',sequence[i]),gene[i][j][0],(gene[i][j][1]-gene[i][j][0])+1)
 
-        #if res2:
-        #    chain.append(res2.decode("cp1252", "replace"))
-            #f.write("\t\t\t\t\t\t\t\t"+str(res2.decode("cp1252", "replace")))
-        #    message+="<td>"+str(res2.decode("cp1252", "replace"))+ "</td>\n"
-        #else:
-        #    message+="<td> none </td>\n"            
-        #mutres = DNA_bin.detecting_mutations(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]-gene[i][j][0])
-        #mutation.append(mutres)
-        #message+="<td>"+str(mutres)+ "</td>\n</tr>\n"
-        #f.write("\t\t\t\t\t\t\t\t"+str(mutres)+"\n")
+        if res2:
+            chain.append(res2.decode("cp1252", "replace"))
+            f.write("\t\t\t\t\t\t\t\t"+str(res2.decode("cp1252", "replace")))
+            message+="<td>"+str(res2.decode("cp1252", "replace"))+ "</td>\n"
+        else:
+            message+="<td> none </td>\n"            
+        mutres = DNA_bin.detecting_mutations(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]-gene[i][j][0])
+        mutation.append(mutres)
+        message+="<td>"+str(mutres)+ "</td>\n</tr>\n"
+        f.write("\t\t\t\t\t\t\t\t"+str(mutres)+"\n")
     message+= "</tbody>\n</table>\n"
 
     #print(str(gene))
@@ -139,7 +139,7 @@ for file in glob.glob("fastas/*.fasta"):
                 #seq1 = DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]- gene[i][j][0])
                 #seq2 = DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene[i][k][0],gene[i][k][1]- gene[i][k][0])
 
-                res = DNA_bin.calculating_matching_score(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]- gene[i][j][0],array.array('l',sequence[i]),gene[i][k][0],gene[i][k][1]- gene[i][k][0])
+                res = DNA_bin.calculating_matching_score(array.array('l',sequence[i]),gene[i][j][0],(gene[i][j][1]- gene[i][j][0])+1,array.array('l',sequence[i]),gene[i][k][0],(gene[i][k][1]- gene[i][k][0])+1)
 
                 message+="<tr><td>sequence</td>\n"
                 f.write("[sequence]=")

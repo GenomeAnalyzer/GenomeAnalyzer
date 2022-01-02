@@ -94,7 +94,7 @@ for file in glob.glob("fastas/*.fasta"):
     #f.write("\nMRNA\t\t\t\t\t\t\t\tCHAIN\t\t\t\t\t\t\t\tMUTATION\n")
     for j in range (len(gene[i])-1):
         message += "<tr><td>"+str(sequence[i][gene[i][j][0]:(gene[i][j][1])+1])+ "</td>\n"
-        res = (DNA.generating_mRNA(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1])])))
+        res = (DNA.generating_mRNA(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1]+1)])))
         if res:
             mrna.append(res.decode("cp1252", "replace"))
             #f.write(str(res.decode("cp1252", "replace")))
@@ -105,7 +105,7 @@ for file in glob.glob("fastas/*.fasta"):
           
 
         #print('aminoacid ='+str(sequence[i][gene[i][j][0]:(gene[i][j][1])]))
-        res2 =  DNA.generating_amino_acid_chain(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1])]))
+        res2 =  DNA.generating_amino_acid_chain(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1]+1)]))
 
         if res2:
             chain.append(res2.decode("cp1252", "replace"))
@@ -114,7 +114,7 @@ for file in glob.glob("fastas/*.fasta"):
         else:
             message+="<td> none </td>\n"            
         #print('ok')
-        mutres = DNA.detecting_mutations(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1])]))
+        mutres = DNA.detecting_mutations(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1]+1)]))
         mutation.append(mutres)
         if len(mutres) == 0:
           message+="<td>none</td>\n</tr>\n"
@@ -141,7 +141,7 @@ for file in glob.glob("fastas/*.fasta"):
             for k in range((int((len(gene[i]))/2))):     
                 message+="<tr><td>"+str(sequence[i][gene[i][j][0]:gene[i][j][1]])+" , "+str(sequence[i][gene[i][k][0]:gene[i][k][1]])+ "</td>\n"
                 f.write("["+str(gene[i][j][0])+","+str(gene[i][k][0])+"]=")
-                res = (DNA.calculating_matching_score(array.array('H',sequence[i][gene[i][j][0]:gene[i][j][1]]),array.array('H',sequence[i][gene[i][k][0]:gene[i][k][1]])))
+                res = (DNA.calculating_matching_score(array.array('H',sequence[i][gene[i][j][0]:gene[i][j][1]+1]),array.array('H',sequence[i][gene[i][k][0]:gene[i][k][1]+1])))
                 matching.append(res)
                 message+="<td>"+str(res)+ "</td> \n</tr>\n"
                 f.write(str(res)+"\t")
