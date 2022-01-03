@@ -132,8 +132,6 @@ long int* xor_binary_array(const long int *seq_bin1, const unsigned seq_size1,
     long int ss1, ss2;
     long int sbs1, sbs2;
     // s1 est toujours plus grand ou égal que s2
-    // printf("\n == xor == \n");
-    // printf("seqbin[0] : %d, %d\n", seq_bin1[0], seq_bin2[0]);
     if (seq_size1 >= seq_size2) {
         s1 = seq_bin1;
         s2 = seq_bin2;
@@ -153,38 +151,29 @@ long int* xor_binary_array(const long int *seq_bin1, const unsigned seq_size1,
 
     if (ss1 == 0) ss1 = 1;
     if (ss2 == 0) ss2 = 1;
-    // printf("s[0] : %d, %d\n", s1[0], s2[0]);
-    // printf("s[0] : %d, %d\n", s1[1], s2[1]);
 
-    // printf("ss1 : %d, ss2 : %d, sbs1 : %d, sbs2 : %d\n", ss1, ss2, sbs1, sbs2);
+    //printf("ss1 : %d, ss2 : %d, sbs1 : %d, sbs2 : %d\n", ss1, ss2, sbs1, sbs2);
 
     long int it = 0;
     long int* res = NULL;
     res = calloc(ss1, sizeof(*res));
 
     for (it = 0; it < ss2 - 1; it++) {
-        // printf("it : %d\n", it);
-        // printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
-        // printf("res[it] = s1[it] ^ s2[it];\n");
+        //printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
         res[it] = s1[it] ^ s2[it];
-        // printf("%d = %d ^ %d\n", res[it], s1[it], s2[it]);
+        //printf("%d = %d ^ %d\n", res[it], s1[it], s2[it]);
     }
-    // printf("it : %d\n", it);
     // it = ss1 - 1
-    // printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
-    // printf("res[it] = XOR(s1[it], s2[it] << ((sbs2 - sbs1) \% int_SIZE))\n");
+    //printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
     res[it] = s1[it] ^ ((s2[it] << ((sbs1 - sbs2) % intsize)));
-    // printf("%d = %d ^ (%d << %d)\n", res[it], s1[it], s2[it], (sbs1 - sbs2) % intsize);
+    //printf("%d = %d ^ (%d << %d)\n", res[it], s1[it], s2[it], (sbs1 - sbs2) % intsize);
     it++;
     // it = ss1
     for (it = ss2; it < ss1; it++) {
-        // printf("it : %d\n", it);
-        // printf("res[it] = s1[it]\n");
-        // printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
+        //printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
         res[it] = s1[it];
-        // printf("%d = %d\n", res[it], s1[it]);
+        //printf("%d = %d\n", res[it], s1[it]);
     }
-    // printf("it : %d\n", it);
 
     return res;
 
@@ -264,19 +253,6 @@ int popcount_binary_array(const long int *seq_bin, const long int seq_size){
     return s;
 }
 
-long int mask_binary_array(const long int seq_bin, const long int pos_start, const long int size) {
-    // printf("seq_bin : %d, start : %d, size : %d\n", seq_bin, pos_start, size);
-    long int res;
-
-    res = seq_bin << ((int_SIZE+1) - size - pos_start);
-    res = res & 0b11111111111111111111111111111111;
-    res = res >> ((int_SIZE+1) - size);
-    // res = res << pos_start;
-
-    // printf("return %d\n", res);
-    return res;
-}
-
 long int* get_piece_binary_array(const long int* seq_bin,  const long int pos_start, const long int size){
 
     long int array_size = (size) / int_SIZE + (size % int_SIZE != 0);
@@ -297,71 +273,6 @@ long int* get_piece_binary_array(const long int* seq_bin,  const long int pos_st
 
     return res;
 }
-
-   /* long int *res;
-
-    long int intsize = int_SIZE + 1;
-
-    long int seq_start = seq_size - 1 - pos_start/(intsize);
-    long int seq_stop = seq_size - 1 - (pos_start+size)/(intsize);
-
-    long int array_size = (size) / intsize + (size % intsize != 0);
-    // printf("array_size : %ld\n", array_size);
-
-    res = calloc(array_size, sizeof(*seq_bin));
-
-    long int relative_start;
-    long int relative_size;
-
-    long int it = 0;
-    long int i = seq_start;
-    long int val = 0;
-    long int res_p = 0;
-    long int relative_space_left = 0;
-    long int writen_so_far = 0;
-
-    // printf("seq_size : %ld, pos_start : %ld, size : %ld\n", seq_size, pos_start, size);
-    // printf("seq_start : %ld, seq_stop : %ld\n", seq_start, seq_stop);
-
-    while(i != seq_stop-1){
-        // printf("FOR : %ld, %ld, %ld\n", i, seq_start, seq_stop);
-        relative_start = i == seq_start ? pos_start % (intsize) : 0;
-        // relative_size = size - it * (intsize) + relative_start % (intsize) + pos_start % (intsize);
-        relative_size = size - writen_so_far;
-        relative_size = relative_size > (intsize) ? (intsize) - relative_start : relative_size;
-        val = mask_binary_array(*(seq_bin + i), relative_start, relative_size);
-        // printf("i : %ld, it : %ld, *(seq_bin + i) : %ld, r_start : %ld, r_size : %ld, val : %ld\n", i, it, *(seq_bin + i), relative_start, relative_size, val);
-
-        res_p = array_size - it - 1;
-        // printf("res_p : %ld\n", res_p);
-        if (i == seq_start){
-            *(res + res_p) = val; // Première itération
-            // printf("première it : res+res_p = %ld (%ld)\n", *(res + res_p), val);
-            writen_so_far += relative_size;
-            // printf("writen_so_far / relative_size : %ld\n", writen_so_far);
-        }
-        else{
-            // printf("relative_space_left : %ld", relative_space_left);
-            relative_space_left = intsize - (writen_so_far % intsize == 0 ? intsize : writen_so_far % intsize);
-            if (relative_space_left) {
-                // *(res + res_p+1) = *(res + res_p+1) | ((mask_binary_array(val, 0, relative_space_left) << intsize - relative_space_left));
-                *(res + res_p + 1) = *(res + res_p + 1) | (mask_binary_array(val, 0, relative_space_left) << (intsize-relative_space_left));
-                // printf("val : %ld, mask : %ld, << %ld\n", val, mask_binary_array(val, 0, relative_space_left), writen_so_far % intsize);
-                // printf("mask << : %ld, res+%ld : %ld\n", mask_binary_array(val, 0, relative_space_left) << (intsize - relative_space_left), res_p+1, *(res + res_p + 1));
-                writen_so_far += relative_space_left;
-                // printf("writen_so_far / relative_size : %ld\n", writen_so_far);
-            }
-            *(res + res_p) = val >> relative_space_left;
-            // printf("*(res + res_p(%ld)) : %ld\n", res_p, *(res + res_p));
-            // relative_space_left = intsize - relative_size;
-            writen_so_far += relative_size - relative_space_left;
-        }
-        it++;
-        i--;
-    }
-    return res;
-}*/
-
 
 
 
@@ -488,7 +399,6 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t*
             return;
         }
     }
-
 
     int start_pos = -1;
 
@@ -768,7 +678,7 @@ char* generating_amino_acid_chain(const long int *gene_seq,const long int start_
             break;
 
         default:
-            return printf("ERROR: generating_amino_acid_chain: invalid value (%d) in RNA sequence\n", hash), NULL;
+            return NULL;//return printf("ERROR: generating_amino_acid_chain: invalid value (%d) in RNA sequence\n", hash), NULL;
         }
     
         temp++;

@@ -162,7 +162,7 @@ fh.close()
 fh = open('output/comp_bin.html','w')
 fh.write(start+ "<h1>Comparaison entre séquences</h1><a href=\"rapport_bin.html\" target=\"_blank\"><input type=\"button\" value=\"Retour\"></a>")
 message = "<table>\n<tr>\n<th class = \"title\">Sequence</th>\n<th class = \"title\">Matching</th>\n</tr>\n<tbody>\n"
-print(str(len(gene)))
+#print(str(len(gene)))
 f.write("\nMatching:")
 for i in range((int((len(gene))/2)), -1, -1):
     for c in range((int((len(gene))/2))):     

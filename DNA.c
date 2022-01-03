@@ -249,20 +249,6 @@ static PyObject *DNA_calculating_matching_score(PyObject *self, PyObject *args)
 	return Py_BuildValue("f", calculating_matching_score(view1.buf, view1.shape[0], view2.buf, view2.shape[0]));
 }
 
-//////////////// Hamming calculation
-static PyObject *DNA_hamming(PyObject *self, PyObject *args)
-{	
-	int obj1 = 0;
-	int obj2 = 0;
-
-	//Get the parameter (2 int values)
-	if(!PyArg_ParseTuple(args, "ii", &obj1, &obj2))
-	    return NULL;
-
-	//Return the int value as a Python int object
-    return Py_BuildValue("i", hamming(obj1, obj2));
-}
-
 //Register the methods to be made available Python side
 static PyMethodDef DNA_methods[] = {
 	{ "convert_to_binary", DNA_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},	
@@ -271,7 +257,6 @@ static PyMethodDef DNA_methods[] = {
 	{ "generating_amino_acid_chain", DNA_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein)"},
 	{ "detecting_mutations", DNA_detecting_mutations, METH_VARARGS, "Detecte probable mutation zones"},
 	{ "calculating_matching_score", DNA_calculating_matching_score, METH_VARARGS, "Detecte probable mutation zones"},
-	{ "hamming", DNA_hamming, METH_VARARGS, "Hamming distance calculation"},
 	{ "version", (PyCFunction)DNA_version, METH_VARARGS, "Return the version of the DNA library."},
 	{NULL, NULL, 0, NULL}
 };
