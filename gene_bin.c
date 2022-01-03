@@ -126,22 +126,92 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
 long int* xor_binary_array(const long int *seq_bin1, const unsigned seq_size1,
                                 const long int *seq_bin2, const unsigned seq_size2){
 
+    long int intsize = int_SIZE + 1;
+
+    long int* s1, * s2;
+    long int ss1, ss2;
+    long int sbs1, sbs2;
+    // s1 est toujours plus grand ou égal que s2
+    printf("\n == xor == \n");
+    printf("seqbin[0] : %d, %d\n", seq_bin1[0], seq_bin2[0]);
+    if (seq_size1 >= seq_size2) {
+        s1 = seq_bin1;
+        s2 = seq_bin2;
+        ss1 = seq_size1 / intsize + ((seq_size1 / intsize) % intsize != 0);
+        sbs1 = seq_size1;
+        ss2 = seq_size2 / intsize + ((seq_size2 / intsize) % intsize != 0);
+        sbs2 = seq_size2;
+    }
+    else {
+        s1 = seq_bin2;
+        s2 = seq_bin1;
+        ss1 = seq_size2 / intsize + ((seq_size2 / intsize) % intsize != 0);
+        sbs1 = seq_size2;
+        ss2 = seq_size1 / intsize + ((seq_size1 / intsize) % intsize != 0);
+        sbs2 = seq_size1;
+    }
+
+    if (ss1 == 0) ss1 = 1;
+    if (ss2 == 0) ss2 = 1;
+    printf("s[0] : %d, %d\n", s1[0], s2[0]);
+    printf("s[0] : %d, %d\n", s1[1], s2[1]);
+
+    printf("ss1 : %d, ss2 : %d, sbs1 : %d, sbs2 : %d\n", ss1, ss2, sbs1, sbs2);
+
+    long int it = 0;
+    long int* res = NULL;
+    res = calloc(ss1, sizeof(*res));
+
+    for (it = 0; it < ss2 - 1; it++) {
+        printf("it : %d\n", it);
+        printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
+        printf("res[it] = s1[it] ^ s2[it];\n");
+        res[it] = s1[it] ^ s2[it];
+        printf("%d = %d ^ %d\n", res[it], s1[it], s2[it]);
+    }
+    printf("it : %d\n", it);
+    // it = ss1 - 1
+    printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
+    printf("res[it] = XOR(s1[it], s2[it] << ((sbs2 - sbs1) \% int_SIZE))\n");
+    res[it] = s1[it] ^ ((s2[it] << ((sbs1 - sbs2) % intsize)));
+    printf("%d = %d ^ (%d << %d)\n", res[it], s1[it], s2[it], (sbs1 - sbs2) % intsize);
+    it++;
+    // it = ss1
+    for (it = ss2; it < ss1; it++) {
+        printf("it : %d\n", it);
+        printf("res[it] = s1[it]\n");
+        printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
+        res[it] = s1[it];
+        printf("%d = %d\n", res[it], s1[it]);
+    }
+    printf("it : %d\n", it);
+
+    return res;
+
     // "nb" = number of 'int' in the arrays 'seq1' and 'seq2' 
     //      = size of the 'long int*' arrays
-    int nb_seq1 = seq_size1 / int_SIZE;
-    if(seq_size1 % int_SIZE != 0)   nb_seq1++;
-    int nb_seq2 = seq_size2 / int_SIZE;
-    if(seq_size2 % int_SIZE != 0)   nb_seq2++;
+    // int nb_seq1 = seq_size1 / int_SIZE;
+    // if(seq_size1 % int_SIZE != 0)   nb_seq1++;
+    // int nb_seq2 = seq_size2 / int_SIZE;
+    // if(seq_size2 % int_SIZE != 0)   nb_seq2++;
 
-    long int max_nb = nb_seq1 >= nb_seq2 ? nb_seq1 : nb_seq2;
+    // long int max_nb = nb_seq1 >= nb_seq2 ? nb_seq1 : nb_seq2;
 
-    long int max_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
-    long int min_size = seq_size1 >= seq_size2 ? seq_size2 : seq_size1;
-    long int diff_size = max_size - min_size;
+    // long int max_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
+    // long int min_size = seq_size1 >= seq_size2 ? seq_size2 : seq_size1;
+    // long int diff_size = max_size - min_size;
 
-    long int *xor = NULL;
-    xor = calloc(max_nb, sizeof(*xor));
+    // long int *xor = NULL;
+    // xor = calloc(max_nb, sizeof(*xor));
 
+    // printf("seq_size1 : %d, seq_size2 : %d\n", seq_size1, seq_size2);
+    // printf("min_size : %d, max_size : %d, diff_size : %d\n", min_size, max_size, diff_size);
+
+    // printf("nbseq1 : %d, nbseq2 : %d, max_nb : %d\n", nb_seq1, nb_seq2, max_nb);
+
+    // for(int it = 0; it < max_nb; it++){
+    //     printf("%ld\n", *(seq_bin1 + it));
+    // }
 
     // If the sequences don't have the same size, do (with x = 1 or 0):
 
@@ -153,28 +223,28 @@ long int* xor_binary_array(const long int *seq_bin1, const unsigned seq_size1,
 
     // And, 0 ^ x = x
 
-    int bit = 0;
-    if(max_size == seq_size1){
-        for (long int i = 0; i < diff_size; ++i){
-           bit = get_binary_value(seq_bin1, i);
-           xor = change_binary_value(xor, i, bit);
-        }
-        for (long int i = diff_size; i < max_size; ++i){
-           bit = get_binary_value(seq_bin1, i) ^ get_binary_value(seq_bin2, i - diff_size);
-           xor = change_binary_value(xor, i, bit);
-        }
-    }
-    else{
-        for (long int i = 0; i < diff_size; ++i){
-           bit = get_binary_value(seq_bin2, i);
-           xor = change_binary_value(xor, i, bit);
-        }
-        for (long int i = diff_size; i < max_size; ++i){
-           bit = get_binary_value(seq_bin1, i - diff_size) ^ get_binary_value(seq_bin2, i);
-           xor = change_binary_value(xor, i, bit);
-        }
-    }
-    return xor;
+    // int bit = 0;
+    // if(max_size == seq_size1){
+    //     for (long int i = 0; i < diff_size; ++i){
+    //        bit = get_binary_value(seq_bin1, i);
+    //        xor = change_binary_value(xor, i, bit);
+    //     }
+    //     for (long int i = diff_size; i < max_size; ++i){
+    //        bit = get_binary_value(seq_bin1, i) ^ get_binary_value(seq_bin2, i - diff_size);
+    //        xor = change_binary_value(xor, i, bit);
+    //     }
+    // }
+    // else{
+    //     for (long int i = 0; i < diff_size; ++i){
+    //        bit = get_binary_value(seq_bin2, i);
+    //        xor = change_binary_value(xor, i, bit);
+    //     }
+    //     for (long int i = diff_size; i < max_size; ++i){
+    //        bit = get_binary_value(seq_bin1, i - diff_size) ^ get_binary_value(seq_bin2, i);
+    //        xor = change_binary_value(xor, i, bit);
+    //     }
+    // }
+    // return xor;
 }
 
 /**

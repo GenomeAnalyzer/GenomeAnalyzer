@@ -173,8 +173,10 @@ static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
 
 	long int* array = xor_binary_array(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2);
 
-	a1 = (a1 / int_SIZE) + (a1 % int_SIZE != 0);
-	a2 = (a2 / int_SIZE) + (a2 % int_SIZE != 0);
+	long int intsize = int_SIZE + 1;
+
+	a1 = (a1 / intsize) + (a1 % intsize != 0);
+	a2 = (a2 / intsize) + (a2 % intsize != 0);
 	long int array_size = a1 > a2 ? a1 : a2;
 	// printf("a1 : %d, a2 : %d, array_size : %d", a1, a2, array_size);
 
