@@ -193,8 +193,6 @@ static PyObject *DNA_detecting_mutations(PyObject *self, PyObject *args)
 
     PyObject* List = PyList_New(0);
     for(short int i = 0; i < 5; i ++){
-		if (m.size[i] == 0 )
-			continue;
 		PyObject *l = PyList_New(3);
 		PyList_SET_ITEM(l, 0, PyLong_FromUnsignedLong(m.size[i]));
     	PyList_SET_ITEM(l, 1, PyLong_FromUnsignedLong(m.start_mut[i]));

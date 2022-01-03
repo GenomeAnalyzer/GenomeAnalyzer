@@ -375,38 +375,6 @@ static void test_get_piece_binary_array(){
   // free(arr);
 }
 
-static void test_mask_binary_array(){
-  assert_int_equal(5, mask_binary_array(203, 1, 4));
-
-  long int intsize = int_SIZE + 1;
-  long int size = 511;
-  long int pos;
-
-  long int *arr;
-  arr = calloc(size+1, sizeof(arr));
-  for (long int i =0 ; i <= size; i++){
-    arr[i] = size-i;
-  }
-
-  for (long int it = 0; it <= size; it++){
-    pos = size - it;
-    // retourner le Xième bit
-    assert_int_equal(it % 2, mask_binary_array(arr[pos], 0, 1));
-    assert_int_equal(it / 2 % 2, mask_binary_array(arr[pos], 1, 1));
-    assert_int_equal(it / 4 % 2, mask_binary_array(arr[pos], 2, 1));
-    assert_int_equal(it / 8 % 2, mask_binary_array(arr[pos], 3, 1));
-    assert_int_equal(it / 16 % 2, mask_binary_array(arr[pos], 4, 1));
-    // Retourner tout le nombre
-    assert_int_equal(it, mask_binary_array(arr[pos], 0, intsize));
-    // retourner plusieurs bits
-    assert_int_equal(it / 2 % 2 * 2 + it % 2, mask_binary_array(arr[pos], 0, 2));
-    assert_int_equal(it/4%2 * 4 + it/2%2 * 2 + it % 2, mask_binary_array(arr[pos], 0, 3));
-    assert_int_equal(it/4%2 * 2 + it/2%2, mask_binary_array(arr[pos], 1, 2));
-    assert_int_equal(it/16%2 * 4 + it/8%2 * 2 + it/4%2, mask_binary_array(arr[pos], 2, 3));
-  }
-  free(arr);
-}
-
 int main(void) {
   int result = 0;
   const struct CMUnitTest tests[] = {
@@ -416,7 +384,6 @@ int main(void) {
     cmocka_unit_test(test_set_binary_array),
     cmocka_unit_test(test_xor_binary_array),
     cmocka_unit_test(test_popcount_binary_array),
-    cmocka_unit_test(test_mask_binary_array),
     cmocka_unit_test(test_get_piece_binary_array),
     // DNA & GENES FUNCTIONS
     cmocka_unit_test(test_convert_to_binary),
