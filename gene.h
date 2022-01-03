@@ -1,5 +1,5 @@
 #pragma once 
-#define MAX_GENES  1024
+#define MAX_GENES 1024
 
 typedef struct gene_map_s {
 
@@ -13,13 +13,6 @@ typedef struct gene_map_s {
     unsigned long long* gene_end;
 
 }gene_map_t;
-
-typedef struct codon {
-    char* codon;
-    char* short_name;
-    char* full_name;
-    char symbol;
-}codon;
 
 typedef struct mutation_map {
     unsigned long *size;
@@ -35,5 +28,3 @@ void detecting_genes(const unsigned long gene [], const unsigned int gene_size, 
 char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsigned int seq_size);
 void detecting_mutations(const unsigned short gene_seq [], const unsigned long size_sequence, mutation_map mut_m);
 float calculating_matching_score(const unsigned short seq1 [], const int sequence_size1, const unsigned short seq2 [], const int sequence_size2);
-int binary_size_count(int b);
-int hamming(int seq1, int seq2);
