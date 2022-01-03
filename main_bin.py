@@ -9,15 +9,9 @@ import os
 def main():
   read = list()
   sequence = list()
-  mrna = list()
   i = 0
   gene = list()
 
-  chain = list()
-
-  mutation = list()
-
-  matching = list()
 
   try:
       # Create target Directory
@@ -91,8 +85,6 @@ def main():
           res = (DNA_bin.generating_mRNA(array.array('l',sequence[i]),gene[i][j][0],gene[i][j][1]-gene[i][j][0]))
           if res:
               message += "<tr><td>"+res.decode("cp1252", "replace").replace("U","T")+"</td>\n"
-
-              mrna.append(res.decode("cp1252", "replace"))
               message+="<td>"+str(res.decode("cp1252", "replace"))+ "</td>\n"
           else:
               message += "<tr><td>["+str(gene[i][j][0])+":"+str(gene[i][j][1])+"]=</td>\n"
@@ -102,7 +94,6 @@ def main():
           res2 =  DNA_bin.generating_amino_acid_chain(array.array('l',sequence[i]),gene[i][j][0],(gene[i][j][1]-gene[i][j][0])+1)
 
           if res2:
-              chain.append(res2.decode("cp1252", "replace"))
               message+="<td>"+str(res2.decode("cp1252", "replace"))+ "</td>\n"
           else:
               message+="<td> none </td>\n"            
@@ -111,7 +102,6 @@ def main():
             message+="<td>none</td>\n</tr>\n"
           else:
             message+="<td>"+str(mutres)+ "</td>\n</tr>\n"          
-          mutation.append(mutres)
 
       message+= "</tbody>\n</table>\n"
 
@@ -124,7 +114,6 @@ def main():
                   res = DNA_bin.calculating_matching_score(array.array('l',sequence[i]),gene[i][j][0],(gene[i][j][1]- gene[i][j][0])+1,array.array('l',sequence[i]),gene[i][k][0],(gene[i][k][1]- gene[i][k][0])+1)
 
                   message+="<tr><td>Sequence ["+str(gene[i][j][0])+":"+str(gene[i][j][1])+"] - ["+str(gene[i][k][0])+":"+str(gene[i][k][1])+"]</td>\n"
-                  matching.append(res)
                   message+="<td>"+str(res)+ "</td> \n</tr>\n"
       message+= "</tbody>\n</table>\n</details>\n </html>" 
       fhtmp.write(message)
@@ -139,13 +128,12 @@ def main():
             for k in range(len(gene[c])):
                   res = DNA_bin.calculating_matching_score(array.array('l',sequence[i]),gene[i][j][0],(gene[i][j][1]- gene[i][j][0])+1,array.array('l',sequence[c]),gene[c][k][0],(gene[c][k][1]- gene[c][k][0])+1)       
                   msgtmp+="<tr><td>Sequence ["+str(gene[i][j][0])+":"+str(gene[i][j][1])+"] - ["+str(gene[c][k][0])+":"+str(gene[c][k][1])+"]</td>\n"
-                  matching.append(res)
                   msgtmp+="<td>"+str(res)+ "</td> \n</tr>\n"
           fhtmp2.write(msgtmp)
           fhtmp2.close()
 
       i=i+1
-      if i ==2:
+      if i ==4:
         break
   message= " <a href=\"comp_bin.html\">Comparaison séquences</a></details></html>"  
   fh.write(message)

@@ -9,15 +9,10 @@ def main():
 
   read = list()
   sequence = list()
-  mrna = list()
   i = 0
   gene = list()
 
-  chain = list()
 
-  mutation = list()
-
-  matching = list()
 
   try:
       # Create target Directory
@@ -92,7 +87,6 @@ def main():
           message += "<tr><td>"+str(sequence[i][gene[i][j][0]:(gene[i][j][1])+1])+ "</td>\n"
           res = (DNA.generating_mRNA(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1]+1)])))
           if res:
-              mrna.append(res.decode("cp1252", "replace"))
               message+="<td>"+str(res.decode("cp1252", "replace"))+ "</td>\n"
           else:
               message+="<td> none </td>\n"
@@ -101,13 +95,10 @@ def main():
           res2 =  DNA.generating_amino_acid_chain(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1]+1)]))
 
           if res2:
-              chain.append(res2.decode("cp1252", "replace"))
               message+="<td>"+str(res2.decode("cp1252", "replace"))+ "</td>\n"
           else:
               message+="<td> none </td>\n"            
-          #print('ok')
           mutres = DNA.detecting_mutations(array.array('H',sequence[i][gene[i][j][0]:(gene[i][j][1]+1)]))
-          mutation.append(mutres)
           if len(mutres) == 0:
             message+="<td>none</td>\n</tr>\n"
           else:
@@ -121,7 +112,6 @@ def main():
               for k in range((int((len(gene[i]))/2))):     
                   message+="<tr><td>"+str(sequence[i][gene[i][j][0]:gene[i][j][1]])+" , "+str(sequence[i][gene[i][k][0]:gene[i][k][1]])+ "</td>\n"
                   res = (DNA.calculating_matching_score(array.array('H',sequence[i][gene[i][j][0]:gene[i][j][1]+1]),array.array('H',sequence[i][gene[i][k][0]:gene[i][k][1]+1])))
-                  matching.append(res)
                   message+="<td>"+str(res)+ "</td> \n</tr>\n"
       message+= "</tbody>\n</table>\n</details>\n </html>"  
 
@@ -139,7 +129,6 @@ def main():
                 for k in range(int((len(gene[c])))):
                       msgtmp+="<tr><td>"+str(sequence[i][gene[i][j][0]:gene[i][j][1]])+" , "+str(sequence[c][gene[c][k][0]:gene[c][k][1]])+ "</td>\n"
                       res = (DNA.calculating_matching_score(array.array('H',sequence[i][gene[i][j][0]:gene[i][j][1]]),array.array('H',sequence[c][gene[c][k][0]:gene[c][k][1]])))
-                      matching.append(res)
                       msgtmp+="<td>"+str(res)+ "</td> \n</tr>\n"
             fhtmp2.write(msgtmp)
             fhtmp2.close()
