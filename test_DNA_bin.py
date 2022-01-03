@@ -58,6 +58,17 @@ def test_xor_binary_array():
   	# Test if the algorithm is OK
 	# 00000 xor 11111
 	assert [0] == DNA_bin.xor_binary_array(array.array('l', [31]), array.array('l', [31]))
+	assert [0b111] == DNA_bin.xor_binary_array(array.array('l', [0b111]), array.array('l', [0b000]))
+	assert [0b1111] == DNA_bin.xor_binary_array(array.array('l', [0b11111]), array.array('l', [0b100]))
+	assert [0b11] == DNA_bin.xor_binary_array(array.array('l', [0b11111]), array.array('l', [0b111]))
+	assert [0b1111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b1111111111111111111111111111111]), array.array('l', [0b0000000000000000000000000000000]))
+	# assert [0b111, 0b100] == DNA_bin.xor_binary_array(array.array('l', [0b111, 0b100]), array.array('l', [0b0]))
+	assert [0b111] == DNA_bin.xor_binary_array(array.array('l', [0b111, 0b100]), array.array('l', [0b0]))
+	assert [0b11111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b11111111111111111111111111111111]), array.array('l', [0b00000000000000000000000000000000]))
+	assert [0b11111111111111111111111111111111, 0b11111111111111111111111111111111, 0b11111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b11111111111111111111111111111111, 0b11111111111111111111111111111111, 0b11111111111111111111111111111111]), array.array('l', [0b0]))
+	assert [0b111, 0b11111111111111111111111111111111, 0b11111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b11111111111111111111111111111111, 0b11111111111111111111111111111111, 0b11111111111111111111111111111111]), array.array('l', [0b11111111111111111111111111111000, 0b0, 0b0]))
+	assert [0b111, 0b111] == DNA_bin.xor_binary_array(array.array('l', [0b11111111111111111111111111111111, 0b11111111111111111111111111111000]), array.array('l', [0b11111111111111111111111111111000, 0b11111111111111111111111111111111]))
+	assert [0b11111111111111111111111111111111, 0b11111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b111, 0b11111111111111111111111111111000]), array.array('l', [0b11111111111111111111111111111000, 0b111]))
 	# 11111 xor 11111
 	assert [31] == DNA_bin.xor_binary_array(array.array('l', [0]), array.array('l', [31]))
 	# 1010101 xor 0101010
@@ -293,8 +304,8 @@ def test_detecting_genes():
 
 	
 def test_detecting_mutations():
-  	#GGGTTGCGCGCGTTAAAGGTTTGAAAGGTG = {261725162, 97523700}
-  	#Test if sequence 10 to 23 is a mutation zone and no other mutation zone
+  	# GGGTTGCGCGCGTTAAAGGTTTGAAAGGTG = {261725162, 97523700}
+  	# Test if sequence 10 to 23 is a mutation zone and no other mutation zone
 	assert 13 == DNA_bin.detecting_mutations(array.array('l',[261725162, 97523700]))[0][0]
 	assert 10 == DNA_bin.detecting_mutations(array.array('l',[261725162, 97523700]))[0][1]
 	assert 23 == DNA_bin.detecting_mutations(array.array('l',[261725162, 97523700]))[0][2]
