@@ -17,7 +17,7 @@
  */
 int get_binary_value(const long int *seq_bin, const int pos){
     int new_pos = pos > int_SIZE ? pos / int_SIZE : 0;
-    return seq_bin[new_pos] & (1 << (pos - new_pos)) ? 1 : 0;
+    return seq_bin[new_pos] & ((long)1 << (pos - new_pos)) ? 1 : 0;
 }
 
 /**
@@ -32,9 +32,9 @@ long int* change_binary_value(long int *seq_bin, const int pos, const int value)
     int new_pos = pos > int_SIZE ? pos / int_SIZE : 0;
 
     if (value)
-        seq_bin[new_pos] |= (1 << (pos - new_pos));
+        seq_bin[new_pos] |= ((long)1 << (pos - new_pos));
     else
-        seq_bin[new_pos] &= ~(1 << (pos - new_pos));
+        seq_bin[new_pos] &= ~((long)1 << (pos - new_pos));
     return seq_bin;
 }
 
