@@ -481,7 +481,7 @@ char* generating_amino_acid_chain(const long int *gene_seq,const long int start_
     if (!gene_seq)
         return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
     if(seq_size % 3 != 0)
-        return printf("ERROR: generating_amino_acid_chain: bad size\n"), NULL;
+        return NULL;
 
     // Create and check the output
     char* aa_seq = NULL;

@@ -286,7 +286,6 @@ char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsign
     if (!gene_seq)
         return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
     if(seq_size % 3 != 0)
-        //return printf("ERROR: generating_amino_acid_chain: bad size (%d => mod3 = %d)\n", seq_size, seq_size%3), 
         return NULL;
 
     // Create and check the output
