@@ -132,8 +132,8 @@ long int* xor_binary_array(const long int *seq_bin1, const unsigned seq_size1,
     long int ss1, ss2;
     long int sbs1, sbs2;
     // s1 est toujours plus grand ou égal que s2
-    printf("\n == xor == \n");
-    printf("seqbin[0] : %d, %d\n", seq_bin1[0], seq_bin2[0]);
+    // printf("\n == xor == \n");
+    // printf("seqbin[0] : %d, %d\n", seq_bin1[0], seq_bin2[0]);
     if (seq_size1 >= seq_size2) {
         s1 = seq_bin1;
         s2 = seq_bin2;
@@ -153,38 +153,38 @@ long int* xor_binary_array(const long int *seq_bin1, const unsigned seq_size1,
 
     if (ss1 == 0) ss1 = 1;
     if (ss2 == 0) ss2 = 1;
-    printf("s[0] : %d, %d\n", s1[0], s2[0]);
-    printf("s[0] : %d, %d\n", s1[1], s2[1]);
+    // printf("s[0] : %d, %d\n", s1[0], s2[0]);
+    // printf("s[0] : %d, %d\n", s1[1], s2[1]);
 
-    printf("ss1 : %d, ss2 : %d, sbs1 : %d, sbs2 : %d\n", ss1, ss2, sbs1, sbs2);
+    // printf("ss1 : %d, ss2 : %d, sbs1 : %d, sbs2 : %d\n", ss1, ss2, sbs1, sbs2);
 
     long int it = 0;
     long int* res = NULL;
     res = calloc(ss1, sizeof(*res));
 
     for (it = 0; it < ss2 - 1; it++) {
-        printf("it : %d\n", it);
-        printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
-        printf("res[it] = s1[it] ^ s2[it];\n");
+        // printf("it : %d\n", it);
+        // printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
+        // printf("res[it] = s1[it] ^ s2[it];\n");
         res[it] = s1[it] ^ s2[it];
-        printf("%d = %d ^ %d\n", res[it], s1[it], s2[it]);
+        // printf("%d = %d ^ %d\n", res[it], s1[it], s2[it]);
     }
-    printf("it : %d\n", it);
+    // printf("it : %d\n", it);
     // it = ss1 - 1
-    printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
-    printf("res[it] = XOR(s1[it], s2[it] << ((sbs2 - sbs1) \% int_SIZE))\n");
+    // printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
+    // printf("res[it] = XOR(s1[it], s2[it] << ((sbs2 - sbs1) \% int_SIZE))\n");
     res[it] = s1[it] ^ ((s2[it] << ((sbs1 - sbs2) % intsize)));
-    printf("%d = %d ^ (%d << %d)\n", res[it], s1[it], s2[it], (sbs1 - sbs2) % intsize);
+    // printf("%d = %d ^ (%d << %d)\n", res[it], s1[it], s2[it], (sbs1 - sbs2) % intsize);
     it++;
     // it = ss1
     for (it = ss2; it < ss1; it++) {
-        printf("it : %d\n", it);
-        printf("res[it] = s1[it]\n");
-        printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
+        // printf("it : %d\n", it);
+        // printf("res[it] = s1[it]\n");
+        // printf("%d, %d, %d\n", res[it], s1[it], s2[it]);
         res[it] = s1[it];
-        printf("%d = %d\n", res[it], s1[it]);
+        // printf("%d = %d\n", res[it], s1[it]);
     }
-    printf("it : %d\n", it);
+    // printf("it : %d\n", it);
 
     return res;
 
