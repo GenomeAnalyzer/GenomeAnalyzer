@@ -401,42 +401,42 @@ static void test_detecting_mutations(void ** state){
   free(M.end_mut);
 }
 
-// static void test_calculating_matching_score(void ** state){
-//   // Test if the algorithm is OK
-//   // --- With same size
-//   //  GACCCGAC = 0100101010010010 = {18770}
-//   //  GGCCAGGC = 0101101000010110 = {26714}
-//   assert_float_equal(81.250000,
-//                     calculating_matching_score(
-//                       (long int []){18770}, 16,
-//                       (long int []){26714}, 16),
-//                     0);
-//   // --- With different size
-//   //  GACCCGAC = 0100101010010010 = {18770}
-//   //  TTTCAGGCTC = 11111110000101101110 = {485503}
-//   assert_float_equal(25.000000,
-//                     calculating_matching_score(
-//                       (long int []){18770}, 16,
-//                       (long int []){485503}, 20),
-//                     0);
-//   //  TTTCAGGCTT = 11111110000101101111 = {1009791}
-//   //  GACCTTCGA = 010010101111100100 = {40786}
-//   assert_float_equal(45.000000,
-//                     calculating_matching_score(
-//                       (long int []){1009791}, 20,
-//                       (long int []){40786}, 18),
-//                     0);
-//   assert_float_equal(35.000000,
-//                     calculating_matching_score(
-//                       (long int []){1009791}, 20,
-//                       (long int []){40786}, 16),
-//                     0);
+static void test_calculating_matching_score(void ** state){
+  // Test if the algorithm is OK
+  // --- With same size
+  //  GACCCGAC = 0100101010010010 = {18770}
+  //  GGCCAGGC = 0101101000010110 = {26714}
+  assert_float_equal(81.250000,
+                    calculating_matching_score(
+                      (long int []){18770}, 0, 16,
+                      (long int []){26714}, 0, 16),
+                    0);
+  // --- With different size
+  //  GACCCGAC = 0100101010010010 = {18770}
+  //  TTTCAGGCTC = 11111110000101101110 = {485503}
+  assert_float_equal(25.000000,
+                    calculating_matching_score(
+                      (long int []){18770}, 0, 16,
+                      (long int []){485503}, 0, 20),
+                    0);
+  //  TTTCAGGCTT = 11111110000101101111 = {1009791}
+  //  GACCTTCGA = 010010101111100100 = {40786}
+  assert_float_equal(45.000000,
+                    calculating_matching_score(
+                      (long int []){1009791}, 0, 20,
+                      (long int []){40786}, 0, 18),
+                    0);
+  assert_float_equal(35.000000,
+                    calculating_matching_score(
+                      (long int []){1009791}, 0, 20,
+                      (long int []){40786}, 0, 16),
+                    0);
 
-//   // Test whether the function correctly detects errors:
-//   // --- NULL error
-//   assert_float_equal(-1.0, calculating_matching_score(NULL, 0, NULL, 0), 0);
+  // Test whether the function correctly detects errors:
+  // --- NULL error
+  assert_float_equal(-1.0, calculating_matching_score(NULL, 0, 0, NULL, 0, 0), 0);
 
-// }
+}
 
 static void test_get_piece_binary_array(){
   // Test if the algorithm is OK
@@ -509,7 +509,7 @@ int main(void) {
     // cmocka_unit_test(test_detecting_genes),
     cmocka_unit_test(test_generating_aa_chain),
     cmocka_unit_test(test_detecting_mutations),
-    // cmocka_unit_test(test_calculating_matching_score),
+    cmocka_unit_test(test_calculating_matching_score),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 
