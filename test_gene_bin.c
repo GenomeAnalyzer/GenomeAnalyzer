@@ -282,23 +282,53 @@ static void test_detecting_genes(void ** state){
   free(gene_map);
 }
 
-// static void test_generating_aa_chain(void ** state){
-//   // Test if the algorithm is OK
-//   //  --- Test all the amino acid
-//   assert_string_equal("KNKNTTTTRSRSIIIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYYSSSSCWCLFLFMOOO",
-//                       generating_amino_acid_chain((long int []){79823872, -2096862942,
-//                             -1577991368, 547545866, -1792699787, -1126245655, 1210084514,
-//                             -752012202, 1001024414, -106443080, -1380064261, -1612777443,
-//                             189184},
-//                         384));
+static void test_generating_aa_chain(void ** state){
+  // Test if the algorithm is OK
 
-//   // Test whether the function correctly detects errors:
-//   // --- NULL error
-//   assert_ptr_equal(NULL, generating_amino_acid_chain(NULL, 0));
-//   // --- invalid value in gene_seq
-//   assert_ptr_not_equal("MRGO",
-//                        generating_amino_acid_chain((long int []){1821290092, 18263}, 24));
-// }
+  // AA -> SEQ -> BINARY -> INVERT BINARY -> CALL FUNCTION
+  // K      K      N      N      R      R      S      S      T      T     
+  // AAA    AAG    AAC    AAT    AGA    AGG    AGC    AGT    ACA    ACG         
+  // 000000 000001 000010 000011 000100 000101 000110 000111 001000 001001   
+  assert_string_equal("KKNNRRSSTT", generating_amino_acid_chain((long int []) {0b100100000100111000011000101000001000110000010000100000000000}, 0, 60));
+  // T      T      I      M      I      I      E      E      D      D
+  // ACC    ACT    ATA    ATG    ATC    ATT    GAA    GAG    GAC    GAT
+  // 001010 001011 001100 001101 001110 001111 010000 010001 010010 010011
+  assert_string_equal("TTIMIIEEDD", generating_amino_acid_chain((long int []) { 0b110010010010100010000010111100011100101100001100110100010100 }, 0, 60));
+  // G      G      A      A      A      A      V      V      V      V 
+  // GGC    GGT    GCA    GCG    GCC    GCT    GTA    GTG    GTC    GTT         
+  // 010110 010111 011000 011001 011010 011011 011100 011101 011110 011111   
+  assert_string_equal("GGAAAAVVVV", generating_amino_acid_chain((long int []) { 0b111110011110101110001110110110010110100110000110111010011010 }, 0, 60));
+  // Q      Q      H      H      R      R      R      R      P      P
+  // CAA    CAG    CAC    CAT    CGA    CGG    CGC    CGT    CCA    CCG
+  // 100000 100001 100010 100011 100100 100101 100110 100111 101000 101001
+  assert_string_equal("QQHHRRRRPP", generating_amino_acid_chain((long int []) { 0b100101000101111001011001101001001001110001010001100001000001 }, 0, 60));
+  // L      L      L      L      O      O      Y      Y      O      W     
+  // CTA    CTG    CTC    CTT    TAA    TAG    TAC    TAT    TGA    TGG    
+  // 101100 101101 101110 101111 110000 110001 110010 110011 110100 110101
+  assert_string_equal("LLLLOOYYOW", generating_amino_acid_chain((long int []) { 0b101011001011110011010011100011000011111101011101101101001101 }, 0, 60));
+  // C      C      S      S      S      S      L      L      F      F
+  // TGC    TGT    TCA    TCG    TCC    TCT    TTA    TTG    TTC    TTT
+  // 110110 110111 111000 111001 111010 111011 111100 111101 111110 111111
+  assert_string_equal("CCSSSSLLFF", generating_amino_acid_chain((long int []) { 0b111111011111101111001111110111010111100111000111111011011011 }, 0, 60));
+  // G      G      P      P
+  // GGA    GGG    CCC    CCT
+  // 010100 010101 101010 101011
+  assert_string_equal("GGPP", generating_amino_acid_chain((long int []) { 0b110101010101101010001010 }, 0, 24));
+
+
+  //  --- Test all the amino acid
+  long int* seq_bin = convert_to_binary("AAAAAGAACAATAGAAGGAGCAGTACAACGACCACTATAATGATCATTGAAGAGGACGATGGCGGTGCAGCGGCCGCTGTAGTGGTCGTTCAACAGCACCATCGACGGCGCCGTCCACCGCTACTGCTCCTTTAATAGTACTATTGATGGTGCTGTTCATCGTCCTCTTTATTGTTCTTTGGAGGGCCCCCT", 384);
+  char* aa_chain = NULL;
+  aa_chain = generating_amino_acid_chain(seq_bin, 0, 384);
+  assert_string_equal("KKNNRRSSTTTTIMIIEEDDGGAAAAVVVVQQHHRRRRPPLLLLOOYYOWCCSSSSLLFFGGPP", aa_chain);
+
+  // Test whether the function correctly detects errors:
+  // --- NULL error
+  assert_ptr_equal(NULL, generating_amino_acid_chain(NULL, 0, 0));
+  // --- invalid value in gene_seq
+  // assert_ptr_not_equal("MRGO",
+  //                      generating_amino_acid_chain((long int []){1821290092, 18263}, 24));
+}
 
 
 // static void test_detecting_mutations(void ** state){
@@ -472,7 +502,7 @@ int main(void) {
     cmocka_unit_test(test_binary_to_dna),
     cmocka_unit_test(test_generating_mRNA),
     // cmocka_unit_test(test_detecting_genes),
-    // cmocka_unit_test(test_generating_aa_chain),
+    cmocka_unit_test(test_generating_aa_chain),
     // cmocka_unit_test(test_detecting_mutations),
     // cmocka_unit_test(test_calculating_matching_score),
   };
