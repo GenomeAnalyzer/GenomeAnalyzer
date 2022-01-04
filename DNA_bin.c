@@ -217,19 +217,6 @@ static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
 	return Py_BuildValue("l", popcount_binary_array(view.buf, size));
 }
 
-static PyObject* DNAb_mask_binary_array(PyObject* self, PyObject* args) {
-
-	long int seq_bin;
-	long int pos_start;
-	long int size;
-
-	//Get the parameter (1-dimensional array of long int)
-	if (!PyArg_ParseTuple(args, "iii", &seq_bin, &pos_start, &size))
-		return NULL;
-
-	return Py_BuildValue("l", mask_binary_array(seq_bin, pos_start, size));
-}
-
 static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 	Py_buffer view_seq_bin;
 	PyObject* obj_seq_bin = NULL;
@@ -562,7 +549,6 @@ static PyMethodDef DNAb_methods [] = {
 	{ "set_binary_array", DNAb_set_binary_array, METH_VARARGS, ""},
 	{ "xor_binary_array", DNAb_xor_binary_array, METH_VARARGS, ""},
 	{ "popcount_binary_array", DNAb_popcount_binary_array, METH_VARARGS, ""},
-	{ "mask_binary_array", DNAb_mask_binary_array, METH_VARARGS, ""},
 	{ "get_piece_binary_array", DNAb_get_piece_binary_array, METH_VARARGS, ""},
 	{ "convert_to_binary", DNAb_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},
 	{ "binary_to_dna", DNAb_binary_to_dna, METH_VARARGS, "Convert a binary sequence to a DNA sequence"},

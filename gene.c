@@ -601,30 +601,3 @@ float calculating_matching_score(const unsigned short seq1 [], const int sequenc
     float y = ((float)count * 100.0) / (float)max_size;
     return 100.0 - y;
 }
-
-//////////////// Counting binary size
-/*
- * in : b : binary number
- * out : int : count of bits
- * The algorithm return the count of bits the binary integer is.
-*/
-int binary_size_count(int b) {
-    int size = 0;
-    while (b) {
-        size++;
-        b >>= 1;
-    }
-    return size;
-}
-
-//////////////// Hamming calculation
-/*
- * in : seq1 : first sequence in binary
- * in : seq2 : second sequence in binary
- * out : int : count of bits
- * The algorithms calculate the hamming distance between two binary sequences
-*/
-int hamming(int seq1, int seq2) {
-    int x = seq1 ^ seq2;
-    return __builtin_popcount(x);
-}

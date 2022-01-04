@@ -1,8 +1,8 @@
 #pragma once 
 
-#define MAX_GENES  1024
+#define MAX_GENES 1024
 // Number of bits in an integer
-#define int_SIZE 31
+#define int_SIZE 63
 
 typedef struct gene_map_s {
 
@@ -16,13 +16,6 @@ typedef struct gene_map_s {
     unsigned long long* gene_end;
 
 }gene_map_t;
-
-typedef struct codon {
-    char* codon;
-    char* short_name;
-    char* full_name;
-    char symbol;
-}codon;
 
 typedef struct mutation_map {
     unsigned long* size;
@@ -39,7 +32,6 @@ long int* set_binary_array(const char *array, const unsigned size);
 long int* xor_binary_array(const long int *seq1, const unsigned array_size1,
                                 const long int *seq2, const unsigned array_size2);
 int popcount_binary_array(const long int *seq, const long int size);
-long int mask_binary_array(const long int seq_bin, const long int pos_start, const long int size);
 long int* get_piece_binary_array(const long int* seq_bin,  const long int pos_start, const long int size);
 
 

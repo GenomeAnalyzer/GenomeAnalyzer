@@ -85,40 +85,6 @@ def test_popcount_binary_array():
 	# 9350764 = 001101100111010101110001
 	assert 13 == DNA_bin.popcount_binary_array(array.array('l', [9350764]))
 
-def test_mask_binary_array():
-	assert 5 == DNA_bin.mask_binary_array(203, 1, 4)
-
-	intsize = int_SIZE + 1
-	size = 511
-	
-	arr = []
-	i = size
-	while i >=0:
-		arr.append(i)
-		i = i-1
-
-	arr = array.array('l', arr)
-	# print(len(arr), arr)
-	# input()
-
-	for it in range(0,size):
-		pos = size - it
-		# print(it, pos, arr[pos])
-
-		# retourner le Xième bit
-		assert it%2 == DNA_bin.mask_binary_array(arr[pos], 0,1)
-		assert int(it/2)%2 == DNA_bin.mask_binary_array(arr[pos], 1,1)
-		assert int(it/4)%2 == DNA_bin.mask_binary_array(arr[pos], 2,1)
-		assert int(it/8)%2 == DNA_bin.mask_binary_array(arr[pos], 3,1)
-		assert int(it/16)%2 == DNA_bin.mask_binary_array(arr[pos], 4,1)
-		# Retourner tout le nombre
-		assert it == DNA_bin.mask_binary_array(arr[pos], 0,intsize)
-		# retourner plusieurs bitss
-		assert int(it/2)%2 * 2 + it%2 == DNA_bin.mask_binary_array(arr[pos], 0,2)
-		assert int(it/4)%2 * 4 + int(it/2)%2 * 2 + it%2 == DNA_bin.mask_binary_array(arr[pos], 0,3)
-		assert int(it/4)%2 * 2 + int(it/2)%2 == DNA_bin.mask_binary_array(arr[pos], 1,2)
-		assert int(it/16)%2 * 4 + int(it/8)%2 * 2 + int(it/4)%2 == DNA_bin.mask_binary_array(arr[pos], 2,3)
-
 def test_get_piece_binary_array():
 	intsize = int_SIZE + 1
 	size = 31
@@ -267,7 +233,6 @@ def test_generating_amino_acid_chain():
 		DNA_bin.generating_amino_acid_chain(array.array('H', [12])) # array format double
 
 def test_detecting_genes():
-
 
    #Test if the algorithm is OK in a basic case: xxxxAUGxxxxUAAxxx
    #The algorithm should detect one gene from the start codon to the stop codon
