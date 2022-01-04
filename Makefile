@@ -10,17 +10,17 @@ LDFLAGS = -lcmocka
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 #For all compiling, building and executing
-all: main DNA check 
+all: main DNA DNA_bin check 
 
 #For only building and testing interface
-build: DNA DNA_bin test_DNA
+build: DNA DNA_bin test_DNA test_DNA_bin
 
 main: main.o gene.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 gene.o: gene.h
 
-check: test_gene test_DNA test_gene_bin
+check: test_gene test_DNA test_DNA_bin test_gene_bin
 
 test_gene: test_gene.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
@@ -37,8 +37,8 @@ DNA :
 	cp build/lib*/*.so .
 
 DNA_bin : 
-	python3 setup_bin.py build
-	cp build/lib*/*.so .
+	python3 setup_bin.py build -b build_bin
+	cp build_bin/lib*/*.so .
 
 test_DNA : 
 	python3 -m pytest -s
@@ -47,6 +47,6 @@ test_DNA_bin :
 	python3 -m pytest -s
 
 clean :
-	@rm -rf __pycache__ build .pytest_cache *.so
+	@rm -rf __pycache__ build build_bin output .pytest_cache *.so
 	@rm -f *.o main test_gene test_gene_bin
 
