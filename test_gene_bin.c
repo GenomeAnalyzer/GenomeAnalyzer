@@ -186,23 +186,52 @@ static void test_binary_to_dna(void ** state){
   assert_ptr_equal(NULL, binary_to_dna((long int []){0}, 3));
 }
 
-// static void test_generating_mRNA(void ** state){
-//   // Test if the algorithm is OK
-//       //9350764 = 001101100111010101110001
-//   assert_string_equal("AUGCGUGGGUAG",
-//                       generating_mRNA((long int []){9350764}, 24));
-//       //913666358 = 00110110011101010111000100110110, 30065 = 0111010101110001
-//   assert_string_equal("AUGCGUGGGUAGAUGCGUGGGUAG",
-//                       generating_mRNA((long int []){1821290092, 18263}, 48));
+static void test_generating_mRNA(void ** state){
+  // Test if the algorithm is OK
+      //9350764 = 001101100111010101110001
+  char* seq_char = NULL;
+  assert_string_equal("AUGCGUGGGUAG", generating_mRNA((long int []){9350764}, 0, 24));
 
-//   // Test whether the function correctly detects errors:
-//   // --- NULL error
-//   assert_ptr_equal(NULL, generating_mRNA(NULL, 0));
-//   // --- invalid value in gene_seq
-//       //11957616 = 101101100111010101110000
-//   assert_ptr_not_equal("AUGCGUGGGUAG",
-//                        generating_mRNA((long int []){1821290092, 18263}, 48));
-// }
+  seq_char = generating_mRNA((long int []) { 1821290092, 18263 }, 0, 128);
+  assert_string_equal("AUGCGUGGGUAGAUGC", generating_mRNA((long int []) { 1821290092 }, 0, 32));
+  assert_string_equal("AUGCGUGGGUAGAUGCAAAAAAAAAAAAAAAA", generating_mRNA((long int []) { 1821290092 }, 0, 64));
+  assert_string_equal("AUGCGUGGGUAGAUGCAAAAAAAAAAAAAAAAGUGGGUAGAAAAAAAAAAAAAAAAAAAAAAAA", generating_mRNA((long int []) { 1821290092, 18263  }, 0, 128));
+
+  seq_char = "ATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCG";
+  char* expected_char = "AUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCG";
+
+  long int seq_size = 64;
+  long int* seq_bin;
+  char* seq_mRNA = NULL;
+
+  seq_bin = convert_to_binary(seq_char, 2 * seq_size);
+  seq_mRNA = generating_mRNA(seq_bin, 0, 2*seq_size);
+  assert_string_equal(expected_char, seq_mRNA);
+
+  expected_char = "AUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCG";
+  seq_char = "ATCGATCGATCGATCGATCGATCGATCGATCG";
+  seq_size = 32;
+  seq_bin;
+  char* seq_test = NULL;
+  seq_test = calloc(seq_size, sizeof(char));
+  char* seq_new = NULL;
+  int* ptr;
+
+  for (long int i = 1; i < seq_size; i++) {
+    seq_bin = convert_to_binary(seq_char, i);
+    seq_new = generating_mRNA(seq_bin, 0, 2 * i);
+    ptr = (int*)realloc(seq_test, sizeof(char) * i);
+    // Check the realloc worked.
+    assert_ptr_not_equal(NULL, ptr);
+    // Copy the sequence in the test sequence, to keep only the sequence needed for the test
+    memcpy(seq_test, expected_char, i);
+    // assert_string_equal(seq_test, seq_new);
+  }
+
+  // Test whether the function correctly detects errors:
+  // --- NULL error
+  assert_ptr_equal(NULL, generating_mRNA(NULL, 0, 0));
+}
 
 
 static void test_detecting_genes(void ** state){
@@ -441,7 +470,7 @@ int main(void) {
     // DNA & GENES FUNCTIONS
     cmocka_unit_test(test_convert_to_binary),
     cmocka_unit_test(test_binary_to_dna),
-    // cmocka_unit_test(test_generating_mRNA),
+    cmocka_unit_test(test_generating_mRNA),
     // cmocka_unit_test(test_detecting_genes),
     // cmocka_unit_test(test_generating_aa_chain),
     // cmocka_unit_test(test_detecting_mutations),
