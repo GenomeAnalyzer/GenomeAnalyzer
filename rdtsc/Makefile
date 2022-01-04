@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -g -std=c99
+CFLAGS = -g -Ofast -funroll-loops -finline-functions -ftree-vectorize
 
 .PHONY: clean all check
 

@@ -49,12 +49,17 @@ int main(int argc, char *argv[])
 
 	// Variable used for function
 	unsigned short int *seq_short = NULL;
+	unsigned long *seq_long = malloc(sizeof(unsigned long) * 2 * seq_char_size);
 	unsigned short int *seq_short2 = NULL;
 	float cms = 0;
 	char *rna_seq_short = NULL;
 	char *aa_seq_short = NULL;
 	
+	seq_short = convert_to_binary(seq_char, 2 * seq_char_size);
 	seq_short2 = convert_to_binary(seq_char2, 2 * seq_char_size2);
+
+	for(int i = 0; i < 2 * seq_char_size; i++)
+		seq_long[i] = (unsigned long)seq_short[i];
   	
   	gene_map_t g;
     g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * 2);
@@ -99,16 +104,16 @@ int main(int argc, char *argv[])
 	elapsed = 0;
 	
 	// /*-----detecting_genes-----*/
-	// for(int i = 0; i < MAX_LOOP; i++)
-	// {
-	// 	before = rdtsc();
-	// 	detecting_genes(seq_short, 2 * seq_char_size, &g);
-	// 	after = rdtsc();
+	for(int i = 0; i < MAX_LOOP; i++)
+	{
+		before = rdtsc();
+		detecting_genes(seq_long, 2 * seq_char_size, &g);
+		after = rdtsc();
 
-	// 	elapsed += (double)(after - before);
-	// }
-	// printf("detecting_genes : %lf cycles\n", elapsed / MAX_LOOP);
-	// elapsed = 0;
+		elapsed += (double)(after - before);
+	}
+	printf("detecting_genes\t\t    : %.3lf\n", elapsed / MAX_LOOP);
+	elapsed = 0;
 	
 	// /*-----generating_amino_acid_chain-----*/
 	for(int i = 0; i < MAX_LOOP; i++)

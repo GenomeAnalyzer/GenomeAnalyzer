@@ -99,16 +99,16 @@ int main(int argc, char *argv[])
 	elapsed = 0;
 	
 	// /*-----detecting_genes-----*/
-	// for(int i = 0; i < MAX_LOOP; i++)
-	// {
-	// 	before = rdtsc();
-	// 	detecting_genes(seq_long, seq_char_size, &g);
-	// 	after = rdtsc();
+	for(int i = 0; i < MAX_LOOP; i++)
+	{
+		before = rdtsc();
+		detecting_genes(seq_long, seq_char_size, &g);
+		after = rdtsc();
 
-	// 	elapsed += (double)(after - before);
-	// }
-	// printf("detecting_genes : %lf cycles\n", elapsed / MAX_LOOP);
-	// elapsed = 0;
+		elapsed += (double)(after - before);
+	}
+	printf("detecting_genes\t\t    : %.3lf\n", elapsed / MAX_LOOP);
+	elapsed = 0;
 	
 	// /*-----generating_amino_acid_chain-----*/
 	for(int i = 0; i < MAX_LOOP; i++)
