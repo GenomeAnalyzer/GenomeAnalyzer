@@ -238,43 +238,55 @@ static void test_detecting_genes(void ** state){
   gene_map_t *gene_map = NULL;
   gene_map = malloc(sizeof(*gene_map));
 
-  // Test if the algorithm is OK in a basic case: xxxxAUGxxxxUAAxxx
+  // Test if the algorithm is OK in a basic case: xxxAUGxxxxUAAxxx
+  //                                              AGC AUG AGGGCC UAA CGU
   // The algorithm should detect one gene from the start codon to the stop codon
-  detecting_genes((long int []){963808024, 42}, 40, gene_map);
+  
+  long int* seq_bin = convert_to_binary("AGCATGAGGGCCTAACGT", 21);
+  // printf("sqe_bin : %s \n", seq_bin);
+  detecting_genes(seq_bin, 21*2, gene_map);
   assert_int_equal(6, gene_map->gene_start[0]);
-  assert_int_equal(28, gene_map->gene_end[0]);
+  assert_int_equal(29, gene_map->gene_end[0]);
   assert_int_equal(1, gene_map->genes_counter);
 
   // Test if the algorithm is OK in a multiple "start" case: xxxxAUGxxxxAUGxxxUAAxxx
+  //                                                         AGC AUG AGGGCC AUG CGAACG UAA CGU
   // The algorithm should detect one gene from the 2nd start codon to the stop codon
-  detecting_genes((long int []){732875499, -2036213923}, 60, gene_map);
-  assert_int_equal(30, gene_map->gene_start[0]);
-  assert_int_equal(48, gene_map->gene_end[0]);
+  seq_bin = convert_to_binary("AGCATGAGGGCCATGCGAACGTAACGT", 27);
+  detecting_genes(seq_bin, 27*2, gene_map);
+  assert_int_equal(24, gene_map->gene_start[0]);
+  assert_int_equal(47, gene_map->gene_end[0]);
   assert_int_equal(1, gene_map->genes_counter);
 
   // Test if the algorithm is OK in a multiple "stop" case: xxxxAUGxxxxUAAxxxUAAxxx
+  //                                                         AGC AUG CACGCG UAA GCACTG UAA CGU
   // The algorithm should detect one gene from the start codon to the first stop codon
-  detecting_genes((long int []){250327787, -2022340747}, 60, gene_map);
-  assert_int_equal(10, gene_map->gene_start[0]);
-  assert_int_equal(26, gene_map->gene_end[0]);
+  seq_bin = convert_to_binary("AGCATGCACGCGTAAGCACTGTAACGT", 27);
+  detecting_genes(seq_bin, 27*2, gene_map);
+  assert_int_equal(6, gene_map->gene_start[0]);
+  assert_int_equal(29, gene_map->gene_end[0]);
   assert_int_equal(1, gene_map->genes_counter);
 
   // Test if the algorithm is OK in a non presence of "start/stop" case: xxxxxxxxx
+  //                                                                     CGCCGCGCCGCGGGCG
   // The algorithm should not detect any genes
   gene_map->gene_start[0] = 0;
   gene_map->gene_end[0] = 0;
-  detecting_genes((long int []){22369621}, 26, gene_map);
+  seq_bin = convert_to_binary("CGCCGCGCCGCGGGCG", 16);
+  detecting_genes(seq_bin, 16*2, gene_map);
   assert_int_equal(0, gene_map->gene_start[0]);
   assert_int_equal(0, gene_map->gene_end[0]);
   assert_int_equal(0, gene_map->genes_counter);
 
   // Test if the algorithm is OK in a multiple gene case: xxxxAUGxxxxUAGxxxAUGxxxUAAxxx
+  //                                                      AGC AUG GCGCAC UAG CGCCCG AUG CUGGGG UAA CGU
   // The algorithm should detect two genes
-  detecting_genes((long int []) {-469763265, -1612578969, -268435456}, 66, gene_map);
+  seq_bin = convert_to_binary("AGCATGGCGCACTAGCGCCCGATGCTGGGGTAACGT", 36);
+  detecting_genes(seq_bin, 36*2, gene_map);
   assert_int_equal(6, gene_map->gene_start[0]);
-  assert_int_equal(24, gene_map->gene_end[0]);
-  assert_int_equal(36, gene_map->gene_start[1]);
-  assert_int_equal(48, gene_map->gene_end[1]);
+  assert_int_equal(29, gene_map->gene_end[0]);
+  assert_int_equal(42, gene_map->gene_start[1]);
+  assert_int_equal(65, gene_map->gene_end[1]);
   assert_int_equal(2, gene_map->genes_counter);
 
   free(gene_map->gene_start);
@@ -506,7 +518,7 @@ int main(void) {
     cmocka_unit_test(test_convert_to_binary),
     cmocka_unit_test(test_binary_to_dna),
     cmocka_unit_test(test_generating_mRNA),
-    // cmocka_unit_test(test_detecting_genes),
+    cmocka_unit_test(test_detecting_genes),
     cmocka_unit_test(test_generating_aa_chain),
     cmocka_unit_test(test_detecting_mutations),
     cmocka_unit_test(test_calculating_matching_score),
