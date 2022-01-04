@@ -37,12 +37,12 @@ int main(int argc, char *argv[])
 	double elapsed = 0.0;
 
 	char seq_char[MAX] = "";
-	load_gene("../fastas/LC528232.1.fasta", seq_char);
+	load_gene("LC528232.1.fasta", seq_char);
 	// printf("%s", seq_char);
 	unsigned long long seq_char_size = strlen(seq_char);
 
 	char seq_char2[MAX] = "";
-	load_gene("../fastas/MN908947.3.fasta", seq_char2);
+	load_gene("MN908947.3.fasta", seq_char2);
 	// printf("%s", seq_char2);
 	unsigned long long seq_char_size2 = strlen(seq_char2);
 
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     	m.end_mut[i]=0;   	
     }
 
-    printf("Naive Function\t\t    | Cycles\n");
+    printf("Naive Functions\t\t    | Cycles\n");
     printf("-----------------------------------------\n");
 
 	/*-----convert_to_binary-----*/
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 	printf("calculating_matching_score  : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 
-
+	printf("\n");
 
 	// free
 	free(g.gene_start);
