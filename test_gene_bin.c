@@ -317,6 +317,7 @@ static void test_generating_aa_chain(void ** state){
 
 
   //  --- Test all the amino acid
+  // (alphabetic order of the above sequences.)
   long int* seq_bin = convert_to_binary("AAAAAGAACAATAGAAGGAGCAGTACAACGACCACTATAATGATCATTGAAGAGGACGATGGCGGTGCAGCGGCCGCTGTAGTGGTCGTTCAACAGCACCATCGACGGCGCCGTCCACCGCTACTGCTCCTTTAATAGTACTATTGATGGTGCTGTTCATCGTCCTCTTTATTGTTCTTTGGAGGGCCCCCT", 384);
   char* aa_chain = NULL;
   aa_chain = generating_amino_acid_chain(seq_bin, 0, 384);
@@ -331,70 +332,74 @@ static void test_generating_aa_chain(void ** state){
 }
 
 
-// static void test_detecting_mutations(void ** state){
-//   mutation_map M;
-//   M.size = malloc(5 * sizeof(unsigned long));
-//   M.start_mut = malloc(5 * sizeof(unsigned long));
-//   M.end_mut = malloc(5 * sizeof(unsigned long));
+static void test_detecting_mutations(void ** state){
+  mutation_map M;
+  M.size = malloc(5 * sizeof(unsigned long));
+  M.start_mut = malloc(5 * sizeof(unsigned long));
+  M.end_mut = malloc(5 * sizeof(unsigned long));
 
-//   //A : 00
-//   //T : 11
-//   //C : 10
-//   //G : 01
+  //A : 00
+  //T : 11
+  //C : 10
+  //G : 01
 
-//   //GGGTTGCGCGCGTTAAAGGTTTGAAAGGTG = {261725162, 97523700}
-//   //Test if sequence 10 to 23 is a mutation zone and no other mutation zone
-//   M.size[1]=0;
-//   M.start_mut[1]=0;
-//   M.end_mut[1]=0;
-//   detecting_mutations((long int []){261725162, 97523700},60, M);
-//   //First mutation is updated with right values
-//   assert_int_equal(13,M.size[0]);
-//   assert_int_equal(10,M.start_mut[0]);
-//   assert_int_equal(23,M.end_mut[0]);
-//   //No other mutations, should not be updated
-//   assert_int_equal(0,M.size[1]);
-//   assert_int_equal(0,M.start_mut[1]);
-//   assert_int_equal(0,M.end_mut[1]);
+  //GGGTTGCGCGCGTTAAAGGTTTGAAAGGTG = {261725162, 97523700}
+  long int* seq_bin = convert_to_binary("GGGTTGCGCGCGTTAAAGGTTTGAAAGGTG", 30);
+  //Test if sequence 10 to 23 is a mutation zone and no other mutation zone
+  M.size[1]=0;
+  M.start_mut[1]=0;
+  M.end_mut[1]=0;
+  detecting_mutations(seq_bin, 0, 60, M);
+  // detecting_mutations((long int []){261725162, 97523700}, 0, 60, M);
+  //First mutation is updated with right values
+  assert_int_equal(13,M.size[0]);
+  assert_int_equal(10,M.start_mut[0]);
+  assert_int_equal(23,M.end_mut[0]);
+  //No other mutations, should not be updated
+  assert_int_equal(0,M.size[1]);
+  assert_int_equal(0,M.start_mut[1]);
+  assert_int_equal(0,M.end_mut[1]);
 
-//   //GTTTTGCAAACGTTAAAGGTTTGAAAGGTG = {261102590, 97523700}
-//   //Test if no mutation in this sequence
-//   M.size[0]=0;
-//   M.start_mut[0]=0;
-//   M.end_mut[0]=0;
-//   detecting_mutations((long int []){261102590, 97523700},60, M);
-//   //No possible mutation zones detected, should not be updated
-//   assert_int_equal(0,M.size[0]);
-//   assert_int_equal(0,M.start_mut[0]);
-//   assert_int_equal(0,M.end_mut[0]);
+  //GTTTTGCAAACGTTAAAGGTTTGAAAGGTG = {261102590, 97523700}
+  seq_bin = convert_to_binary("GTTTTGCAAACGTTAAAGGTTTGAAAGGTG", 30);
+  //Test if no mutation in this sequence
+  M.size[0]=0;
+  M.start_mut[0]=0;
+  M.end_mut[0]=0;
+  detecting_mutations((long int []){261102590, 97523700}, 0, 60, M);
+  //No possible mutation zones detected, should not be updated
+  assert_int_equal(0,M.size[0]);
+  assert_int_equal(0,M.start_mut[0]);
+  assert_int_equal(0,M.end_mut[0]);
 
-//   //GGGCCGTTCCGCCCATAGGCCCGGCTAAGA = {-983172758, 17224372}
-//   //Test with 3 mutation zones in this sequence
-//   M.size[3]=0;
-//   M.start_mut[3]=0;
-//   M.end_mut[3]=0;
-//   detecting_mutations((long int []){-983172758, 17224372},60, M);
-//   //First mutation is updated with right values
-//   assert_int_equal(11,M.size[0]);
-//   assert_int_equal(0,M.start_mut[0]);
-//   assert_int_equal(11,M.end_mut[0]);
-//   //First mutation is updated with right values
-//   assert_int_equal(11,M.size[1]);
-//   assert_int_equal(16,M.start_mut[1]);
-//   assert_int_equal(27,M.end_mut[1]);
-//   //First mutation is updated with right values
-//   assert_int_equal(15,M.size[2]);
-//   assert_int_equal(34,M.start_mut[2]);
-//   assert_int_equal(49,M.end_mut[2]);
-//   //No other mutations, should not be updated
-//   assert_int_equal(0,M.size[3]);
-//   assert_int_equal(0,M.start_mut[3]);
-//   assert_int_equal(0,M.end_mut[3]);
+  //GGGCCGTTCCGCCCATAGGCCCGGCTAAGA = {-983172758, 17224372}
+  seq_bin = convert_to_binary("GGGCCGTTCCGCCCATAGGCCCGGCTAAGA", 30);
+  //Test with 3 mutation zones in this sequence
+  M.size[3]=0;
+  M.start_mut[3]=0;
+  M.end_mut[3]=0;
+  detecting_mutations(seq_bin, 0, 60, M);
+  //First mutation is updated with right values
+  assert_int_equal(11,M.size[0]);
+  assert_int_equal(0,M.start_mut[0]);
+  assert_int_equal(11,M.end_mut[0]);
+  //First mutation is updated with right values
+  assert_int_equal(11,M.size[1]);
+  assert_int_equal(16,M.start_mut[1]);
+  assert_int_equal(27,M.end_mut[1]);
+  //First mutation is updated with right values
+  assert_int_equal(15,M.size[2]);
+  assert_int_equal(34,M.start_mut[2]);
+  assert_int_equal(49,M.end_mut[2]);
+  //No other mutations, should not be updated
+  assert_int_equal(0,M.size[3]);
+  assert_int_equal(0,M.start_mut[3]);
+  assert_int_equal(0,M.end_mut[3]);
 
-//   free(M.size);
-//   free(M.start_mut);
-//   free(M.end_mut);
-// }
+  free(M.size);
+  free(M.start_mut);
+  free(M.end_mut);
+}
 
 // static void test_calculating_matching_score(void ** state){
 //   // Test if the algorithm is OK
@@ -503,7 +508,7 @@ int main(void) {
     cmocka_unit_test(test_generating_mRNA),
     // cmocka_unit_test(test_detecting_genes),
     cmocka_unit_test(test_generating_aa_chain),
-    // cmocka_unit_test(test_detecting_mutations),
+    cmocka_unit_test(test_detecting_mutations),
     // cmocka_unit_test(test_calculating_matching_score),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
