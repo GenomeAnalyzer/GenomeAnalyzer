@@ -162,6 +162,25 @@ static void test_binary_to_dna(void ** state){
   // --- Test all conversion
   assert_string_equal("ATCG", binary_to_dna((long int []){156}, 8));
 
+  char* seq_char = "ATCGATCGATCGATCGATCGATCGATCGATCG";
+  long int seq_size = 32;
+  long int* seq_bin;
+  char* seq_test = NULL;
+  seq_test = calloc(seq_size, sizeof(char));
+  char* seq_new = NULL;
+  int* ptr;
+
+  for(long int i = 1; i < seq_size; i++){
+    seq_bin = convert_to_binary(seq_char, i);
+    seq_new = binary_to_dna(seq_bin, 2*i);
+    ptr = (int*) realloc(seq_test, sizeof(char)*i);
+    // Check the realloc worked.
+    assert_ptr_not_equal(NULL, ptr);
+    // Copy the sequence in the test sequence, to keep only the sequence needed for the test
+    memcpy(seq_test, seq_char, i);
+    assert_string_equal(seq_test, seq_new);
+  }
+
   // Test whether the function correctly detects errors:
   // --- Wrong size bin_dna_seq
   assert_ptr_equal(NULL, binary_to_dna((long int []){0}, 3));
