@@ -1,21 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdlib.h>
 #include <stdbool.h>
+
 #include "gene.h"
 
-//A   : 00
-//T/U : 11
-//C   : 10
-//G   : 01
-
-// UAA 110000
-// UAG 110001
-// UGA 110100
-
-// ATC 001110
-
-//////////////// Convert to binary
 /**
  * in : dna_seq : array of char
  * in : size : size of dna_seq
@@ -23,11 +11,14 @@
  * Convert a char DNA sequence to its binary sequence
  */
 unsigned short* convert_to_binary(char* dna_seq, unsigned size){
-    unsigned i = 0;
     unsigned temp = 0;
 
+    //Create and check the output
     unsigned short *seq = calloc(sizeof(unsigned short),size); 
+    if(!seq)
+        return printf("ERROR: convert_to_binary: cannot allocate memory.\n"), NULL;
 
+    //Parse the sequence, two nucleotides by two
     for (unsigned i = 0;i < size/2; i ++){
         switch(dna_seq[i]){
             case 'A':
@@ -123,8 +114,8 @@ unsigned short* convert_to_binary(char* dna_seq, unsigned size){
 
             break;
             default:
-                printf("Error: wrong letter in the sequence(%c).\nExit.\n",dna_seq[i]);
-                seq[temp] = NULL;
+                printf("Error: convert_to_binary: wrong letter in the sequence(%c).\nExit.\n",dna_seq[i]);
+                seq = NULL;
                 return seq;
         }
     }
@@ -132,23 +123,27 @@ unsigned short* convert_to_binary(char* dna_seq, unsigned size){
     return seq;
 }
 
-//////////////// Convert binary aa to codon
 /**
  * in : bin_dna_seq : unsigned short array - size must be 3*2 = 6.
  * out : aa : array of binary
  * Convert a binary aa sequence to its aa codon
  */
 char* binary_to_aa(unsigned short* bin_dna_seq, unsigned size){
-    if (size%2 != 0) {
+    //Check the input
+    if (size % 2 != 0) {
         printf("Error: wrong binary size (%d). Must be odd.\nExit.\n",size);
         return NULL;
     }
 
-    // char *codon[size/2];
+    //Create and check the output
     char* codon = malloc(sizeof(char)*size/2);
+    if (!codon)
+        return printf("ERROR: binary_to_aa: cannot allocate memory.\n"), NULL;
+
+    //Parse the array, two by two
     for (unsigned i = 0;i < size/2; i ++){
         if (bin_dna_seq[2*i] == 0 && bin_dna_seq[2*i+1] == 0)
-            codon[i] = 'A'; // Assuming "N" is "A", as it's done in convert_to_binary
+            codon[i] = 'A';
         else if (bin_dna_seq[2*i] == 1 && bin_dna_seq[2*i+1] == 1)
             codon[i] = 'T';
         else if (bin_dna_seq[2*i] == 1 && bin_dna_seq[2*i+1] == 0)
@@ -160,7 +155,6 @@ char* binary_to_aa(unsigned short* bin_dna_seq, unsigned size){
     return codon;
 }
 
-//////////////// Generating mRNA
 /**
  * in : gene_seq : array of binary
  * in : seq_len : size of dna_seq
@@ -180,7 +174,7 @@ char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_s
 
     int j = 0;
     // Parse the binary DNA sequence two by two
-    for (int i = 0; i < seq_size; i += 2) {
+    for (unsigned i = 0; i < seq_size; i += 2) {
         switch (gene_seq[i]) {
         case 0:
             if (gene_seq[i + 1] == 0)
@@ -207,7 +201,6 @@ char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_s
     return rna_seq;
 }
 
-//////////////// Detecting genes 
 /*
 * in : gene : sequence of genes
 * in : gene_map : struct to map the genes
@@ -215,7 +208,7 @@ char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_s
 * Detect if a gene exists in the sequence and insert it in the structure
 */
 void detecting_genes(const unsigned long gene [], const unsigned int gene_size, gene_map_t* gene_map) {
-    //struct gene_map_s gene_map;
+    // Initialise the gene counter
     gene_map->genes_counter = 0;
 
     // Check if memory ever have been allocated, do it if not
@@ -230,18 +223,16 @@ void detecting_genes(const unsigned long gene [], const unsigned int gene_size, 
     }
 
     bool find = false;
-
     unsigned long long start_pos = -1;
-
     unsigned long long i = 0;
 
+    //Parse the array
     while ((i + 6) <= gene_size) {   
 
-            //If a start pos and a stop pos doesn't exist, search for AUG
-            // if (!(gene[i%32] & ( 1 << (i%32) ))
+            //If a 'start pos' and a 'stop pos' doesn't exist, search for AUG
             if (gene[i] == 0 && gene[i + 1] == 0 && gene[i + 2] == 1 
                 && gene[i + 3] == 1 && gene[i + 4] == 0 && gene[i + 5] == 1) {
-            //if atc, it's the start of a gene
+            //if exist, it's the start of a gene
                 start_pos = i;
                 i += 6;
                 find = true;
@@ -249,13 +240,14 @@ void detecting_genes(const unsigned long gene [], const unsigned int gene_size, 
             else{
 
             if (find ) {
-                //if a start pos exists , search for UAA / UAG / UGA
+                //if a 'start pos' exists , search for UAA / UAG / UGA
                 if ((gene[i] == 1 && gene[i + 1] == 1 && gene[i + 2] == 0) 
                     && ((gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 0)
                         || (gene[i + 3] == 0 && gene[i + 4] == 0 && gene[i + 5] == 1)
                         || (gene[i + 3] == 1 && gene[i + 4] == 0 && gene[i + 5] == 0))) {
-                   //It's the end of a gene          
-                   //If a start pos and an stop pos has been found, a gene exists so we save it in the struc
+                   //If exist, it's the end of a gene          
+                   //If a 'start pos' and an 'stop pos' has been found,
+                   //a gene exists so we save it in the struc
                     gene_map->gene_start[gene_map->genes_counter] = start_pos;
                     gene_map->gene_end[gene_map->genes_counter] = i+5;
 
@@ -274,15 +266,17 @@ void detecting_genes(const unsigned long gene [], const unsigned int gene_size, 
         
     }
 }
-//////////////// Generating an amino acid chain (protein) 
+
 /*
  * in : seq : original mRNA sequence.
  * out : char* : protein in symbols
  * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
 */
 char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsigned int seq_size) {
+    // 1 codon = 3 nucleotides = 6 bits
     short codon_size = 6;
-    // Check the input argument
+
+    // Check the input arguments
     if (!gene_seq)
         return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
     if(seq_size % 3 != 0)
@@ -300,7 +294,7 @@ char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsign
         // The hash functions, takes the 6 bits, and transform the array into an integer.
         // The integer first char is a 2, for hash generation purposes.
         int hash = 2;
-        for(int k = i; k<i+codon_size; k++){
+        for(unsigned k = i; k<i+codon_size; k++){
             hash = 10 * hash + gene_seq[k];
         }
 
@@ -509,7 +503,6 @@ char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsign
     return aa_seq;
 }
 
-//////////////// Detecting probable mutation zones
 /*
 * in : gene_seq : sequence of the gene
 * in : size_sequence : size of the sequence
@@ -532,7 +525,7 @@ void detecting_mutations(const unsigned short gene_seq [], const unsigned long s
         mut_m.start_mut = malloc(5 * sizeof(mut_m.size));
     }
 
-    //Read the sequence
+    //Parse the sequence
     for (unsigned long i = 0; i < size_sequence; i += 2) {
         //Increment detect_mut if find a C or G nucl
         if (((gene_seq[i] == 0) && (gene_seq[i + 1] == 1)) ||
@@ -561,7 +554,6 @@ void detecting_mutations(const unsigned short gene_seq [], const unsigned long s
 }
 
 
-//////////////// Calculating the matching score of two sequences
 /*
  * in : seq1 : first sequence in binary
  * in : seq2 : second sequence in binary
@@ -584,20 +576,23 @@ float calculating_matching_score(const unsigned short seq1 [], const int sequenc
 
     // And, 0 ^ x = x
 
+    //Find the greater sequence and rename both
     const unsigned short* s1 = sequence_size1 >= sequence_size2 ? seq1 : seq2;
     const unsigned short* s2 = sequence_size1 >= sequence_size2 ? seq2 : seq1;
     int diff_size = sequence_size1 >= sequence_size2 ? sequence_size1 - sequence_size2 : sequence_size2 - sequence_size1;
     int max_size = sequence_size1 >= sequence_size2 ? sequence_size1 : sequence_size2;
     int count = 0;
 
+    // For the greater part of the greater sequence, count the number of '1'
     for (int i = 0; i < diff_size; i++)
         if (s1[i]) ++count;
 
-
+    // Count the number of '1', after aplying the xor operation
     for (int i = diff_size; i < max_size; ++i) {
         if (s1[i] ^ s2[i - diff_size]) ++count;
     }
 
+    // Compute and return the percentage
     float y = ((float)count * 100.0) / (float)max_size;
     return 100.0 - y;
 }
