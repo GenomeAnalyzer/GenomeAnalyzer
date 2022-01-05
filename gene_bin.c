@@ -723,7 +723,7 @@ void detecting_mutations(const long int *gene_seq,const long int start_pos, cons
             //Check if previous GC sequence is a probable mutation zone
             if (detect_mut >= (size_sequence / 5)) {
                 mut_m.start_mut[cmp] = tmp_start_mut;
-                mut_m.end_mut[cmp] = (i-1)-start_pos;
+                mut_m.end_mut[cmp] = (i)-start_pos;
                 mut_m.size[cmp] = detect_mut-1;
                 cmp++;
             }
@@ -733,7 +733,7 @@ void detecting_mutations(const long int *gene_seq,const long int start_pos, cons
     //Check if ending sequence is a probable mutation zone
     if (detect_mut >= (size_sequence / 5)) {
         mut_m.start_mut[cmp] = tmp_start_mut;
-        mut_m.end_mut[cmp] = (size_sequence-1)-start_pos;
+        mut_m.end_mut[cmp] = size_sequence;
         mut_m.size[cmp] = detect_mut-1;
     }
 }
