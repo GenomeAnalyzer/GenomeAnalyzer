@@ -111,19 +111,35 @@ static void test_generating_aa_chain(void ** state){
 
 static void test_convert_to_binary(void ** state){
   // Test aa to binary conversions
-  unsigned short* res = convert_to_binary("ATCGN", 10);
-  unsigned short expected_res[10] = {0,0,1,1,1,0,0,1,0,0};
+  unsigned short* res = convert_to_binary("ATCG", 8);
+  unsigned short expected_res = 0b0011100100;
 
   // --- Test all valid letters
+  // A 00 T 11 C 10 G 01
   for(unsigned short i = 0; i < 10; i++)
-    assert_int_equal(res[i], expected_res[i]);
+    assert_int_equal((expected_res >> (9-i)) & 0b1, res[i]);
 
+  expected_res = 0b0011100100111001;
+  res = convert_to_binary("ATCGATCG", 16);
+  for(unsigned short i = 0; i < 16; i++)
+    assert_int_equal((expected_res >> (15-i)) & 0b1, res[i]);
+
+  // Give a different size than the char sequence.
+  res = convert_to_binary("ATCGATCG", 8);
+  expected_res = 0b00111001;
+  for (unsigned short i = 0; i < 8; i++)
+    assert_int_equal((expected_res >> (7 - i)) & 0b1, res[i]);
+
+  res = convert_to_binary("ATCGATCG", 7);
+  assert_int_equal((expected_res >> 7) & 0b1, res[0]);
+  for (unsigned short i = 0; i < 7; i++)
+    assert_int_equal((expected_res >> (7 - i)) & 0b1, res[i]);
 
   // Test whether the function correctly detects errors:
   unsigned short* res2 = convert_to_binary("AK", 10);
-  
+
   // --- Unknown letter in sequence
-  assert_ptr_equal(NULL, res2[2]);
+  assert_ptr_equal(NULL, res2);
 }
 
 static void test_binary_to_aa(void ** state){
