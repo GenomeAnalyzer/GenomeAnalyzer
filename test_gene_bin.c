@@ -346,9 +346,10 @@ static void test_generating_aa_chain(void ** state){
 
 static void test_detecting_mutations(void ** state){
   mutation_map M;
-  M.size = malloc(5 * sizeof(unsigned long));
-  M.start_mut = malloc(5 * sizeof(unsigned long));
-  M.end_mut = malloc(5 * sizeof(unsigned long));
+  unsigned short nb_mutations = 6;
+  M.size = calloc(nb_mutations, sizeof(unsigned long));
+  M.start_mut = calloc(nb_mutations, sizeof(unsigned long));
+  M.end_mut = calloc(nb_mutations, sizeof(unsigned long));
 
   //A : 00
   //T : 11
@@ -407,6 +408,17 @@ static void test_detecting_mutations(void ** state){
   assert_int_equal(0,M.size[3]);
   assert_int_equal(0,M.start_mut[3]);
   assert_int_equal(0,M.end_mut[3]);
+
+
+  // Test three mutations in sequence
+  seq_bin = convert_to_binary("GGGTTGCGCGCGGCGCGCGGCGCGCGCGCGCGGCGCGCGGCGCGCGGGTTGCGCGCGGCGCGCGGCGCGCGCGCGCGGCGCGCGGCGCGCGGGTTGCGCGCGGCGCGCGGCGCGCGCGCGCGGCGCGCGGCGCGCGGGTTAAAGGTG", 147);
+  detecting_mutations(seq_bin, 0, 147*2, M);
+
+  for(int i = 0; i < 3; i++){
+    assert_int_equal(85, M.size[i]);
+    assert_int_equal(10 + 90*i, M.start_mut[i]);
+    assert_int_equal(95 + 90 * i, M.end_mut[i]);
+  }
 
   free(M.size);
   free(M.start_mut);
