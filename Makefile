@@ -16,7 +16,7 @@ all: DNA check
 build: DNA DNA_bin
 
 #For only executing tests
-check: test_gene test_DNA test_gene_bin test_DNA_bin
+check: test_gene_bin test_gene test_DNA test_DNA_bin
 
 #For only running the non-binary program
 run:

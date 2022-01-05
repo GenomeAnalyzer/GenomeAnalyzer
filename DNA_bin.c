@@ -464,9 +464,9 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 
 	mutation_map m;
 
-	m.size = malloc(sizeof(unsigned long) * 5);
-	m.start_mut = malloc(sizeof(unsigned long) * 5);
-	m.end_mut = malloc(sizeof(unsigned long) * 5);
+	m.size = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long)*5);
+	m.start_mut = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long)*5);
+	m.end_mut = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long)*5);
 
 	//Initializing to 0 
 	for (int i = 0; i < 5; i++) {		
