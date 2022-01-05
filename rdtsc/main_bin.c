@@ -6,7 +6,7 @@
 
 #define MAX 31000
 #define MAX_LINE 150
-#define MAX_LOOP 500
+#define MAX_LOOP 1000
 
 void load_gene(char *filename, char *seq_char)
 {
@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
 	seq_long2 = convert_to_binary(seq_char2, seq_char_size2);
   	
   	gene_map_t g;
-    g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * 2);
-    g.gene_end = malloc(sizeof(*g.gene_end) * seq_char_size * 2);
+    g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * int_SIZE);
+    g.gene_end = malloc(sizeof(*g.gene_end) * seq_char_size * int_SIZE);
     
     mutation_map m;
 	m.size = malloc(sizeof(unsigned long) * 5);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
     	before = rdtsc();
-		rna_seq_long = generating_mRNA(seq_long, 0, seq_char_size);
+		rna_seq_long = generating_mRNA(seq_long, 0, 2*seq_char_size);
     	after = rdtsc();
 
     	elapsed += (double)(after - before);
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
 		before = rdtsc();
-		detecting_genes(seq_long, seq_char_size, &g);
+		detecting_genes(seq_long, 2*seq_char_size, &g);
 		after = rdtsc();
 
 		elapsed += (double)(after - before);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
     	before = rdtsc();
-    	detecting_mutations(seq_long, 0, seq_char_size, m);
+    	detecting_mutations(seq_long, 0, 2*seq_char_size, m);
     	after = rdtsc();
 
     	elapsed += (double)(after - before);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
     	before = rdtsc();
-		cms = calculating_matching_score(seq_long, 0, seq_char_size, seq_long2, 0, 2 * seq_char_size2);
+		cms = calculating_matching_score(seq_long, 0, 2*seq_char_size, seq_long2, 0, 2*seq_char_size2);
     	after = rdtsc();
 
     	elapsed += (double)(after - before);

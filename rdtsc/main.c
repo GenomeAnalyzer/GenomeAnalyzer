@@ -6,7 +6,7 @@
 
 #define MAX 31000
 #define MAX_LINE 150
-#define MAX_LOOP 500
+#define MAX_LOOP 1000
 
 void load_gene(char *filename, char *seq_char)
 {
