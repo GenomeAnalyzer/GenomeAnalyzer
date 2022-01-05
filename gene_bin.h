@@ -29,8 +29,8 @@ typedef struct mutation_map {
 int get_binary_value(const long int *seq_bin, const int pos);
 long int* change_binary_value(long int *seq_bin, const int pos, const int value);
 long int* set_binary_array(const char *array, const unsigned size);
-long int* xor_binary_array(const long int *seq1, const unsigned array_size1,
-                                const long int *seq2, const unsigned array_size2);
+long int* xor_binary_array( long int *seq1, const unsigned array_size1,
+                                 long int *seq2, const unsigned array_size2);
 int popcount_binary_array(const long int *seq, const long int size);
 long int* get_piece_binary_array(const long int* seq_bin,  const long int pos_start, const long int size);
 
