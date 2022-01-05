@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <cmocka.h>
+#include <string.h>
 
 #include "gene.c"
 #include "gene.h"
@@ -146,13 +147,36 @@ static void test_binary_to_aa(void ** state){
   // Test binary to aa conversions
 
   // --- Test all conversion
-  unsigned short bin_dna_seq[8] = { 0,0,1,1,1,0,0,1 };
+  unsigned short bin_dna_seq[16] = { 0,0,1,1,1,0,0,1 };
   assert_string_equal("ATCG", binary_to_aa(bin_dna_seq, 8));
 
   // Test whether the function correctly detects errors:
   // --- Wrong size bin_dna_seq
   unsigned short bin_dna_seq2[3] = {0,0,1};
   assert_ptr_equal(NULL, binary_to_aa(bin_dna_seq2, 3));
+
+  unsigned short bin_dna_seq3[16] = {0,0,1,1,1,0,0,1,0,0,1,1,1,0,0,1};
+  assert_string_equal("ATCGATCG", binary_to_aa(bin_dna_seq3, 16));
+  assert_string_equal("ATCGATC", binary_to_aa(bin_dna_seq3, 14));
+
+  char* seq_char = "ATCGATCGATCGATCG";
+  unsigned short seq_size = 16;
+  unsigned short bin_dna_seq4[32] = { 0,0,1,1,1,0,0,1,0,0,1,1,1,0,0,1,0,0,1,1,1,0,0,1,0,0,1,1,1,0,0,1 };
+  char* seq_test = NULL;
+  seq_test = calloc(seq_size, sizeof(char));
+  char* seq_new = NULL;
+  int* ptr;
+
+  for (long int i = 1; i < seq_size; i++) {
+    seq_new = binary_to_aa(bin_dna_seq4, 2 * i);
+    ptr = (int*)realloc(seq_test, sizeof(char) * i);
+    // Check the realloc worked.
+    assert_ptr_not_equal(NULL, ptr);
+    // Copy the sequence in the test sequence, to keep only the sequence needed for the test
+    memcpy(seq_test, seq_char, i);
+    assert_string_equal(seq_test, seq_new);
+  }
+
 }
 
 static void test_calculating_matching_score(void ** state){
