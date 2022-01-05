@@ -130,8 +130,8 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
  * in : seq_size2 : number total of used bits in the sequence seq_bin2
  * out : xor : "binary array" which is the result of the xor operation beteween seq1 and seq2
  */
-long int* xor_binary_array(long int *seq_bin1, unsigned seq_size1,
-                           long int *seq_bin2, unsigned seq_size2){
+long int* xor_binary_array(long int* const seq_bin1, const unsigned seq_size1,
+                           long int * const seq_bin2, const unsigned seq_size2){
 
     long int intsize = int_SIZE + 1;
 
