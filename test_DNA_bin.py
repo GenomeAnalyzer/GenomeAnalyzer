@@ -139,7 +139,6 @@ def test_get_piece_binary_array():
 			assert [it+1, it] == DNA_bin.get_piece_binary_array(arr, it*intsize,2*intsize)
 			assert [(it+2)%2, it+1, it] == DNA_bin.get_piece_binary_array(arr, it*intsize,2*intsize+1)
 
-
 def test_convert_to_binary():
 	# Test if the algorithm is OK
 
@@ -159,11 +158,11 @@ def test_generating_mRNA():
 	# Test if the algorithm is OK
 
 	# assert empty
-	assert b'' == DNA_bin.generating_mRNA(array.array('l', [0]))
+	assert b'' == DNA_bin.generating_mRNA(array.array('l', [0]), 0, 0)
 	# 9350764 = 001101100111010101110001 - array size : 1
-	assert b'AUGCGUGGGUAG' == DNA_bin.generating_mRNA(array.array('l', [9350764]))
+	assert b'AUGCGUGGGUAG' == DNA_bin.generating_mRNA(array.array('l', [9350764]), 0, 24)
 	# 913666358 = 00110110011101010111000100110110, 30065 = 0111010101110001 - array size : 2
-	assert b'AUGCGUGGGUAGAUGCGUGGGUAG' == DNA_bin.generating_mRNA(array.array('l', [1821290092, 18263]))
+	assert b'AUGCGUGGGUAGAUGCGUGGGUAG' == DNA_bin.generating_mRNA(array.array('l', [1821290092, 18263]), 0, 64)
 	# assert TypeError for not supported format entries
 	with pytest.raises(TypeError):
 		DNA_bin.generating_mRNA(None) # no entry
@@ -188,14 +187,14 @@ def test_calculating_matching_score():
 	# --- With same size
 	#  GACCCGAC = 0100101010010010 = {18770}
 	#  GGCCAGGC = 0101101000010110 = {26714}
-	assert 81.25 == DNA_bin.calculating_matching_score(array.array('l', [18770]), array.array('l', [26714]))
+	assert 81.25 == DNA_bin.calculating_matching_score(array.array('l', [18770]), 0, 16, array.array('l', [26714]), 0, 16)
 	# --- With different size
 	#  GACCCGAC = 0100101010010010 = {18770}
 	#  TTTCAGGCTC = 11111110000101101110 = {485503}
-	assert 25.0 == DNA_bin.calculating_matching_score(array.array('l', [18770]), array.array('l', [485503]))
+	assert 25.0 == DNA_bin.calculating_matching_score(array.array('l', [18770]), 0, 16, array.array('l', [485503]), 0, 20)
 	#  TTTCAGGCTT = 11111110000101101111 = {1009791}
 	#  GACCTTCGA = 1001010111110010 = {40786}
-	assert 35.0 == DNA_bin.calculating_matching_score(array.array('l', [1009791]), array.array('l', [40786]))
+	assert 35.0 == DNA_bin.calculating_matching_score(array.array('l', [1009791]), 0, 20, array.array('l', [40786]), 0, 16)
 
 	# Test whether the function correctly detects errors:
 	# --- NULL error
@@ -206,20 +205,20 @@ def test_calculating_matching_score():
 def test_generating_amino_acid_chain():
 	assert 0 == 0
 	# # Test if the algorithm is OK
-	assert b'KKNNR' == DNA_bin.generating_amino_acid_chain(array.array('l', [146868224]))
-	assert b'RSSTT' == DNA_bin.generating_amino_acid_chain(array.array('l', [605259304]))
-	assert b'TTIMI' == DNA_bin.generating_amino_acid_chain(array.array('l', [481348884]))
-	assert b'IEEDD' == DNA_bin.generating_amino_acid_chain(array.array('l', [843718844]))
-	assert b'GGGGA' == DNA_bin.generating_amino_acid_chain(array.array('l', [115976842]))
-	assert b'AAAVV' == DNA_bin.generating_amino_acid_chain(array.array('l', [775644582]))
-	assert b'VVQQH' == DNA_bin.generating_amino_acid_chain(array.array('l', [293871518]))
-	assert b'HRRRR' == DNA_bin.generating_amino_acid_chain(array.array('l', [963023473]))
-	assert b'PPPPL' == DNA_bin.generating_amino_acid_chain(array.array('l', [232085829]))
-	assert b'LLLOO' == DNA_bin.generating_amino_acid_chain(array.array('l', [588240749]))
-	assert b'YYOWC' == DNA_bin.generating_amino_acid_chain(array.array('l', [464305363]))
-	assert b'CSSSS' == DNA_bin.generating_amino_acid_chain(array.array('l', [928936443]))
-	assert b'LLFF' == DNA_bin.generating_amino_acid_chain(array.array('l', [16645071]))
-	assert b'MRGOMRGO' == DNA_bin.generating_amino_acid_chain(array.array('l', [1821290092, 18263]))
+	assert b'KKNNR' == DNA_bin.generating_amino_acid_chain(array.array('l', [146868224]), 0, 60)
+	assert b'RSSTT' == DNA_bin.generating_amino_acid_chain(array.array('l', [605259304]), 0, 60)
+	assert b'TTIMI' == DNA_bin.generating_amino_acid_chain(array.array('l', [481348884]), 0, 60)
+	assert b'IEEDD' == DNA_bin.generating_amino_acid_chain(array.array('l', [843718844]), 0, 60)
+	assert b'GGGGA' == DNA_bin.generating_amino_acid_chain(array.array('l', [115976842]), 0, 60)
+	assert b'AAAVV' == DNA_bin.generating_amino_acid_chain(array.array('l', [775644582]), 0, 60)
+	assert b'VVQQH' == DNA_bin.generating_amino_acid_chain(array.array('l', [293871518]), 0, 60)
+	assert b'HRRRR' == DNA_bin.generating_amino_acid_chain(array.array('l', [963023473]), 0, 60)
+	assert b'PPPPL' == DNA_bin.generating_amino_acid_chain(array.array('l', [232085829]), 0, 60)
+	assert b'LLLOO' == DNA_bin.generating_amino_acid_chain(array.array('l', [588240749]), 0, 60)
+	assert b'YYOWC' == DNA_bin.generating_amino_acid_chain(array.array('l', [464305363]), 0, 60)
+	assert b'CSSSS' == DNA_bin.generating_amino_acid_chain(array.array('l', [928936443]), 0, 60)
+	assert b'LLFF' == DNA_bin.generating_amino_acid_chain(array.array('l', [16645071]), 0, 24)
+	assert b'MRGOMRGO' == DNA_bin.generating_amino_acid_chain(array.array('l', [1821290092, 18263]), 0, 60)
 	# --- Test all the amino acid
 	# assert b'KKNNRRSSTTTTIMIIEEDDGGGGAAAAVVVVQQHHRRRRPPPPLLLLOOYYOWCCSSSSLLFF' == DNA_bin.generating_amino_acid_chain(array.array('l', [146868224, 605259304, 481348884, 843718844, 115976842, 775644582, 293871518, 963023473, 232085829, 588240749, 464305363, 928936443, 16645071]))
 	# assert b'KNKNTTTTRSRSIIIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYYSSSSCWCLFLFMOOO' == DNA_bin.generating_amino_acid_chain(array.array('l', [79823872, -2096862942,

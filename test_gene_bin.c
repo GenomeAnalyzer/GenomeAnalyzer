@@ -396,11 +396,11 @@ static void test_detecting_mutations(void ** state){
   assert_int_equal(11,M.size[0]);
   assert_int_equal(0,M.start_mut[0]);
   assert_int_equal(12,M.end_mut[0]);
-  //First mutation is updated with right values
+  //Second mutation is updated with right values
   assert_int_equal(11,M.size[1]);
   assert_int_equal(16,M.start_mut[1]);
   assert_int_equal(28,M.end_mut[1]);
-  //First mutation is updated with right values
+  //Third mutation is updated with right values
   assert_int_equal(15,M.size[2]);
   assert_int_equal(34,M.start_mut[2]);
   assert_int_equal(50,M.end_mut[2]);
