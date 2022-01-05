@@ -367,7 +367,7 @@ static void test_detecting_mutations(void ** state){
   //First mutation is updated with right values
   assert_int_equal(13,M.size[0]);
   assert_int_equal(10,M.start_mut[0]);
-  assert_int_equal(23,M.end_mut[0]);
+  assert_int_equal(24,M.end_mut[0]);
   //No other mutations, should not be updated
   assert_int_equal(0,M.size[1]);
   assert_int_equal(0,M.start_mut[1]);
@@ -395,15 +395,15 @@ static void test_detecting_mutations(void ** state){
   //First mutation is updated with right values
   assert_int_equal(11,M.size[0]);
   assert_int_equal(0,M.start_mut[0]);
-  assert_int_equal(11,M.end_mut[0]);
+  assert_int_equal(12,M.end_mut[0]);
   //First mutation is updated with right values
   assert_int_equal(11,M.size[1]);
   assert_int_equal(16,M.start_mut[1]);
-  assert_int_equal(27,M.end_mut[1]);
+  assert_int_equal(28,M.end_mut[1]);
   //First mutation is updated with right values
   assert_int_equal(15,M.size[2]);
   assert_int_equal(34,M.start_mut[2]);
-  assert_int_equal(49,M.end_mut[2]);
+  assert_int_equal(50,M.end_mut[2]);
   //No other mutations, should not be updated
   assert_int_equal(0,M.size[3]);
   assert_int_equal(0,M.start_mut[3]);
@@ -417,7 +417,7 @@ static void test_detecting_mutations(void ** state){
   for(int i = 0; i < 3; i++){
     assert_int_equal(85, M.size[i]);
     assert_int_equal(10 + 90*i, M.start_mut[i]);
-    assert_int_equal(95 + 90 * i, M.end_mut[i]);
+    assert_int_equal(95 + 90 * i+1, M.end_mut[i]);
   }
 
   free(M.size);
