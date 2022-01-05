@@ -52,9 +52,24 @@ static void test_convert_to_binary(void** state) {
   // --- Test all valid letters
   // A 00 T 11 C 10 G 01
 
+  // Check all valid letters.
+  // Binary sequence is inverted.
+  assert_int_equal(0b10011100, convert_to_binary("ATCG", 4)[0]);
+  assert_int_equal(0b100111001001110010011100, convert_to_binary("ATCGATCGATCG", 12)[0]);
 
-  
-  char* seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA";
+  // Give a different size than the char sequence.
+  assert_int_equal(0b011100, convert_to_binary("ATCG", 3)[0]);
+  assert_int_equal(0b0010011100, convert_to_binary("ATCG", 5)[0]); // Expect 00 for high order bit
+
+  char* seq_char = "ATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCG";
+  assert_int_equal(0b10011100100111001001110010011100, convert_to_binary(seq_char, 16)[0]);
+  assert_int_equal(0b1001110010011100100111001001110010011100100111001001110010011100, convert_to_binary(seq_char, 32)[0]);
+
+  // Check for multiple positions in array
+  assert_int_equal(0b1001110010011100100111001001110010011100100111001001110010011100, convert_to_binary(seq_char, 64)[0]);
+
+  // Check of a random sequence
+  seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA";
   unsigned seq_size = 45;
 
   long int* seq_bin = NULL;
@@ -62,8 +77,8 @@ static void test_convert_to_binary(void** state) {
   seq_bin = convert_to_binary(seq_char, seq_size);
 
   long int seq_sol[2] = { -3131702537379864750, -9223372036849555181 };
-  for(int i = 0 ; i<2; i++)
-    assert_int_equal(seq_sol[i], seq_bin[i]);
+  assert_int_equal(seq_sol[0], seq_bin[0]);
+  assert_int_equal(seq_sol[1], seq_bin[1]);
 
   // Test whether the function correctly detects errors:
   // --- Unknown letter in sequence
