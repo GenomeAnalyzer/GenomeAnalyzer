@@ -22,7 +22,6 @@ typedef struct mutation_map {
 
 //extern struct gene_map_s gene_map;
 unsigned short* convert_to_binary(char* dna_seq, unsigned size);
-char* binary_to_codon(unsigned short* bin_dna_seq, unsigned size);
 char* generating_mRNA(const unsigned short gene_seq [], const unsigned int seq_size);
 void detecting_genes(const unsigned long gene [], const unsigned int gene_size, gene_map_t* gene_map);
 char* generating_amino_acid_chain(const unsigned short gene_seq [], const unsigned int seq_size);
