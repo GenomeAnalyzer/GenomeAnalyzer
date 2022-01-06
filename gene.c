@@ -25,94 +25,92 @@ unsigned short* convert_to_binary(char* dna_seq, unsigned size){
                 seq[temp] = 0;
                 seq[temp+1] = 0; 
                 temp += 2;
-
                 break;
             
             case 'T':
                 seq[temp] = 1;
                 seq[temp+1] = 1;
                 temp += 2;
-
                 break;
             
             case 'C':
                 seq[temp] = 1;
                 seq[temp+1] = 0;
                 temp += 2;
-
                 break;
+
             case 'G':
                 seq[temp] = 0;
                 seq[temp+1] = 1;
                 temp += 2;
-
                 break;
+
             case 'N':
                 seq[temp] = 0;
                 seq[temp+1] = 0; 
                 temp += 2;
-
                 break;
+
             case 'R': // R = A or G, here R = A
                 seq[temp] = 0;
                 seq[temp+1] = 0; 
                 temp += 2;
-
                 break;
+
             case 'Y': // Y = C or T, here Y = C
                 seq[temp] = 1;
                 seq[temp+1] = 0; 
                 temp += 2;
-
                 break;
+
             case 'K': // K = G or T, here K = G
                 seq[temp] = 0;
                 seq[temp+1] = 1; 
                 temp += 2;
-
                 break;
+
             case 'M': // M = A or C, here M = A
             seq[temp] = 0;
             seq[temp+1] = 0; 
             temp += 2;
-
             break;
+
             case 'S': // S = C or G, here S = C
             seq[temp] = 1;
             seq[temp+1] = 0; 
             temp += 2;
-
             break;
+
             case 'W': // W = T or A, here W = T
             seq[temp] = 1;
             seq[temp+1] = 1; 
             temp += 2;
-
             break;
+
             case 'B': // B = not A, here B = C
             seq[temp] = 1;
             seq[temp+1] = 0; 
             temp += 2;
-
             break;
+
             case 'D': // D = not C, here D = A
             seq[temp] = 0;
             seq[temp+1] = 0; 
             temp += 2;
-
             break;
+
             case 'H': // H = not G, here H = A
             seq[temp] = 0;
             seq[temp+1] = 0; 
             temp += 2;
-
             break;
+
             case 'V': // V = not T, here V = A
             seq[temp] = 0;
             seq[temp+1] = 0; 
             temp += 2;
-
             break;
+
             default:
                 printf("Error: convert_to_binary: wrong letter in the sequence(%c).\nExit.\n",dna_seq[i]);
                 seq = NULL;
