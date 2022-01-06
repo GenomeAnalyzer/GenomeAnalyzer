@@ -83,21 +83,50 @@ static void test_detecting_genes(void ** state){
 
 static void test_generating_aa_chain(void ** state){
   // Test if the algorithm is OK
+
+  // AA -> SEQ -> BINARY -> CALL FUNCTION
+  // K      K      N      N      R      R      S      S      T      T     
+  // AAA    AAG    AAC    AAT    AGA    AGG    AGC    AGT    ACA    ACG         
+  // 000000 000001 000010 000011 000100 000101 000110 000111 001000 001001
+  assert_string_equal("KKNNRRSSTT", generating_amino_acid_chain((unsigned short[]) {0,0,0,0,0,0,0,0,0,0,0,1,0,0,
+  0,0,1,0,0,0,0,0,1,1,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,1,1,0,0,0,0,1,1,1,0,0,1,0,0,0,0,0,1,0,0,1 }, 60));
+  // T      T      I      M      I      I      E      E      D      D
+  // ACC    ACT    ATA    ATG    ATC    ATT    GAA    GAG    GAC    GAT
+  // 001010 001011 001100 001101 001110 001111 010000 010001 010010 010011
+  assert_string_equal("TTIMIIEEDD", generating_amino_acid_chain((unsigned short[]) {0,0,1,0,1,0,0,0,1,0,1,1,0,0,
+  1,1,0,0,0,0,1,1,0,1,0,0,1,1,1,0,0,0,1,1,1,1,0,1,0,0,0,0,0,1,0,0,0,1,0,1,0,0,1,0,0,1,0,0,1,1 }, 60));
+  // G      G      A      A      A      A      V      V      V      V 
+  // GGC    GGT    GCA    GCG    GCC    GCT    GTA    GTG    GTC    GTT         
+  // 010110 010111 011000 011001 011010 011011 011100 011101 011110 011111
+  assert_string_equal("GGAAAAVVVV", generating_amino_acid_chain((unsigned short[]) {0,1,0,1,1,0,0,1,0,1,1,1,0,1,
+  1,0,0,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,1,0,1,1,0,1,1,1,0,0,0,1,1,1,0,1,0,1,1,1,1,0,0,1,1,1,1,1 }, 60));
+  // Q      Q      H      H      R      R      R      R      P      P
+  // CAA    CAG    CAC    CAT    CGA    CGG    CGC    CGT    CCA    CCG
+  // 100000 100001 100010 100011 100100 100101 100110 100111 101000 101001
+  assert_string_equal("QQHHRRRRPP", generating_amino_acid_chain((unsigned short[]) {1,0,0,0,0,0,1,0,0,0,0,1,1,0,
+  0,0,1,0,1,0,0,0,1,1,1,0,0,1,0,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,1,1,1,0,1,0,0,0,1,0,1,0,0,1 }, 60));
+  // L      L      L      L      O      O      Y      Y      O      W     
+  // CTA    CTG    CTC    CTT    TAA    TAG    TAC    TAT    TGA    TGG    
+  // 101100 101101 101110 101111 110000 110001 110010 110011 110100 110101
+  assert_string_equal("LLLLOOYYOW", generating_amino_acid_chain((unsigned short[]) {1,0,1,1,0,0,1,0,1,1,0,1,1,0,
+  1,1,1,0,1,0,1,1,1,1,1,1,0,0,0,0,1,1,0,0,0,1,1,1,0,0,1,0,1,1,0,0,1,1,1,1,0,1,0,0,1,1,0,1,0,1 }, 60));
+  // C      C      S      S      S      S      L      L      F      F
+  // TGC    TGT    TCA    TCG    TCC    TCT    TTA    TTG    TTC    TTT
+  // 110110 110111 111000 111001 111010 111011 111100 111101 111110 111111
+  assert_string_equal("CCSSSSLLFF", generating_amino_acid_chain((unsigned short[]) {1,1,0,1,1,0,1,1,0,1,1,1,1,1,
+  1,0,0,0,1,1,1,0,0,1,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,1,0,0,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1 }, 60));
+  // G      G      P      P
+  // GGA    GGG    CCC    CCT
+  // 010100 010101 101010 101011
+  assert_string_equal("GGPP", generating_amino_acid_chain((unsigned short []) { 0,1,0,1,0,0,0,1,0,1,0,1,1,0,1,0,1,0,1,0,1,0,1,1 }, 24));
+
+
   //  --- Test all the amino acid
-  assert_string_equal("KNKNTTTTRSRSIIIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYYSSSSCWCLFLFMOOO",
-                      generating_amino_acid_chain((unsigned short[]){0,0,0,0,0,0,0,0,0,0,1,0,
-                         0,0,0,0,0,1,0,0,0,0,1,1,0,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,1,0,0,1,0,
-                         1,1,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,1,0,1,0,0,0,1,1,1,0,0,1,1,0,0,0,0,
-                         1,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,1,1,0,0,0,1,1,
-                         1,0,1,0,0,0,1,0,1,0,1,0,1,0,1,0,0,1,1,0,1,0,1,1,1,0,0,1,0,0,1,0,0,1,
-                         1,0,1,0,0,1,0,1,1,0,0,1,1,1,1,0,1,1,0,0,1,0,1,1,1,0,1,0,1,1,0,1,1,0,
-                         1,1,1,1,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,1,0,1,0,0,1,1,0,1,1,0,0,0,
-                         0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,1,0,1,0,1,0,0,0,1,0,1,1,0,0,1,0,1,
-                         0,1,0,1,0,1,1,1,0,1,1,1,0,0,0,1,1,1,1,0,0,1,1,1,0,1,0,1,1,1,1,1,1,1,
-                         0,0,1,0,1,1,0,0,1,1,1,1,1,0,0,0,1,1,1,0,1,0,1,1,1,0,0,1,1,1,1,0,1,1,
-                         1,1,0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,0,1,1,1,1,
-                         0,1,1,1,1,1,1,1,0,0,1,1,0,1,1,1,0,0,0,0,1,1,0,0,0,1,1,1,0,1,0,0},
-                        384));
+  // (alphabetic order of the above sequences.)
+  unsigned short* seq_bin = convert_to_binary("AAAAAGAACAATAGAAGGAGCAGTACAACGACCACTATAATGATCATTGAAGAGGACGATGGCGGTGCAGCGGCCGCTGTAGTGGTCGTTCAACAGCACCATCGACGGCGCCGTCCACCGCTACTGCTCCTTTAATAGTACTATTGATGGTGCTGTTCATCGTCCTCTTTATTGTTCTTTGGAGGGCCCCCT", 384);
+  char* aa_chain = NULL;
+  aa_chain = generating_amino_acid_chain(seq_bin, 384);
+  assert_string_equal("KKNNRRSSTTTTIMIIEEDDGGAAAAVVVVQQHHRRRRPPLLLLOOYYOWCCSSSSLLFFGGPP", aa_chain);
 
   // Test whether the function correctly detects errors:
   // --- NULL error
@@ -107,7 +136,6 @@ static void test_generating_aa_chain(void ** state){
                        generating_amino_acid_chain((unsigned short[]){0,0,1,44,0,1,1,0,0,1,1,1,
                         0,1,0,1,0,1,1,1,0,0,0,1},
                        24));
-
 }
 
 static void test_convert_to_binary(void ** state){
