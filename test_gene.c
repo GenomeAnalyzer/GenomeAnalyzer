@@ -10,17 +10,31 @@
 
 static void test_generating_mRNA(void ** state){
   // Test if the algorithm is OK
-  assert_string_equal("AUGCGUGGGUAG",
-                      generating_mRNA((unsigned short[]){0,0,1,1,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1},
-                                      24));
 
-  // Test whether the function correctly detects errors:
-  // --- NULL error
-  assert_ptr_equal(NULL, generating_mRNA(NULL, 0));
-  // --- invalid value in gene_seq
-  assert_ptr_not_equal("AUGCGUGGGUAG",
-                       generating_mRNA((unsigned short[]){0,0,1,44,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1},
-                                       24));
+  unsigned short bin_dna_seq[16] = { 0,0,1,1,1,0,0,1 };
+  assert_string_equal("AUCG", generating_mRNA(bin_dna_seq, 8));
+
+  unsigned short bin_dna_seq2[16] = { 0,0,1,1,1,0,0,1,0,0,1,1,1,0,0,1 };
+  assert_string_equal("AUCGAUCG", generating_mRNA(bin_dna_seq2, 16));
+  assert_string_equal("AUCGAUC", generating_mRNA(bin_dna_seq2, 14));
+
+  char* seq_char = "AUCGAUCGAUCGAUCG";
+  unsigned short seq_size = 16;
+  unsigned short bin_dna_seq4[32] = { 0,0,1,1,1,0,0,1,0,0,1,1,1,0,0,1,0,0,1,1,1,0,0,1,0,0,1,1,1,0,0,1 };
+  char* seq_test = NULL;
+  seq_test = calloc(seq_size, sizeof(char));
+  char* seq_new = NULL;
+  int* ptr;
+
+  for (long int i = 1; i < seq_size; i++) {
+    seq_new = generating_mRNA(bin_dna_seq4, 2 * i);
+    ptr = (int*)realloc(seq_test, sizeof(char) * i);
+    // Check the realloc worked.
+    assert_ptr_not_equal(NULL, ptr);
+    // Copy the sequence in the test sequence, to keep only the sequence needed for the test
+    memcpy(seq_test, seq_char, i);
+    assert_string_equal(seq_test, seq_new);
+  }
 }
 
 static void test_detecting_genes(void ** state){
