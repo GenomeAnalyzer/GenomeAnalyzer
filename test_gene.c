@@ -181,7 +181,16 @@ static void test_binary_to_aa(void ** state){
 
 static void test_calculating_matching_score(void ** state){
   // Test if the algorithm is OK
+  //A : 00 T : 11 C : 10 G : 01
+
   // --- With same size
+  // ATCGT = 0011100111
+  unsigned short seq_bin[10] = {0,0,1,1,1,0,0,1,1,1}; 
+  // Check exact same sequence and size
+  assert_float_equal(100, calculating_matching_score(seq_bin, 10, seq_bin, 10), 0);
+  // Check same sequence but size null for second parameter.
+  assert_float_equal(40, calculating_matching_score(seq_bin, 10, seq_bin, 0), 0);
+
   assert_float_equal(81.250000,
                     calculating_matching_score(
                       (unsigned short[]){0,1,0,0,1,0,1,0,1,0,0,1,0,0,1,0}, 16,
@@ -204,10 +213,11 @@ static void test_calculating_matching_score(void ** state){
   unsigned short ar1[20] = { 0 };
   unsigned short ar2[20] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
   for (short i = 0; i < 20; i++) {
+    assert_float_equal( (float)(i) * 5,
+                        calculating_matching_score(ar1, i + 1, ar2, 20), 0);
     ar1[i] = 1;
     assert_float_equal( (float)(i + 1) * 5,
-                        calculating_matching_score(ar1, i + 1, ar2, 20),
-                      0);
+                        calculating_matching_score(ar1, i + 1, ar2, 20), 0);
   }
 
   // Test whether the function correctly detects errors:
