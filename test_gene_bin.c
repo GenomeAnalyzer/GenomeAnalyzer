@@ -37,7 +37,6 @@ static void test_change_binary_value(void ** state){
 
   // 85 = 1010101
   seq_bin = 85;
-  int bin;
   // Invert values of seq_bin
   for (int i = 0;i < 7;i++) change_binary_value(&seq_bin, i, i%2);
   // 42 = 0101010
@@ -73,7 +72,6 @@ static void test_convert_to_binary(void** state) {
   unsigned seq_size = 45;
 
   long int* seq_bin = NULL;
-  long int* seq_bin2 = NULL;
   seq_bin = convert_to_binary(seq_char, seq_size);
 
   long int seq_sol[2] = { -3131702537379864750, -9223372036849555181 };
@@ -97,7 +95,6 @@ static void test_set_binary_array(void ** state){
   assert_int_equal(0b00111001, set_binary_array("CGTA", 4)[0]);
 
   char* seq_char = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT";
-  unsigned seq_size = 64;
 
   long int  pow = 1;
   long int  pow2 = 1;
@@ -226,7 +223,6 @@ static void test_generating_mRNA(void ** state){
   expected_char = "AUCGAUCGAUCGAUCGAUCGAUCGAUCGAUCG";
   seq_char = "ATCGATCGATCGATCGATCGATCGATCGATCG";
   seq_size = 32;
-  seq_bin;
   char* seq_test = NULL;
   seq_test = calloc(seq_size, sizeof(char));
   char* seq_new = NULL;
@@ -240,7 +236,7 @@ static void test_generating_mRNA(void ** state){
     assert_ptr_not_equal(NULL, ptr);
     // Copy the sequence in the test sequence, to keep only the sequence needed for the test
     memcpy(seq_test, expected_char, i);
-    // assert_string_equal(seq_test, seq_new);
+    assert_string_equal(seq_test, seq_new);
   }
 
   // Test whether the function correctly detects errors:
