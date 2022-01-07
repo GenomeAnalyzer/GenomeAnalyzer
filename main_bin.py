@@ -4,7 +4,7 @@ import array
 import glob
 import moduleDNA as m
 import os
-
+import sys
 
 def main():
   read = list()
@@ -57,6 +57,17 @@ def main():
   </head>
 
   """
+  try:
+    if not sys.argv[1].isnumeric():
+      raise NameError('nan')
+  except NameError:
+    print("Arg is not a number")
+    raise
+  if len(sys.argv) == 1:
+    fin = 25698
+  else:
+    fin = sys.argv[1]
+
   fhc = open('output/comp_bin.html','w')
   messagematch = start+ "<h1>Comparaison entre séquences</h1><a href=\"rapport_bin.html\" target=\"_blank\"><input type=\"button\" value=\"Retour\"></a>"
 
@@ -133,7 +144,7 @@ def main():
           fhtmp2.close()
 
       i=i+1
-      if i ==4:
+      if i == int(fin):
         break
   message= " <a href=\"comp_bin.html\">Comparaison séquences</a></details></html>"  
   fh.write(message)

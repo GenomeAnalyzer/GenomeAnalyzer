@@ -4,6 +4,7 @@ import array
 import glob
 import moduleDNA as m
 import os
+import sys
 
 def main():
 
@@ -58,6 +59,16 @@ def main():
   </head>
 
   """
+  try:
+    if not sys.argv[1].isnumeric():
+      raise NameError('nan')
+  except NameError:
+    print("Arg is not a number")
+    raise
+  if len(sys.argv) == 1:
+    fin = 25698
+  else:
+    fin = sys.argv[1]
   fhc = open('output/comp.html','w')
 
   messagematch = start+ "<h1>Comparaison entre séquences</h1><a href=\"rapport.html\" target=\"_blank\"><input type=\"button\" value=\"Retour\"></a>"
@@ -128,12 +139,12 @@ def main():
             for j in range(int((len(gene[i])))):
                 for k in range(int((len(gene[c])))):
                       msgtmp+="<tr><td>"+str(sequence[i][gene[i][j][0]:gene[i][j][1]])+" , "+str(sequence[c][gene[c][k][0]:gene[c][k][1]])+ "</td>\n"
-                      res = (DNA.calculating_matching_score(array.array('H',sequence[i][gene[i][j][0]:gene[i][j][1]]),array.array('H',sequence[c][gene[c][k][0]:gene[c][k][1]])))
+                      res = (DNA.calculating_matching_score(array.array('H',sequence[i][gene[i][j][0]:gene[i][j][1]+1]),array.array('H',sequence[c][gene[c][k][0]:gene[c][k][1]+1])))
                       msgtmp+="<td>"+str(res)+ "</td> \n</tr>\n"
             fhtmp2.write(msgtmp)
             fhtmp2.close()
       i=i+1
-      if i ==3:
+      if i == int(fin):
         break
 
 
