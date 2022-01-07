@@ -11,9 +11,13 @@
 
 
 /**
- * in : seq_bin : "binary array"
- * in : pos : position of the wanted bit (0 <= pos < size_seq * 2)
- * out : int : the wanted bit
+ * Retrieve one bit from the binary array sequence.
+ * 
+ * in : seq_bin : sequence in binary array format
+ * in : pos : position of the requested bit (0 <= pos < size_seq * 2)
+ * out : int : the requested bit
+ * 
+ * Shifts the seq_bin by pos.
  */
 int get_binary_value(const long int *seq_bin, const int pos){
     int new_pos = pos > int_SIZE ? pos / int_SIZE : 0;
@@ -21,16 +25,18 @@ int get_binary_value(const long int *seq_bin, const int pos){
 }
 
 /**
- * in : seq_bin : "binary array"
+ * Change one bit in the binary array sequence.
+ * 
+ * in : seq_bin : sequence in binary array format
  * in : pos : position of the bit to be replaced (0 <= pos < size_seq * 2)
- * in : value : the bit to replace
- * out : seq_bin : "binary array" modified
+ * in : value : new bit value
+ * out : seq_bin : sequence in binary array format with the one bit changed
+ * 
+ * Set the bit value of seq_bin at pos position to value
  */
 long int* change_binary_value(long int *seq_bin, const int pos, const int value){
-    // ~(1000) = (0001)
     int new_pos = pos > int_SIZE ? pos / int_SIZE : 0;
 
-    //for value = 1 or 0, inverse the bit at the 'pos' position
     if (value)
         seq_bin[new_pos] |= ((long)1 << (pos - new_pos));
     else
@@ -39,20 +45,25 @@ long int* change_binary_value(long int *seq_bin, const int pos, const int value)
 }
 
 /**
+ * Convert a char formated DNA sequence to its binary array format.
+ * 
  * in : seq_char : the DNA seq in it's char* mode
- * in : seq_size : size of the array 'seq_char' = number of nucleotides
- * out : seq_bin : "binary array" filled
+ * in : seq_size : size of the array 'seq_char' (number of nucleotides)
+ * out : seq_bin : sequence in binary array format
+ * 
+ * Iterates over seq_char and sets seq_bin bit values according to the nucleotide read.
+ * The non-ACGT nucleotides corresponding to several possible nucleotides are arbitrarily defined.
  */
 long int* set_binary_array(const char *seq_char, const unsigned seq_size){
-    // Find the number of bits need to transforme seq_char to a binary array
+    // Number of bits needed to transform seq_char into a binary array.
     int seq_bin_size = 2 * seq_size;
 
-    // Find the future size of the binary array
+    // Binary array new size
     int nb = seq_bin_size / int_SIZE;
     if(seq_bin_size % int_SIZE != 0)
         nb++;
 
-    // Create and check the output
+    // Allocate memory and verify it has been allocated
     long int* seq_bin = NULL;
     seq_bin = calloc(nb, sizeof(long int));
     if(!seq_bin)
@@ -60,62 +71,47 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
 
     int pos = 0;
     // Parse the DNA sequence, per nucleotides
-    for (long int i = 0; i < seq_size; ++i)
-    {
+    for (long int i = 0; i < seq_size; ++i){
+        // Set seq_bin bit values according to the nucleotide read
         switch(seq_char[i]){
-        case 'A':
-            // A = 00
+        case 'A': // A = 00
             break;
-        case 'T':
-            // T = 11
+        case 'T': // T = 11
             change_binary_value(seq_bin, pos, 1);
             change_binary_value(seq_bin, pos + 1, 1);
             break;
-        case 'G':
-            // G = 01
+        case 'G': // G = 01
             change_binary_value(seq_bin, pos + 1, 1);
             break;
-        case 'C':
-            // C = 10
+        case 'C': // C = 10
             change_binary_value(seq_bin, pos, 1);
             break;
-        case 'N':
-            // N = A = 00
+        case 'N': // N = A = 00
             break;
-        case 'R':
-            // R = A = 00
+        case 'R': // R = A = 00
             break;
-        case 'Y':
-            // Y = C = 10
+        case 'Y': // Y = C = 10
             change_binary_value(seq_bin, pos, 1);
             break;
-        case 'K':
-            // K = G = 01
+        case 'K': // K = G = 01
             change_binary_value(seq_bin, pos + 1, 1);
             break;
-        case 'M':
-            // M = A = 00
+        case 'M': // M = A = 00
             break;
-        case 'S':
-            // S = C = 10
+        case 'S': // S = C = 10
             change_binary_value(seq_bin, pos, 1);
             break;
-        case 'W':
-            // W = A = 00
+        case 'W': // W = A = 00
             break;
-        case 'B':
-            // B = C = 10
+        case 'B': // B = C = 10
             change_binary_value(seq_bin, pos, 1);
             break;
-        case 'D':
-            // D = A = 00
+        case 'D': // D = A = 00
             break;
-        case 'H':
-            // H = G = 01
+        case 'H': // H = G = 01
             change_binary_value(seq_bin, pos + 1, 1);
             break;
-        case 'V':
-            // V = A = 00
+        case 'V': // V = A = 00
             break;
         }
         pos += 2;
@@ -124,23 +120,31 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
 }
 
 /**
- * in : seq_bin1 : first sequence to xor: "binary array"
- * in : seq_size1 : number total of used bits in the sequence seq_bin1
- * in : seq_bin2 : second sequence to xor: "binary array"
- * in : seq_size2 : number total of used bits in the sequence seq_bin2
- * out : xor : "binary array" which is the result of the xor operation beteween seq1 and seq2
+ * Xor two binary array sequences.
+ * 
+ * in : seq_bin1 : first sequence in binary array format to xor
+ * in : seq_size1 : seq_bin1 length (number total of used bits)
+ * in : seq_bin2 : first sequence in binary array format to xor
+ * in : seq_size2 : seq_bin2 length (number total of used bits)
+ * out : xor : binary array sequence resulting from the xor operation between seq1 and seq2
+ * 
+ * Iterates over sequences value per value. 
+ * Xor the two sequences values since its value is the same length.
+ * If one sequence is larger than the other, shift the last value of the smaller sequence to xor it with the other value.
+ * Values from the largest binary array are assigned to the xor result. (x^0 = x)
  */
 long int* xor_binary_array(long int* const seq_bin1, const unsigned seq_size1,
                            long int * const seq_bin2, const unsigned seq_size2){
 
+    // size of the binary array type used
     long int intsize = int_SIZE + 1;
 
     long int* s1, * s2;
     long int ss1, ss2;
     long int sbs1, sbs2;
+
     // Find the greater binary array, and rename them
-    // -- if s1 is greater or equal than s2
-    if (seq_size1 >= seq_size2) {
+    if (seq_size1 >= seq_size2) { // if s1 is greater or equal than s2
         s1 = seq_bin1;
         s2 = seq_bin2;
         ss1 = seq_size1 / intsize + ((seq_size1 / intsize) % intsize != 0);
@@ -148,8 +152,7 @@ long int* xor_binary_array(long int* const seq_bin1, const unsigned seq_size1,
         ss2 = seq_size2 / intsize + ((seq_size2 / intsize) % intsize != 0);
         sbs2 = seq_size2;
     }
-    // -- else if s2 is greater or equal than s1
-    else {
+    else { // else if s2 is greater or equal than s1
         s1 = seq_bin2;
         s2 = seq_bin1;
         ss1 = seq_size2 / intsize + ((seq_size2 / intsize) % intsize != 0);
@@ -162,69 +165,83 @@ long int* xor_binary_array(long int* const seq_bin1, const unsigned seq_size1,
     if (ss2 == 0) ss2 = 1;
 
     long int it = 0;
-    // Create and check the output
-    long int* res = NULL;
-    res = calloc(ss1, sizeof(*res));
-    if (!res)
+
+    // Allocate memory and verify it has been allocated
+    long int* xor = NULL;
+    xor = calloc(ss1, sizeof(*xor));
+    if (!xor)
         return printf("ERROR: xor_binary_array: cannot allocate memory.\n"), NULL;
 
-    // Parse the xor operation on each integer betweens both arrays,
-    // execept for the greater part of the greater array
-    for (it = 0; it < ss2 - 1; it++) {
-        res[it] = s1[it] ^ s2[it];
-    }
-    res[it] = s1[it] ^ ((s2[it] << ((sbs1 - sbs2) % intsize)));
-    it++;
-    for (it = ss2; it < ss1; it++) {
-        // 0 ^ x = x, so no need of a xor operation here
-        res[it] = s1[it];
-    }
+    // Xor the two sequences values since its value is the same length.
+    for (it = 0; it < ss2 - 1; it++)
+        xor[it] = s1[it] ^ s2[it];
 
-    return res;
+    // If one sequence is larger than the other, shift the last value of the smaller sequence toxor it with the other value.
+    xor[it] = s1[it] ^ ((s2[it] << ((sbs1 - sbs2) % intsize)));
+    it++;
+
+    // Values from the largest binary array are assigned to the xor result. (x^0 = x)
+    for (it = ss2; it < ss1; it++)
+        xor[it] = s1[it];
+
+    return xor;
 }
 
 /**
- * in : seq_bin : "binary array"
- * in : seq_size : number total of used bits in the sequence
- * out : s : popcount of the seq : number of '1'
+ * Popcount a binary array sequence.
+ * 
+ * in : seq_bin : sequence in binary array format
+ * in : seq_size : seq_bin length (number total of used bits)
+ * out : bin_popcount : popcount of the seq : number of '1'
+ * 
+ * Iterates on seq_bin and for each value, adds its popcount to bin_popcount.
  */
 int popcount_binary_array(const long int *seq_bin, const long int seq_size){
-    int s = 0;
+    int bin_popcount = 0;
 
     // Find the size of the binary array
-    int nb = seq_size / int_SIZE;
-    if(seq_size % int_SIZE != 0)    nb++;
+    long int array_size = seq_size / int_SIZE;
+    if(seq_size % int_SIZE != 0) array_size++;
 
     // Parse the binary array
-    for (int i = 0; i < nb; ++i)
-        s += __builtin_popcount(seq_bin[i]);
+    for (long int i = 0; i < array_size; ++i)
+        bin_popcount += __builtin_popcount(seq_bin[i]);
 
-    return s;
+    return bin_popcount;
 }
 
-long int* get_piece_binary_array(const long int* seq_bin,  const long int pos_start, const long int size){
+/**
+ * Retrieve a piece of the binary array sequence.
+ * 
+ * in : seq_bin : sequence in binary array format
+ * in : size : size of the binary requested
+ * out : piece_seq_bin : the requested part of seq_bin, from pos_start and size.
+ * 
+ * Iterates on seq_bin from pos_start, size times and gets for each iteration its binary value.
+ */
+long int* get_piece_binary_array(const long int* seq_bin, const long int pos_start, const long int size){
     //Find the size of the output
     long int array_size = (size) / int_SIZE + (size % int_SIZE != 0);
-
-    //Create and check the output
-    long int *res;
-    res = calloc(array_size, sizeof(*seq_bin));
-    if(!res)
+    
+    // Allocate memory and verify it has been allocated
+    long int *piece_seq_bin = NULL;
+    piece_seq_bin = calloc(array_size, sizeof(*seq_bin));
+    if(!piece_seq_bin) 
         return printf("ERROR: get_piece_binary_array: cannot allocate memory.\n"), NULL;
 
-    long int stop_pos = pos_start+size;
+    // stop position.
+    long int stop_pos = pos_start + size;
 
     long j = 0;
 
     //Parse the binary array,
     //from the bit at 'pos_start' position to 'pos_stop' position
-    for(long i = pos_start ; i < stop_pos; i++)
-    {
-        change_binary_value(res, j, get_binary_value(seq_bin,i));
+    for(long i = pos_start ; i < stop_pos; i++){
+        change_binary_value(piece_seq_bin, j, get_binary_value(seq_bin,i));
         j++;
     }
 
-    return res;
+    return piece_seq_bin;
 }
 
 
@@ -235,10 +252,13 @@ long int* get_piece_binary_array(const long int* seq_bin,  const long int pos_st
 
 //////////////// Convert to binary
 /**
- * in : dna_seq : array of char
- * in : size : size of dna_seq = number of nucleotides (= number of letter)
- * out : seq : array of int
- * Convert a char DNA sequence to its binary sequence
+ * Convert a DNA base sequence to its binary array format.
+ * 
+ * in : dna_seq : DNA sequence in char array format
+ * in : size : dna_seq length = number of nucleotides (= number of letters)
+ * out : seq : DNA sequence in binary array format
+ * 
+ * Calls set_binary_array.
  */
 long int* convert_to_binary(const char* dna_seq, const unsigned size){
     return set_binary_array(dna_seq, size);
@@ -246,10 +266,13 @@ long int* convert_to_binary(const char* dna_seq, const unsigned size){
 
 //////////////// Convert binary aa to codon
 /**
- * in : bin_dna_seq : long int array
- * in : size : number total of used bits in bin_dna_seq
- * out : dna_seq : array of binary
- * Convert a binary sequence to its DNA bases
+ * Convert a DNA sequence in binary array format to its DNA bases.
+ * 
+ * in : bin_dna_seq : DNA sequencDNA sequence in binary array format
+ * in : size : total number total of used bits in the sequence bin_dna_seq
+ * out : dna_seq : DNA sequence in char array format
+ * 
+ * For each pair of bits in bin_dna_seq, append to dna_seq its corresponding nucleotide.
  */
 char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
     if (size % 2 != 0) {
@@ -257,15 +280,15 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
         return NULL;
     }
 
-    //Create and check the output
+    //Allocate memory and verify it has been allocated
     char* dna_seq = calloc((size / 2) + 1, sizeof(*dna_seq));
     if(!dna_seq)
         return printf("ERROR: binary_to_dna: cannot allocate memory.\n"), NULL;
 
     int j = 0;
-    //Parse the binary array, two bits by two bits
+    //Parse the binary array, two bits per iteration
     for (unsigned i = 0; i < size; i += 2){
-        // nucleotides = A, T/U, G, C
+        // nucleotides = A, T, G, C
         int nucl1 = get_binary_value(bin_dna_seq, i);
         int nucl2 = get_binary_value(bin_dna_seq, i + 1);
 
@@ -288,17 +311,21 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
 
 //////////////// Generating mRNA
 /**
- * in : gene_seq : long int array : "binary array"
- * in : seq_size : size of gene_seq : number of used bits in gene_seq
- * out : rna_seq : array of char
+ * Convert a DNA sequence in binary array format to its mRNA sequence.
+ * 
+ * in : gene_seq : DNA sequence in binary array format
+ * in : seq_size : number total of used bits in the sequence gene_seq
+ * out : rna_seq : resulting mRNA sequence in char array format
  * Convert a binary DNA sequence to a string mRNA sequence
+ * 
+ * For each pair of bits in bin_dna_seq, append to dna_seq its corresponding nucleotide in mRNA. (T -> U)
  */
 char* generating_mRNA(const long int* gene_seq, const long start_pos, const long int seq_size) {
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
 
-    // Create and check the output
+    // Allocate memory and verify it has been allocated
     char* rna_seq = NULL;
     rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 2);
     if (!rna_seq)
@@ -307,10 +334,10 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
     int j = 0;
 
     long stop = seq_size+start_pos;
-    // Parse the binary DNA sequence, two by two
+    // Parse the binary DNA sequence, two bits per iteration
     for (long int i = start_pos; i < stop; i += 2) {
 
-        // nucleotides = A, T/U, G, C
+        // nucleotides = A, U, G, C
         int nucl1 = get_binary_value(gene_seq, i);
         int nucl2 = get_binary_value(gene_seq, i + 1);
 
@@ -336,17 +363,23 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
 
 //////////////// Detecting genes 
 /**
-* in : gene : long int array : "binary array"
-* in : gene_size : size of gene : number of used bits in gene
-* in : gene_map : struct to map the genes
-* out : void
-* Detect if a gene exists in the sequence and insert it in the structure
-*/
+ * Detects genes in the mRNA sequence in binary array format and maps them.
+ * 
+ * in : gene : mRNA sequence in binary array format
+ * in : gene_size : number total of used bits in the sequence gene
+ * in : gene_map : gene mapping struct
+ * out : void
+ * 
+ * Iterates in the gene, and for each packet of 6 binary bits (corresponding to a nucleotide), searches for a start codon (AUG).
+ * If a start codon is found, iterate until a stop codon is found (UAA, UAG or UGA).
+ * If a stop codon is found, append to gene_map the gene length (from start to stop codon), its start position and stop one.
+ * 
+ * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
+ */
 void detecting_genes(const long int *gene, const long int gene_size, gene_map_t* gene_map) {
-    //struct gene_map_s gene_map;
     gene_map->genes_counter = 0;
 
-    // Check if memory ever have been allocated, do it if not
+    // Check if memory ever have been allocated and allocate it if not
     if(!gene_map->gene_start || !gene_map->gene_end){
         gene_map->gene_start = malloc(sizeof(*gene_map->gene_start) * MAX_GENES);
         gene_map->gene_end = malloc(sizeof(*gene_map->gene_end) * MAX_GENES);
@@ -363,7 +396,7 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t*
 
     //Parse the binary array, and find all the start and stop codons
     while ((i + 6) <= gene_size) {
-        // each nucleotides can be A, U, G or C
+        // Each nucleotides can be A, U, G or C
         int nucl1 = get_binary_value(gene, i);
         int nucl2 = get_binary_value(gene, i + 1);
         int nucl3 = get_binary_value(gene, i + 2);
@@ -372,10 +405,9 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t*
         int nucl6 = get_binary_value(gene, i + 5);
 
         //If a start pos and a stop pos doesn't exist, search for AUG
-        // if (!(gene[i%32] & ( 1 << (i%32) ))
         if (nucl1 == 0 && nucl2 == 0 && nucl3 == 1 
             && nucl4 == 1 && nucl5 == 0 && nucl6 == 1) {
-        //if atc, it's the start of a gene
+        //if AUG, it's the start of a gene
             start_pos = i;
             i += 6;
         }
@@ -408,23 +440,28 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t*
 }
 
 /**
- * in : gene_seq : long int array : "binary array"
- * in : seq_size : size of gene_seq : number of used bits in gene_seq
- * out : char* : protein in symbols
- * The program parses the mRNA sequence, verify its length and if the first codon is a START codon.
+ * Retrives amino acid chains in a mRNA sequence in binary array format.
+ * 
+ * in : gene_seq : DNA sequence in binary array format
+ * in : seq_size : gene_seq length (number total of used bits)
+ * out : aa_seq : char array of proteins symbols.
+ * 
+ * The program parses the mRNA sequence, verify its length (seq_size).
+ * Then iterates on gene_seq and for each packet of 6 binary bits (corresponding to a nucleotide), append to aa_seq its corresponding protein symbol.
+ * 
+ * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
 */
 char* generating_amino_acid_chain(const long int *gene_seq, const long int start_pos, const long int seq_size) {
-    short codon_size = 6;
+    long int codon_size = 6;
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
     if(seq_size % 3 != 0)
         return NULL;
 
-    // Create and check the output
+    // Allocate memory and verify it has been allocated
     char* aa_seq = NULL;
      aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
-    //aa_seq = calloc((seq_size ) + 1, sizeof(*aa_seq));
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
@@ -649,14 +686,19 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
 
 
 /**
-* in : gene_seq : sequence of the gene : "binary array"
-* in : size_sequence : size of the sequence : number of used bits in gene_seq
-* in : mut_m : map of the possible mutation's areas
-* out : boolean
-* The algorithm runs through a gene sequence and detects if there is a sequence with a high GC frequency
-* (at least 1/5th of the gene sequence's size) it returns true, else it returns false.
-* Precondition: gene_seq is of size size_sequence.
-*/
+ * Detects probable mutation areas.
+ * 
+ * in : gene_seq : DNA sequence in binary array format
+ * in : size_sequence : gene_seq length (number total of used bits)
+ * in : mut_m : map of the possible mutation's areas
+ * out : void
+ * 
+ * The algorithm scans a gene sequence and locates the high frequency of GC DNA bases in the sequence.
+ * Must be at least 1/5th of the gene length
+ * Precondition: gene_seq is of size size_sequence.
+ * 
+ * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
+ */
 void detecting_mutations(const long int *gene_seq, const long int start_pos, const long int size_sequence,
                          mutation_map mut_m) {
     long int detect_mut = 0;  //Counting size of GC sequence
@@ -698,12 +740,15 @@ void detecting_mutations(const long int *gene_seq, const long int start_pos, con
 }
 
 /**
+ * Calculates the matching score of two binary array sequences.
+ * 
  * in : seq1 : first sequence in binary
  * in : sequence_size1 : number total of used bits in the sequence seq1
  * in : seq2 : second sequence in binary
  * in : sequence_size2 : number total of used bits in the sequence seq2
- * out : float : matching score in %
- * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
+ * out : float : 
+ * 
+ * The algorithms runs the hamming distance between two binary sequences, and return their matching score percentage
 */
 float calculating_matching_score(const long int *seq1, long int start_pos1,const int seq_size1,
                                  const long int *seq2, long int start_pos2,const int seq_size2) {
@@ -723,7 +768,7 @@ float calculating_matching_score(const long int *seq1, long int start_pos1,const
     // xor_size = max size between 'seq_size1' and 'seq_size2'
     int xor_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
 
-    //Second step: count the number of bit at '1' on the result
+    //Second step: count the number of bits whose value is 1 on the result
     int pop = popcount_binary_array(xor, xor_size);
 
     //Last step: compute the percentage
