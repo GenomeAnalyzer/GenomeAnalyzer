@@ -21,13 +21,9 @@ static PyObject* DNAb_version(PyObject* self) {
 long int DNAb_get_binary_size(Py_buffer view) {
 	long int* res, res2;
 	long int size = 0;
-	// Copy buffer into var. memcpy needed otherwise it doesn't work.
+	// Copy buffer into var. memcpy needed.
 	for (int i = 0; i < view.len / view.itemsize; i++) {
-		// printf("len : %ld\n", view.len);
-		// printf("itemsize : %ld\n", view.itemsize);
-		// printf("shape[0] : %ld\n", view.shape[0]);
 		res = view.buf + i * view.itemsize;
-		// printf("sizeof(res) : %ld\n", sizeof(res));
 		memcpy(&res2, res, sizeof(res2));
 		while (res2 > 0) {
 			res2 = res2 / 2;
@@ -35,72 +31,70 @@ long int DNAb_get_binary_size(Py_buffer view) {
 		}
 		if (size % 2 != 0) size++;
 	}
-	// printf("size : %d\n", size);
 	return size;
-	// For some reasons, causes a *** stack smashing detected ***: terminated error.
 }
 
 
 /********** BINARIES FUNCTION **********/
 
 static PyObject* DNAb_get_binary_value(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
-	int obj2 = 0;
+	Py_buffer view_seq_bin;
+	PyObject* obj_seq_bin = NULL;
+	int pos = 0;
 
-	//Get the parameter (1-dimensional array of long int, int position)
-	if (!PyArg_ParseTuple(args, "Oi", &obj, &obj2))
+	//Get the parameters (1-dimensional array of long int, int position)
+	if (!PyArg_ParseTuple(args, "Oi", &obj_seq_bin, &pos))
 		return NULL;
 
 	//Get the array memory view
-	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_seq_bin, &view_seq_bin, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
-	if (view.ndim != 1) {
+	if (view_seq_bin.ndim != 1) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_seq_bin);
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view_seq_bin.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_seq_bin);
 		return NULL;
 	}
 
-	return Py_BuildValue("l", get_binary_value(view.buf, obj2));
+	return Py_BuildValue("l", get_binary_value(view_seq_bin.buf, pos));
 }
 
 static PyObject* DNAb_change_binary_value(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
-	int obj2 = 0;
-	int obj3 = 0;
+	Py_buffer view_seq_bin;
+	PyObject* obj_seq_bin = NULL;
+	int pos = 0;
+	int value = 0;
 
-	//Get the parameter (1-dimensional array of long int, int position, int value)
-	if (!PyArg_ParseTuple(args, "Oii", &obj, &obj2, &obj3))
+	//Get the parameters (1-dimensional array of long int, int position, int value)
+	if (!PyArg_ParseTuple(args, "Oii", &obj_seq_bin, &pos, &value))
 		return NULL;
 
 	//Get the array memory view
-	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_seq_bin, &view_seq_bin, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
-	if (view.ndim != 1) {
+	if (view_seq_bin.ndim != 1) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_seq_bin);
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view_seq_bin.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_seq_bin);
 		return NULL;
 	}
 
-	long int* array = change_binary_value(view.buf, obj2, obj3);
-	PyObject* pylist = PyList_New(view.shape[0]);
+	long int* array = change_binary_value(view_seq_bin.buf, pos, value);
 
-	for (int i = 0; i < view.shape[0]; i++)
+	PyObject* pylist = PyList_New(view_seq_bin.shape[0]);
+	for (int i = 0; i < view_seq_bin.shape[0]; i++)
 		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
 
 	return pylist;
@@ -110,7 +104,7 @@ static PyObject* DNAb_set_binary_array(PyObject* self, PyObject* args) {
 	char* seq_char;
 	long int seq_size = 0;
 
-	//Get the parameter (1-dimensional array of char, and its length)
+	//Get the parameters (1-dimensional array of char, and its length)
 	if (!PyArg_ParseTuple(args, "si", &seq_char, &seq_size))
 		return NULL;
 
@@ -126,13 +120,13 @@ static PyObject* DNAb_set_binary_array(PyObject* self, PyObject* args) {
 	return pylist;
 }
 
-static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
+static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args) {
 	Py_buffer view_seq_bin1;
 	Py_buffer view_seq_bin2;
 	PyObject* obj_seq_bin1 = NULL;
 	PyObject* obj_seq_bin2 = NULL;
 
-	//Get the parameter (1-dimensional array of long int, int position, int value)
+	//Get the parameters (first 1-dimensional array of long int, second 1-dimensional array of long int)
 	if (!PyArg_ParseTuple(args, "OO", &obj_seq_bin1, &obj_seq_bin2))
 		return NULL;
 
@@ -168,17 +162,16 @@ static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
 		return NULL;
 	}
 
-	long int a1 = DNAb_get_binary_size(view_seq_bin1);
-	long int a2 = DNAb_get_binary_size(view_seq_bin2);
+	long int array_size1 = DNAb_get_binary_size(view_seq_bin1);
+	long int array_size2 = DNAb_get_binary_size(view_seq_bin2);
 
-	long int* array = xor_binary_array(view_seq_bin1.buf, a1, view_seq_bin2.buf, a2);
+	long int* array = xor_binary_array(view_seq_bin1.buf, array_size1, view_seq_bin2.buf, array_size2);
 
 	long int intsize = int_SIZE + 1;
 
-	a1 = (a1 / intsize) + (a1 % intsize != 0);
-	a2 = (a2 / intsize) + (a2 % intsize != 0);
-	long int array_size = a1 > a2 ? a1 : a2;
-	// printf("a1 : %d, a2 : %d, array_size : %d", a1, a2, array_size);
+	array_size1 = (array_size1 / intsize) + (array_size1 % intsize != 0);
+	array_size2 = (array_size2 / intsize) + (array_size2 % intsize != 0);
+	long int array_size = array_size1 > array_size2 ? array_size1 : array_size2;
 
 	PyObject* pylist = PyList_New(array_size);
 
@@ -189,32 +182,32 @@ static PyObject* DNAb_xor_binary_array(PyObject* self, PyObject* args){
 }
 
 static PyObject* DNAb_popcount_binary_array(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
+	Py_buffer view_seq;
+	PyObject* obj_seq = NULL;
 
 	//Get the parameter (1-dimensional array of long int)
-	if (!PyArg_ParseTuple(args, "O", &obj))
+	if (!PyArg_ParseTuple(args, "O", &obj_seq))
 		return NULL;
 
 	//Get the array memory view
-	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_seq, &view_seq, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
-	if (view.ndim != 1) {
+	if (view_seq.ndim != 1) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_seq);
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view_seq.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_seq);
 		return NULL;
 	}
 
-	long int size = DNAb_get_binary_size(view);
+	long int size = DNAb_get_binary_size(view_seq);
 
-	return Py_BuildValue("l", popcount_binary_array(view.buf, size));
+	return Py_BuildValue("l", popcount_binary_array(view_seq.buf, size));
 }
 
 static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
@@ -223,7 +216,7 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 	int pos_start = 0;
 	int size = 0;
 
-	//Get the parameter (1-dimensional array of long int, int position, int value)
+	//Get the parameters (1-dimensional array of long int, the start position, its length)
 	if (!PyArg_ParseTuple(args, "Oii", &obj_seq_bin, &pos_start, &size))
 		return NULL;
 
@@ -243,17 +236,11 @@ static PyObject* DNAb_get_piece_binary_array(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	// long int *res = view_seq_bin.buf;
-	// for (long int i = 0; i < view_seq_bin.shape[0]; i++){
-	// 	printf("*(view_seq_bin.buf+%d) = %d\n", i, *(res+i));
-	// }
+	long int* array = get_piece_binary_array(view_seq_bin.buf, pos_start, size);
 
-	long int* array = get_piece_binary_array(view_seq_bin.buf,  pos_start, size);
+	long int intsize = int_SIZE + 1;
 
-	long int intsize = int_SIZE +1;
-
-	long int array_size = (size) / intsize + (size%intsize != 0);
-	printf("array_size : %ld\n", array_size);
+	long int array_size = (size) / intsize + (size % intsize != 0);
 	PyObject* pylist = PyList_New(array_size);
 
 	for (long int i = 0; i < array_size; i++)
@@ -271,7 +258,7 @@ static PyObject* DNAb_convert_to_binary(PyObject* self, PyObject* args) {
 	char* seq_char;
 	long int seq_size = 0;
 
-	//Get the parameter (1-dimensional array of char, and its length)
+	//Get the parameters (1-dimensional array of char, and its length)
 	if (!PyArg_ParseTuple(args, "si", &seq_char, &seq_size))
 		return NULL;
 
@@ -289,103 +276,99 @@ static PyObject* DNAb_convert_to_binary(PyObject* self, PyObject* args) {
 
 //////////////// Binary to DNA
 static PyObject* DNAb_binary_to_dna(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
+	Py_buffer view_bin_dna_seq;
+	PyObject* obj_bin_dna_seq = NULL;
 
 	//Get the parameter (1-dimensional array of long int)
-	if (!PyArg_ParseTuple(args, "O", &obj))
+	if (!PyArg_ParseTuple(args, "O", &obj_bin_dna_seq))
 		return NULL;
 
 	//Get the array memory view
-	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_bin_dna_seq, &view_bin_dna_seq, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
-	if (view.ndim != 1) {
+	if (view_bin_dna_seq.ndim != 1) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_bin_dna_seq);
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view_bin_dna_seq.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_bin_dna_seq);
 		return NULL;
 	}
 
-	long int size = DNAb_get_binary_size(view);
+	long int size = DNAb_get_binary_size(view_bin_dna_seq);
 
 	//Return the char* value as a Python string object
-	return Py_BuildValue("y", binary_to_dna(view.buf, size));
+	return Py_BuildValue("y", binary_to_dna(view_bin_dna_seq.buf, size));
 }
 
 //////////////// Generating mRNA
 static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
+	Py_buffer view_gene_seq;
+	PyObject* obj_gene_seq = NULL;
 
-	int start =0;
-	int length = 0;
+	int start_pos = 0;
+	int seq_size = 0;
 
-	//Get the parameter (1-dimensional array of long int)
-	if (!PyArg_ParseTuple(args, "Oii", &obj,&start,&length))
+	//Get the parameters (1-dimensional array of long int, the start position and its length)
+	if (!PyArg_ParseTuple(args, "Oii", &obj_gene_seq, &start_pos, &seq_size))
 		return NULL;
 
 	//Get the array memory view
-	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_gene_seq, &view_gene_seq, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
-	if (view.ndim != 1) {
+	if (view_gene_seq.ndim != 1) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_gene_seq);
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view_gene_seq.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_gene_seq);
 		return NULL;
 	}
-
-	//long int size = DNAb_get_binary_size(view);
-
-	//long int size = view.shape[0]*int_SIZE;
 
 	//Return the char* value as a Python string object
-	return Py_BuildValue("y", generating_mRNA(view.buf, start,length));
+	return Py_BuildValue("y", generating_mRNA(view_gene_seq.buf, start_pos, seq_size));
 }
 
 //////////////// Detecting genes
 static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
+	Py_buffer view_gene;
+	PyObject* obj_gene = NULL;
 
 	//Get the parameter (1-dimensional arrays of long int)
-	if (!PyArg_ParseTuple(args, "O", &obj))
+	if (!PyArg_ParseTuple(args, "O", &obj_gene))
 		return NULL;
 
 	//Get the array memory view
-	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_gene, &view_gene, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
-	if (view.ndim != 1) {
+	if (view_gene.ndim != 1) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_gene);
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view_gene.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_gene);
 		return NULL;
 	}
 
-	unsigned long size = view.shape[0]*int_SIZE;
+	unsigned long gene_size = view_gene.shape[0] * int_SIZE;
 
 	gene_map_t g;
-	g.gene_start = malloc(sizeof(*g.gene_start) * size);
-	g.gene_end = malloc(sizeof(*g.gene_end) * size);
+	g.gene_start = malloc(sizeof(*g.gene_start) * gene_size);
+	g.gene_end = malloc(sizeof(*g.gene_end) * gene_size);
 
-	detecting_genes(view.buf, size, &g);
+	detecting_genes(view_gene.buf, gene_size, &g);
 
 
 	PyObject* List = PyList_New(0);
@@ -404,85 +387,81 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 
 //////////////// Generating an amino acid chain (protein)
 static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
+	Py_buffer view_gene_seq;
+	PyObject* obj_gene_seq = NULL;
 
-	int start =0, length = 0;
+	int start_pos = 0, seq_size = 0;
 
-	//Get the parameter (1-dimensional array of long int)
-	if (!PyArg_ParseTuple(args, "Oii", &obj,&start,&length))
+	//Get the parameters (1-dimensional array of long int, the start position, and its length)
+	if (!PyArg_ParseTuple(args, "Oii", &obj_gene_seq, &start_pos, &seq_size))
 		return NULL;
 
 	//Get the array memory view
-	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_gene_seq, &view_gene_seq, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
-	if (view.ndim != 1) {
+	if (view_gene_seq.ndim != 1) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_gene_seq);
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view_gene_seq.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_gene_seq);
 		return NULL;
 	}
-
-	//long int size = DNAb_get_binary_size(view);
 
 	//Return the char* value as a Python string object
-	return Py_BuildValue("y", generating_amino_acid_chain(view.buf, start,length));
+	return Py_BuildValue("y", generating_amino_acid_chain(view_gene_seq.buf, start_pos, seq_size));
 }
 
 //////////////// Detecting probable mutation zones
 static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
-	Py_buffer view;
-	PyObject* obj = NULL;
+	Py_buffer view_gene_seq;
+	PyObject* obj_gene_seq = NULL;
 
-	long start =0 , length = 0;
+	long start_pos = 0, size_sequence = 0;
 
-	//Get the parameter (1-dimensional arrays of long int)
-	if (!PyArg_ParseTuple(args, "Oii", &obj,&start,&length))
+	//Get the parameters (1-dimensional arrays of long int, the start position, and its length)
+	if (!PyArg_ParseTuple(args, "Oii", &obj_gene_seq, &start_pos, &size_sequence))
 		return NULL;
 
 	//Get the array memory view
-	if (PyObject_GetBuffer(obj, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	if (PyObject_GetBuffer(obj_gene_seq, &view_gene_seq, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
 		return NULL;
 
-	if (view.ndim != 1) {
+	if (view_gene_seq.ndim != 1) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_gene_seq);
 		return NULL;
 	}
 
-	if (strcmp(view.format, "l")) {
+	if (strcmp(view_gene_seq.format, "l")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
-		PyBuffer_Release(&view);
+		PyBuffer_Release(&view_gene_seq);
 		return NULL;
 	}
 
 	mutation_map m;
 
-	m.size = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long)*5);
-	m.start_mut = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long)*5);
-	m.end_mut = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long)*5);
+	m.size = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long) * 5);
+	m.start_mut = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long) * 5);
+	m.end_mut = aligned_alloc(sizeof(unsigned long), sizeof(unsigned long) * 5);
 
 	//Initializing to 0 
-	for (int i = 0; i < 5; i++) {		
+	for (int i = 0; i < 5; i++) {
 		m.size[i] = 0;
 		m.start_mut[i] = 0;
 		m.end_mut[i] = 0;
 	}
 
-	//long int size = DNAb_get_binary_size(view);
-
-	detecting_mutations(view.buf, start,length, m);
+	detecting_mutations(view_gene_seq.buf, start_pos, size_sequence, m);
 
 	PyObject* List = PyList_New(0);
 	for (short int i = 0; i < 5; i++) {
-		if (m.size[i] == 0 )
-			continue;		
+		if (m.size[i] == 0)
+			continue;
 		PyObject* l = PyList_New(3);
 		PyList_SET_ITEM(l, 0, PyLong_FromUnsignedLong(m.size[i]));
 		PyList_SET_ITEM(l, 1, PyLong_FromUnsignedLong(m.start_mut[i]));
@@ -504,10 +483,10 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 	PyObject* obj_seq_bin1 = NULL;
 	PyObject* obj_seq_bin2 = NULL;
 
-	long start_pos1 =0, start_pos2 = 0, size1 = 0 , size2 = 0; 
+	long start_pos1 = 0, start_pos2 = 0, seq_size1 = 0, seq_size2 = 0;
 
-	//Get the parameter (2 1-dimensional arrays)
-	if (!PyArg_ParseTuple(args, "OiiOii", &obj_seq_bin1, &start_pos1, &size1 ,&obj_seq_bin2 , &start_pos2, &size2))
+	//Get the parameters (2 1-dimensional arrays, with its start position and its length)
+	if (!PyArg_ParseTuple(args, "OiiOii", &obj_seq_bin1, &start_pos1, &seq_size1, &obj_seq_bin2, &start_pos2, &seq_size2))
 		return NULL;
 
 	//Get the first array memory view
@@ -532,11 +511,8 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 		return NULL;
 	}
 
-	//long int a1 = DNAb_get_binary_size(view_seq_bin1);
-	//long int a2 = DNAb_get_binary_size(view_seq_bin2);
-
 	//Return the float value as a Python float object
-	return Py_BuildValue("f", calculating_matching_score(view_seq_bin1.buf, start_pos1,size1, view_seq_bin2.buf, start_pos2,size2));
+	return Py_BuildValue("f", calculating_matching_score(view_seq_bin1.buf, start_pos1, seq_size1, view_seq_bin2.buf, start_pos2, seq_size2));
 }
 
 
@@ -544,19 +520,19 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 
 //Register the methods to be made available Python side
 static PyMethodDef DNAb_methods [] = {
-	{ "get_binary_value", DNAb_get_binary_value, METH_VARARGS, ""},
-	{ "change_binary_value", DNAb_change_binary_value, METH_VARARGS, ""},
-	{ "set_binary_array", DNAb_set_binary_array, METH_VARARGS, ""},
-	{ "xor_binary_array", DNAb_xor_binary_array, METH_VARARGS, ""},
-	{ "popcount_binary_array", DNAb_popcount_binary_array, METH_VARARGS, ""},
-	{ "get_piece_binary_array", DNAb_get_piece_binary_array, METH_VARARGS, ""},
+	{ "get_binary_value", DNAb_get_binary_value, METH_VARARGS, "Retrieve one bit from the binary array sequence"},
+	{ "change_binary_value", DNAb_change_binary_value, METH_VARARGS, "Change one bit in the binary array sequence"},
+	{ "set_binary_array", DNAb_set_binary_array, METH_VARARGS, "Convert a char format sequence into the binary array format"},
+	{ "xor_binary_array", DNAb_xor_binary_array, METH_VARARGS, "Xor two binary array sequences"},
+	{ "popcount_binary_array", DNAb_popcount_binary_array, METH_VARARGS, "Popcount the binary array sequence"},
+	{ "get_piece_binary_array", DNAb_get_piece_binary_array, METH_VARARGS, "Retrieve piece of the binary array sequence"},
 	{ "convert_to_binary", DNAb_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},
 	{ "binary_to_dna", DNAb_binary_to_dna, METH_VARARGS, "Convert a binary sequence to a DNA sequence"},
-	{ "generating_mRNA", DNAb_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a string mRNA sequence"},
+	{ "generating_mRNA", DNAb_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a mRNA sequence"},
 	{ "detecting_genes", DNAb_detecting_genes, METH_VARARGS, "Detect genes"},
-	{ "generating_amino_acid_chain", DNAb_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein)"},
-	{ "detecting_mutations", DNAb_detecting_mutations, METH_VARARGS, "Detecte probable mutation zones"},
-	{ "calculating_matching_score", DNAb_calculating_matching_score, METH_VARARGS, "Detecte probable mutation zones"},
+	{ "generating_amino_acid_chain", DNAb_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein) from a binary arary sequence"},
+	{ "detecting_mutations", DNAb_detecting_mutations, METH_VARARGS, "Detects probable mutation zones"},
+	{ "calculating_matching_score", DNAb_calculating_matching_score, METH_VARARGS, "Calculates the matching score of two binary array sequences"},
 	{ "version", (PyCFunction)DNAb_version, METH_VARARGS, "Return the version of the DNA library."},
 	{NULL, NULL, 0, NULL}
 };
