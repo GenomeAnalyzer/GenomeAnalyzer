@@ -522,18 +522,18 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 static PyMethodDef DNAb_methods [] = {
 	{ "get_binary_value", DNAb_get_binary_value, METH_VARARGS, "Retrieve one bit from the binary array sequence"},
 	{ "change_binary_value", DNAb_change_binary_value, METH_VARARGS, "Change one bit in the binary array sequence"},
-	{ "set_binary_array", DNAb_set_binary_array, METH_VARARGS, "Convert a char format sequence into the binary array format"},
+	{ "set_binary_array", DNAb_set_binary_array, METH_VARARGS, "Convert a DNA base sequence to its binary array format"},
 	{ "xor_binary_array", DNAb_xor_binary_array, METH_VARARGS, "Xor two binary array sequences"},
 	{ "popcount_binary_array", DNAb_popcount_binary_array, METH_VARARGS, "Popcount the binary array sequence"},
 	{ "get_piece_binary_array", DNAb_get_piece_binary_array, METH_VARARGS, "Retrieve piece of the binary array sequence"},
-	{ "convert_to_binary", DNAb_convert_to_binary, METH_VARARGS, "Convert a char sequence to a binary sequence"},
-	{ "binary_to_dna", DNAb_binary_to_dna, METH_VARARGS, "Convert a binary sequence to a DNA sequence"},
-	{ "generating_mRNA", DNAb_generating_mRNA, METH_VARARGS, "Convert a binary DNA sequence to a mRNA sequence"},
-	{ "detecting_genes", DNAb_detecting_genes, METH_VARARGS, "Detect genes"},
+	{ "convert_to_binary", DNAb_convert_to_binary, METH_VARARGS, "Convert a DNA base sequence to its binary array format"},
+	{ "binary_to_dna", DNAb_binary_to_dna, METH_VARARGS, "Convert a DNA sequence in binary array format to its DNA bases"},
+	{ "generating_mRNA", DNAb_generating_mRNA, METH_VARARGS, "Convert a DNA sequence in binary array format to its mRNA sequence"},
+	{ "detecting_genes", DNAb_detecting_genes, METH_VARARGS, "Detects genes in the mRNA sequence in binary array format and maps them"},
 	{ "generating_amino_acid_chain", DNAb_generating_amino_acid_chain, METH_VARARGS, "Generate an amino acid chain (protein) from a binary arary sequence"},
-	{ "detecting_mutations", DNAb_detecting_mutations, METH_VARARGS, "Detects probable mutation zones"},
+	{ "detecting_mutations", DNAb_detecting_mutations, METH_VARARGS, "Detects probable mutation areas"},
 	{ "calculating_matching_score", DNAb_calculating_matching_score, METH_VARARGS, "Calculates the matching score of two binary array sequences"},
-	{ "version", (PyCFunction)DNAb_version, METH_VARARGS, "Return the version of the DNA library."},
+	{ "version", (PyCFunction)DNAb_version, METH_VARARGS, "Return the version of the DNA library"},
 	{NULL, NULL, 0, NULL}
 };
 
