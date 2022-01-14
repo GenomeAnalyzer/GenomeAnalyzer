@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
 	float cms = 0;
 	char *rna_seq_long = NULL;
 	char *aa_seq_long = NULL;
+	char *seq_test = calloc(seq_char_size, sizeof(char));
 	
 	seq_long2 = convert_to_binary(seq_char2, seq_char_size2);
   	
@@ -75,74 +76,81 @@ int main(int argc, char *argv[])
     printf("-----------------------------------------\n");
 
 	/*-----convert_to_binary-----*/
+    before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
     	seq_long = set_binary_array(seq_char, seq_char_size);
-    	after = rdtsc();
 
-    	elapsed += (double)(after - before);
 	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("convert_to_binary\t    : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 
-	// /*-----generating_mRNA-----*/
+	/*-----binary_to_dna-----*/
+    before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
-		rna_seq_long = generating_mRNA(seq_long, 0, 2*seq_char_size);
-    	after = rdtsc();
-
-    	elapsed += (double)(after - before);
+    	seq_test = binary_to_dna(seq_long, 2 * seq_char_size);
 	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
+	printf("binary_to_dna\t\t    : %.3lf\n", elapsed / MAX_LOOP);
+	elapsed = 0;
+
+	/*-----generating_mRNA-----*/
+    before = rdtsc();
+	for(int i = 0; i < MAX_LOOP; i++)
+	{
+		rna_seq_long = generating_mRNA(seq_long, 0, 2 * seq_char_size);
+
+	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("generating_mRNA\t\t    : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 	
-	// /*-----detecting_genes-----*/
+	/*-----detecting_genes-----*/
+	before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		before = rdtsc();
-		detecting_genes(seq_long, 2*seq_char_size, &g);
-		after = rdtsc();
-
-		elapsed += (double)(after - before);
+		detecting_genes(seq_long, 2 * seq_char_size, &g);
 	}
+	after = rdtsc();
+	elapsed = (double)(after - before);
 	printf("detecting_genes\t\t    : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 	
-	// /*-----generating_amino_acid_chain-----*/
+	/*-----generating_amino_acid_chain-----*/
+    before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
 		aa_seq_long = generating_amino_acid_chain(seq_long, 0, seq_char_size);
-    	after = rdtsc();
-
-    	elapsed += (double)(after - before);
 	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("generating_amino_acid_chain : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 
-	// /*-----detecting_mutations-----*/
+	/*-----detecting_mutations-----*/
+    before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
-    	detecting_mutations(seq_long, 0, 2*seq_char_size, m);
-    	after = rdtsc();
-
-    	elapsed += (double)(after - before);
+    	detecting_mutations(seq_long, 0, 2 * seq_char_size, m);
 	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("detecting_mutations\t    : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 
-	// /*-----calculating_matching_score-----*/
+	/*-----calculating_matching_score-----*/
+    before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
-		cms = calculating_matching_score(seq_long, 0, 2*seq_char_size, seq_long2, 0, 2*seq_char_size2);
-    	after = rdtsc();
-
-    	elapsed += (double)(after - before);
+		cms = calculating_matching_score(seq_long, 0, 2 * seq_char_size, seq_long2, 0, 2 * seq_char_size2);
 	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("calculating_matching_score  : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 
