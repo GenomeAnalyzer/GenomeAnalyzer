@@ -21,8 +21,8 @@ typedef struct{
  * in : nucl : nucleotid to convert
  * in/out : bit_nucl : nucleotid converted
 */
-void getbitsfromchar(const lookup_table* L, const int n, const char nucl, int* bit_nucl){
-    for(int i=0; i<n;++i){
+void getbitsfromchar(const lookup_table* L, const char nucl, int* bit_nucl){
+    for(int i=0; i<15;++i){
         if(nucl == L[i].nucl){
             bit_nucl[0] = L[i].bit_code1;
             bit_nucl[1] = L[i].bit_code2;
@@ -42,6 +42,7 @@ char getcharfrombits(const lookup_table* const L, const int bnucl1, const int bn
         if((bnucl1 == L[i].bit_code1) && (bnucl2 == L[i].bit_code2))
             return L[i].nucl;
     }
+    return printf("ERROR: invalid value in DNA sequence\n"), NULL;
 }
 
 /***************************************/
@@ -108,72 +109,36 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
         return printf("ERROR: set_binary_array: cannot allocate memory.\n"), NULL;
 
     int pos = 0;
+    
+    //Lookup table to convert char nucl to bits
+    lookup_table LUT[15] = {
+        {0,0,'A'},
+        {1,1,'T'},
+        {0,1,'G'},
+        {1,0,'C'},
+        {0,0,'N'},
+        {0,0,'R'},
+        {1,0,'Y'},
+        {0,1,'K'},
+        {0,0,'M'},
+        {1,0,'S'},
+        {0,0,'W'},
+        {1,0,'B'},
+        {0,0,'D'},
+        {0,1,'H'},
+        {0,0,'V'}
+    };
+
     // Parse the DNA sequence, per nucleotides
     for (long int i = 0; i < seq_size; ++i){
-        // Set seq_bin bit values according to the nucleotide read
-        lookup_table LUT[15] = {
-            {0,0,'A'},
-            {1,1,'T'},
-            {0,1,'G'},
-            {1,0,'C'},
-            {0,0,'N'},
-            {0,0,'R'},
-            {1,0,'Y'},
-            {0,1,'K'},
-            {0,0,'M'},
-            {1,0,'S'},
-            {0,0,'W'},
-            {1,0,'B'},
-            {0,0,'D'},
-            {0,1,'H'},
-            {0,0,'V'}
-        };
+
+        //get the 2-bits value of char read
         int bit_nucl[2] = {0,0};
-        getbitsfromchar(&LUT,15,seq_char[i],&bit_nucl);
+        getbitsfromchar(&LUT,seq_char[i],&bit_nucl);
+
+        // Set seq_bin bit values according to the nucleotide read
         change_binary_value(seq_bin, pos, bit_nucl[0]);
         change_binary_value(seq_bin, pos + 1, bit_nucl[1]);
-        /*
-        switch(seq_char[i]){
-        case 'A': // A = 00
-            break;
-        case 'T': // T = 11
-            change_binary_value(seq_bin, pos, 1);
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'G': // G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'C': // C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'N': // N = A = 00
-            break;
-        case 'R': // R = A = 00
-            break;
-        case 'Y': // Y = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'K': // K = G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'M': // M = A = 00
-            break;
-        case 'S': // S = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'W': // W = A = 00
-            break;
-        case 'B': // B = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'D': // D = A = 00
-            break;
-        case 'H': // H = G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'V': // V = A = 00
-            break;
-        }*/
         pos += 2;
     }
     return seq_bin;
@@ -344,8 +309,8 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
         return printf("ERROR: binary_to_dna: cannot allocate memory.\n"), NULL;
 
     int j = 0;
-    //Parse the binary array, two bits per iteration
 
+    //Lookup table to convert bits nucl to char
     static const lookup_table LUT[4] = {
         {0,0,'A'},
         {1,1,'T'},
@@ -353,6 +318,7 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
         {1,0,'C'},
     };
 
+    //Parse the binary array, two bits per iteration
     for (unsigned i = 0; i < size; i += 2){
         // nucleotides = A, T, G, C
         int nucl1 = get_binary_value(bin_dna_seq, i);
@@ -390,6 +356,15 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
     int j = 0;
 
     long stop = seq_size+start_pos;
+
+    //Lookup table to convert bits nucl to char
+    static const lookup_table LUT[4] = {
+        {0,0,'A'},
+        {1,1,'U'},
+        {0,1,'G'},
+        {1,0,'C'},
+    };
+
     // Parse the binary DNA sequence, two bits per iteration
     for (long int i = start_pos; i < stop; i += 2) {
 
@@ -397,20 +372,8 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
         int nucl1 = get_binary_value(gene_seq, i);
         int nucl2 = get_binary_value(gene_seq, i + 1);
 
-        if (nucl1 == 0 && nucl2 == 0)
-            // 00 = A
-            rna_seq[j] = 'A';
-        else if (nucl1 == 1 && nucl2 == 1)
-            // 11 = U
-            rna_seq[j] = 'U';
-        else if (nucl1 == 1 && nucl2 == 0)
-            // 10 = C
-            rna_seq[j] = 'C';
-        else if (nucl1 == 0 && nucl2 == 1)
-            // 01 = G
-            rna_seq[j] = 'G';
-        else
-            return printf("ERROR: generating_mRNA: invalid value in DNA sequence\n"), NULL;
+        char value = getcharfrombits(&LUT,nucl1,nucl2);
+        rna_seq[j] = value;
         j++;
     }
     rna_seq[j] = '\0';
