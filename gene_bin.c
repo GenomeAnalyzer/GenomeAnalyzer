@@ -4,7 +4,11 @@
 
 #include "gene_bin.h"
 
-
+typedef struct{
+        const int bit_code1;
+        const int bit_code2;
+        const char nucl;
+    }lookup_table;
 /***************************************/
 /********** BINARIES FUNCTION **********/
 /***************************************/
@@ -73,6 +77,28 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
     // Parse the DNA sequence, per nucleotides
     for (long int i = 0; i < seq_size; ++i){
         // Set seq_bin bit values according to the nucleotide read
+
+        /*typedef struct{
+            char* nucl;
+            unsigned bit_code;
+        }lookup_table;
+        lookup_table LUT[] = {
+            {'A', 00},
+            {'T', 11},
+            {'G', 01},
+            {'C', 10},
+            {'N', 00},
+            {'R', 00},
+            {'Y', 10},
+            {'K', 01},
+            {'M', 00},
+            {'S', 10},
+            {'W', 00},
+            {'B', 10},
+            {'D', 00},
+            {'H', 01},
+            {'V', 00},
+        }*/
         switch(seq_char[i]){
         case 'A': // A = 00
             break;
@@ -244,7 +270,12 @@ long int* get_piece_binary_array(const long int* seq_bin, const long int pos_sta
     return piece_seq_bin;
 }
 
-
+char getcharfrombits(const lookup_table* const L, const int bnucl1, const int bnucl2){
+    for(int i=0;i<4;++i){
+        if((bnucl1 == L[i].bit_code1) && (bnucl2 == L[i].bit_code2))
+            return L[i].nucl;
+    }
+}
 
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
@@ -287,12 +318,26 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
 
     int j = 0;
     //Parse the binary array, two bits per iteration
+
+    static const lookup_table LUT[4] = {
+        {0,0,'A'},
+        {1,1,'T'},
+        {0,1,'G'},
+        {1,0,'C'},
+    };
+
     for (unsigned i = 0; i < size; i += 2){
         // nucleotides = A, T, G, C
         int nucl1 = get_binary_value(bin_dna_seq, i);
         int nucl2 = get_binary_value(bin_dna_seq, i + 1);
 
-        if (nucl1 == 0 && nucl2 == 0)
+        char value = getcharfrombits(&LUT,nucl1,nucl2);
+        dna_seq[j] = value;
+
+        
+        //char value = nucl[nucl1+nucl2+nucl2];
+        //dna_seq[j] = value;
+        /*if (nucl1 == 0 && nucl2 == 0)
             // 00 = A/N
             dna_seq[j] = 'A';
         else if (nucl1 == 1 && nucl2 == 1)
@@ -303,7 +348,8 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
             dna_seq[j] = 'C';
         else if (nucl1 == 0 && nucl2 == 1)
             // 01 = G
-            dna_seq[j] = 'G';
+            dna_seq[j] = 'G';*/
+
         j++;
     }
     return dna_seq;
