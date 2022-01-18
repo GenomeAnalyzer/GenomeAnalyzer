@@ -9,10 +9,44 @@ typedef struct{
         const int bit_code2;
         const char nucl;
     }lookup_table;
+
+/***************************************/
+/********** LOOKUP_TABLE FUNC **********/
+/***************************************/
+
+/**
+ * Returns corresponding bits from entry char.
+ * in : L : lookup table
+ * in : n : size of lookup table
+ * in : nucl : nucleotid to convert
+ * in/out : bit_nucl : nucleotid converted
+*/
+void getbitsfromchar(const lookup_table* L, const int n, const char nucl, int* bit_nucl){
+    for(int i=0; i<n;++i){
+        if(nucl == L[i].nucl){
+            bit_nucl[0] = L[i].bit_code1;
+            bit_nucl[1] = L[i].bit_code2;
+            break;
+        }
+    }
+}
+
+/**
+ * Returns corresponding char from entry bits.
+ * in : L : lookup table (size is always 4)
+ * in : nucl : nucleotid to convert
+ * in/out : bit_nucl : nucleotid converted
+*/
+char getcharfrombits(const lookup_table* const L, const int bnucl1, const int bnucl2){
+    for(int i=0;i<4;++i){
+        if((bnucl1 == L[i].bit_code1) && (bnucl2 == L[i].bit_code2))
+            return L[i].nucl;
+    }
+}
+
 /***************************************/
 /********** BINARIES FUNCTION **********/
 /***************************************/
-
 
 /**
  * Retrieve one bit from the binary array sequence.
@@ -77,28 +111,28 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
     // Parse the DNA sequence, per nucleotides
     for (long int i = 0; i < seq_size; ++i){
         // Set seq_bin bit values according to the nucleotide read
-
-        /*typedef struct{
-            char* nucl;
-            unsigned bit_code;
-        }lookup_table;
-        lookup_table LUT[] = {
-            {'A', 00},
-            {'T', 11},
-            {'G', 01},
-            {'C', 10},
-            {'N', 00},
-            {'R', 00},
-            {'Y', 10},
-            {'K', 01},
-            {'M', 00},
-            {'S', 10},
-            {'W', 00},
-            {'B', 10},
-            {'D', 00},
-            {'H', 01},
-            {'V', 00},
-        }*/
+        lookup_table LUT[15] = {
+            {0,0,'A'},
+            {1,1,'T'},
+            {0,1,'G'},
+            {1,0,'C'},
+            {0,0,'N'},
+            {0,0,'R'},
+            {1,0,'Y'},
+            {0,1,'K'},
+            {0,0,'M'},
+            {1,0,'S'},
+            {0,0,'W'},
+            {1,0,'B'},
+            {0,0,'D'},
+            {0,1,'H'},
+            {0,0,'V'}
+        };
+        int bit_nucl[2] = {0,0};
+        getbitsfromchar(&LUT,15,seq_char[i],&bit_nucl);
+        change_binary_value(seq_bin, pos, bit_nucl[0]);
+        change_binary_value(seq_bin, pos + 1, bit_nucl[1]);
+        /*
         switch(seq_char[i]){
         case 'A': // A = 00
             break;
@@ -139,7 +173,7 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
             break;
         case 'V': // V = A = 00
             break;
-        }
+        }*/
         pos += 2;
     }
     return seq_bin;
@@ -270,13 +304,6 @@ long int* get_piece_binary_array(const long int* seq_bin, const long int pos_sta
     return piece_seq_bin;
 }
 
-char getcharfrombits(const lookup_table* const L, const int bnucl1, const int bnucl2){
-    for(int i=0;i<4;++i){
-        if((bnucl1 == L[i].bit_code1) && (bnucl2 == L[i].bit_code2))
-            return L[i].nucl;
-    }
-}
-
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
 /***************************************/
@@ -333,23 +360,6 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
 
         char value = getcharfrombits(&LUT,nucl1,nucl2);
         dna_seq[j] = value;
-
-        
-        //char value = nucl[nucl1+nucl2+nucl2];
-        //dna_seq[j] = value;
-        /*if (nucl1 == 0 && nucl2 == 0)
-            // 00 = A/N
-            dna_seq[j] = 'A';
-        else if (nucl1 == 1 && nucl2 == 1)
-            // 11 = T
-            dna_seq[j] = 'T';
-        else if (nucl1 == 1 && nucl2 == 0)
-            // 10 = C
-            dna_seq[j] = 'C';
-        else if (nucl1 == 0 && nucl2 == 1)
-            // 01 = G
-            dna_seq[j] = 'G';*/
-
         j++;
     }
     return dna_seq;
