@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -g -std=c99
+CFLAGS = -g -std=c99 -Wall
 
 LDFLAGS = -lcmocka
 
@@ -10,31 +10,63 @@ LDFLAGS = -lcmocka
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 #For all compiling, building and executing
-all: main DNA check
+all: DNA check 
 
 #For only building and testing interface
-build: DNA test_DNA
+build: DNA_bit
 
-main: main.o gene.o
-	$(CC) $(CFLAGS) -o $@ $^
+#Clean compilation files & output result
+clean :
+	@rm -rf __pycache__ build .pytest_cache output *.so
+	@rm -f *.o test_gene test_gene_bin
 
-gene.o: gene.h
+#For only executing tests
+check: run_test_gene test_DNA run_test_gene_bin test_DNA_bin
 
-check: test_gene test_DNA
+#For only running the non-binary program
+run:
+	sudo python3 setup.py install
+	python3 main.py
+
+#For only running the binary program
+run_bin:
+	sudo python3 setup_bin.py install
+	python3 main_bin.py
+
+
+# Naïve library
+test_gene.o: gene.c
 
 test_gene: test_gene.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-test_gene.o: gene.c 
+run_test_gene: test_gene
+	./test_gene &
 
 DNA : 
 	python3 setup.py build
 	cp build/lib*/*.so .
 
 test_DNA : 
-	python3 -m pytest -s
+	python3 -m pytest -s test_DNA.py
 
-clean :
-	@rm -rf __pycache__ build .pytest_cache *.so
-	@rm -f *.o main test_gene
 
+# Binary optimized library
+test_gene_bin.o: gene_bin.c
+
+test_gene_bin: test_gene_bin.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+run_test_gene_bin: test_gene_bin
+	./test_gene_bin &
+
+DNA_bin : 
+	python3 setup_bin.py build
+	cp build/lib*/*.so .
+
+DNA_bit : 
+	python3 setup_bit.py build
+	cp build/lib*/*.so .	
+
+test_DNA_bit : 
+	python3 -m pytest -s test_DNA_bit.py
