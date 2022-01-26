@@ -6,7 +6,7 @@
 
 #define MAX 31000
 #define MAX_LINE 150
-#define MAX_LOOP 500
+#define MAX_LOOP 1000
 
 void load_gene(char *filename, char *seq_char)
 {
@@ -49,12 +49,17 @@ int main(int argc, char *argv[])
 
 	// Variable used for function
 	unsigned short int *seq_short = NULL;
+	unsigned long *seq_long = malloc(sizeof(unsigned long) * 2 * seq_char_size);
 	unsigned short int *seq_short2 = NULL;
 	float cms = 0;
 	char *rna_seq_short = NULL;
 	char *aa_seq_short = NULL;
 	
+	seq_short = convert_to_binary(seq_char, 2 * seq_char_size);
 	seq_short2 = convert_to_binary(seq_char2, 2 * seq_char_size2);
+
+	for(int i = 0; i < 2 * seq_char_size; i++)
+		seq_long[i] = (unsigned long)seq_short[i];
   	
   	gene_map_t g;
     g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * 2);
@@ -75,74 +80,68 @@ int main(int argc, char *argv[])
     printf("-----------------------------------------\n");
 
 	/*-----convert_to_binary-----*/
+    before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
     	seq_short = convert_to_binary(seq_char, 2 * seq_char_size);
-    	after = rdtsc();
-
-    	elapsed += (double)(after - before);
 	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("convert_to_binary\t    : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 
 	// /*-----generating_mRNA-----*/
+    before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
 		rna_seq_short = generating_mRNA(seq_short, 2 * seq_char_size);
-    	after = rdtsc();
-
-    	elapsed += (double)(after - before);
 	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("generating_mRNA\t\t    : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 	
 	// /*-----detecting_genes-----*/
-	// for(int i = 0; i < MAX_LOOP; i++)
-	// {
-	// 	before = rdtsc();
-	// 	detecting_genes(seq_short, 2 * seq_char_size, &g);
-	// 	after = rdtsc();
-
-	// 	elapsed += (double)(after - before);
-	// }
-	// printf("detecting_genes : %lf cycles\n", elapsed / MAX_LOOP);
-	// elapsed = 0;
-	
-	// /*-----generating_amino_acid_chain-----*/
+	before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
-		aa_seq_short = generating_amino_acid_chain(seq_short, 2 * seq_char_size);
-    	after = rdtsc();
-
-    	elapsed += (double)(after - before);
+		detecting_genes(seq_long, 2 * seq_char_size, &g);
 	}
+	after = rdtsc();
+	elapsed = (double)(after - before);
+	printf("detecting_genes\t\t    : %.3lf\n", elapsed / MAX_LOOP);
+	elapsed = 0;
+	
+	// /*-----generating_amino_acid_chain-----*/
+    before = rdtsc();
+	for(int i = 0; i < MAX_LOOP; i++)
+	{
+		aa_seq_short = generating_amino_acid_chain(seq_short, 2 * seq_char_size);
+	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("generating_amino_acid_chain : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 
 	// /*-----detecting_mutations-----*/
+    before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
     	detecting_mutations(seq_short, 2 * seq_char_size, m);;
-    	after = rdtsc();
-
-    	elapsed += (double)(after - before);
 	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("detecting_mutations\t    : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 
 	// /*-----calculating_matching_score-----*/
+    before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	before = rdtsc();
 		cms = calculating_matching_score(seq_short, 2 * seq_char_size, seq_short2, 2 * seq_char_size2);
-    	after = rdtsc();
-
-    	elapsed += (double)(after - before);
 	}
+    after = rdtsc();
+    elapsed = (double)(after - before);
 	printf("calculating_matching_score  : %.3lf\n", elapsed / MAX_LOOP);
 	elapsed = 0;
 
