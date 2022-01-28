@@ -11,68 +11,6 @@
 
 
 
-
-
-/**
- * Xor two binary array sequences.
- * 
- * in : seq_bin1 : first sequence in binary array format to xor
- * in : seq_size1 : seq_bin1 length (number total of used bits)
- * in : seq_bin2 : first sequence in binary array format to xor
- * in : seq_size2 : seq_bin2 length (number total of used bits)
- * out : xor : binary array sequence resulting from the xor operation between seq1 and seq2
- * 
- * Iterates over sequences value per value. 
- * Xor the two sequences values since its value is the same length.
- * If one sequence is larger than the other, shift the last value of the smaller sequence to xor it with the other value.
- * Values from the largest binary array are assigned to the xor result. (x^0 = x)
- */
-long int* xor_binary_array(_Bool* const seq_bin1, const unsigned seq_size1,
-                           _Bool * const seq_bin2, const unsigned seq_size2){
-
-    // size of the binary array type used
-    long int intsize = int_SIZE + 1;
-
-    long int* s1, * s2;
-    long int ss1, ss2;
-
-    // Find the greater binary array, and rename them
-    if (seq_size1 >= seq_size2) { // if s1 is greater or equal than s2
-        s1 = seq_bin1;
-        s2 = seq_bin2;
-        ss1 = seq_size1 ;
-        ss2 = seq_size2 ;
-    }
-    else { // else if s2 is greater or equal than s1
-        s1 = seq_bin2;
-        s2 = seq_bin1;
-        ss1 = seq_size2 ;
-        ss2 = seq_size1 ;
-    }
-
-    long int it = 0;
-
-    // Allocate memory and verify it has been allocated
-    long int* xor = NULL;
-    xor = calloc(ss1, sizeof(*xor));
-    if (!xor)
-        return printf("ERROR: xor_binary_array: cannot allocate memory.\n"), NULL;
-
-    // Xor the two sequences values since its value is the same length.
-    for (it = 0; it < ss2 - 1; it++)
-        xor[it] = s1[it] ^ s2[it];
-
-    // If one sequence is larger than the other, shift the last value of the smaller sequence toxor it with the other value.
-    xor[it] = s1[it] ^ ((s2[it] << ((ss1 - ss2))));
-    it++;
-
-    // Values from the largest binary array are assigned to the xor result. (x^0 = x)
-    for (it = ss2; it < ss1; it++)
-        xor[it] = s1[it];
-
-    return xor;
-}
-
 /**
  * Popcount a binary array sequence.
  * 
@@ -113,7 +51,7 @@ int popcount_binary_array(const _Bool *seq_bin, const long int seq_size){
  * 
  * Calls set_binary_array.
  */
-long int* convert_to_binary(const char* dna_seq, const unsigned size){
+_Bool * convert_to_binary(const char* dna_seq, const unsigned size){
 
 
     // Allocate memory and verify it has been allocated
@@ -125,44 +63,45 @@ long int* convert_to_binary(const char* dna_seq, const unsigned size){
     int pos = 0;
     // Parse the DNA sequence, per nucleotides
     for (long int i = 0; i < size; ++i){
+        //printf("%c ",dna_seq[i]);
         // Set seq_bin bit values according to the nucleotide read
         switch(dna_seq[i]){
         case 'A': // A = 00
             break;
         case 'T': // T = 11
-            seq_bin[i] = 1;
-            seq_bin[i+1] = 1;
+            seq_bin[pos] = 1;
+            seq_bin[pos+1] = 1;
             break;
         case 'G': // G = 01
-            seq_bin[i+1] = 1;
+            seq_bin[pos+1] = 1;
             break;
         case 'C': // C = 10
-            seq_bin[i] = 1;
+            seq_bin[pos] = 1;
             break;
         case 'N': // N = A = 00
             break;
         case 'R': // R = A = 00
             break;
         case 'Y': // Y = C = 10
-            seq_bin[i] = 1;
+            seq_bin[pos] = 1;
             break;
         case 'K': // K = G = 01
-            seq_bin[i+1] = 1;
+            seq_bin[pos+1] = 1;
             break;
         case 'M': // M = A = 00
             break;
         case 'S': // S = C = 10
-            seq_bin[i] = 1;
+            seq_bin[pos] = 1;
             break;
         case 'W': // W = A = 00
             break;
         case 'B': // B = C = 10
-            seq_bin[i] = 1;
+            seq_bin[pos] = 1;
             break;
         case 'D': // D = A = 00
             break;
         case 'H': // H = G = 01
-            seq_bin[i+1] = 1;
+            seq_bin[pos+1] = 1;
             break;
         case 'V': // V = A = 00
             break;
@@ -229,40 +168,39 @@ char* binary_to_dna(_Bool* bin_dna_seq, const unsigned size){
  * For each pair of bits in bin_dna_seq, append to dna_seq its corresponding nucleotide in mRNA. (T -> U)
  */
 char* generating_mRNA(const _Bool* gene_seq, const long int seq_size) {
-    // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
 
-    // Allocate memory and verify it has been allocated
+    // Create and check the output
     char* rna_seq = NULL;
     rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 2);
     if (!rna_seq)
         return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
 
+
     int j = 0;
-
-    long stop = seq_size;
-    // Parse the binary DNA sequence, two bits per iteration
-    for (long int i = 0; i < stop; i += 2) {
-
-        // nucleotides = A, U, G, C
-        int nucl1 = gene_seq[i];
-        int nucl2 = gene_seq[i + 1];
-
-        if (nucl1 == 0 && nucl2 == 0)
-            // 00 = A
-            rna_seq[j] = 'A';
-        else if (nucl1 == 1 && nucl2 == 1)
-            // 11 = U
-            rna_seq[j] = 'U';
-        else if (nucl1 == 1 && nucl2 == 0)
-            // 10 = C
-            rna_seq[j] = 'C';
-        else if (nucl1 == 0 && nucl2 == 1)
-            // 01 = G
-            rna_seq[j] = 'G';
-        else
+    // Parse the binary DNA sequence two by two
+    for (unsigned i = 0; i < seq_size; i += 2) {
+        switch (gene_seq[i]) {
+        case 0:
+            if (gene_seq[i + 1] == 0)
+                // A = 00
+                rna_seq[j] = 'A';
+            else if (gene_seq[i + 1] == 1)
+                // G = 01
+                rna_seq[j] = 'G';
+            break;
+        case 1:
+            if (gene_seq[i + 1] == 0)
+                // C = 10
+                rna_seq[j] = 'C';
+            else if (gene_seq[i + 1] == 1)
+                // U = 11
+                rna_seq[j] = 'U';
+            break;
+        default:
             return printf("ERROR: generating_mRNA: invalid value in DNA sequence\n"), NULL;
+        }
         j++;
     }
     rna_seq[j] = '\0';
@@ -284,7 +222,7 @@ char* generating_mRNA(const _Bool* gene_seq, const long int seq_size) {
  * 
  * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
  */
-void detecting_genes(const _Bool*gene, const long int gene_size, gene_map_t* gene_map) {
+void detecting_genes(const _Bool* gene, const long int gene_size, gene_map_t* gene_map) {
     gene_map->genes_counter = 0;
 
     // Check if memory ever have been allocated and allocate it if not
@@ -311,6 +249,8 @@ void detecting_genes(const _Bool*gene, const long int gene_size, gene_map_t* gen
         int nucl4 = gene[i + 3];
         int nucl5 = gene[i + 4];
         int nucl6 = gene[i + 5];
+       // printf("%d %d %d %d %d %d\n",nucl1,nucl2,nucl3,nucl4,nucl5,nucl6);
+
 
         //If a start pos and a stop pos doesn't exist, search for AUG
         if (nucl1 == 0 && nucl2 == 0 && nucl3 == 1 
@@ -632,7 +572,7 @@ void detecting_mutations(const _Bool*gene_seq, const long int size_sequence,
             //Check if previous GC sequence is a probable mutation zone
             if (detect_mut >= (size_sequence / 5)) {
                 mut_m.start_mut[cmp] = tmp_start_mut;
-                mut_m.end_mut[cmp] = (i);
+                mut_m.end_mut[cmp] = (i-1);
                 mut_m.size[cmp] = detect_mut-1;
                 cmp++;
             }
@@ -642,39 +582,50 @@ void detecting_mutations(const _Bool*gene_seq, const long int size_sequence,
     //Check if ending sequence is a probable mutation zone
     if (detect_mut >= (size_sequence / 5)) {
         mut_m.start_mut[cmp] = tmp_start_mut;
-        mut_m.end_mut[cmp] = size_sequence;
+        mut_m.end_mut[cmp] = size_sequence-1;
         mut_m.size[cmp] = detect_mut-1;
     }
 }
 
-/**
- * Calculates the matching score of two binary array sequences.
- * 
+/*
  * in : seq1 : first sequence in binary
- * in : sequence_size1 : number total of used bits in the sequence seq1
  * in : seq2 : second sequence in binary
- * in : sequence_size2 : number total of used bits in the sequence seq2
- * out : float : 
- * 
- * The algorithms runs the hamming distance between two binary sequences, and return their matching score percentage
+ * out : float : matching score in %
+ * The algorithms runs the hamming distance between two binary sequences, and return their matching score in %
 */
-float calculating_matching_score(const _Bool*seq1,const int seq_size1,
-                                 const _Bool*seq2,const int seq_size2) {
+float calculating_matching_score(const _Bool seq1 [], const int sequence_size1,
+                                 const _Bool seq2 [], const int sequence_size2) {
     // Check the input argument
     if (!seq1 || !seq2)
         return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
 
-    // First step: apply the xor operation between both arrays 
+    // If the sequences don't have the same size, do (with x = 1 or 0):
 
-    long int *xor = NULL;
-    xor = xor_binary_array(seq1, seq_size1, seq2, seq_size2);
-    // xor_size = max size between 'seq_size1' and 'seq_size2'
-    int xor_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
+    //  xxxxxxxxx
+    // ^
+    //  000xxxxxx
+    // -----------
+    //  xxxxxxxxx
 
-    //Second step: count the number of bits whose value is 1 on the result
-    int pop = popcount_binary_array(xor, xor_size);
+    // And, 0 ^ x = x
 
-    //Last step: compute the percentage
-    float y = ((float)pop * 100.0) / (float)xor_size;
+    //Find the greater sequence and rename both
+    const _Bool* s1 = sequence_size1 >= sequence_size2 ? seq1 : seq2;
+    const _Bool* s2 = sequence_size1 >= sequence_size2 ? seq2 : seq1;
+    int diff_size = sequence_size1 >= sequence_size2 ? sequence_size1 - sequence_size2 : sequence_size2 - sequence_size1;
+    int max_size = sequence_size1 >= sequence_size2 ? sequence_size1 : sequence_size2;
+    int count = 0;
+
+    // For the greater part of the greater sequence, count the number of '1'
+    for (int i = 0; i < diff_size; i++)
+        if (s1[i]) ++count;
+
+    // Count the number of '1', after aplying the xor operation
+    for (int i = diff_size; i < max_size; ++i) {
+        if (s1[i] ^ s2[i - diff_size]) ++count;
+    }
+
+    // Compute and return the percentage
+    float y = ((float)count * 100.0) / (float)max_size;
     return 100.0 - y;
 }

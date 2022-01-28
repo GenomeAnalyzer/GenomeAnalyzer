@@ -1,6 +1,7 @@
 #coding: utf8
-import DNA_bin
-import DNA
+#import DNA_bin
+#import DNA
+import DNA_bit
 import array
 import glob
 import moduleDNA as m
@@ -46,26 +47,30 @@ for file in glob.glob("fastas/*.fasta"):
 
     read = m.read_file(file)
 
-    sequence.append(DNA_bin.convert_to_binary(read,len(read)))
+    sequence.append(DNA_bit.convert_to_binary(read,len(read)))
 
-    sequence2.append(DNA.convert_to_binary(read,len(read)))
-
-    gene1.append(DNA_bin.detecting_genes(array.array('l',sequence[i])))
-
-    gen1 = DNA_bin.detecting_genes(array.array('l',sequence[i]))
-
-    gene2.append(DNA.detecting_genes(array.array('L',sequence2[i])))
-
-    gen2 = DNA.detecting_genes(array.array('L',sequence2[i]))
-
-    #print("gene2"+str(gene2))
     print(str(file))
 
-    for j in range (len(gene2[i])-1):
+    #sequence2.append(DNA.convert_to_binary(read,len(read)))
+
+    gene1.append(DNA_bit.detecting_genes(array.array('h',sequence[i+1])))
+
+    
+
+    #gen1 = DNA_bin.detecting_genes(array.array('l',sequence[i]))
+
+    #gene2.append(DNA.detecting_genes(array.array('L',sequence2[i])))
+
+    #gen2 = DNA.detecting_genes(array.array('L',sequence2[i]))
+
+    #print("gene2"+str(gene2))
+    print(str(gene1))
+
+    for j in range (len(gene1[i])-1):
         print('####')
         #print("gene2"+str(gene1))
 
-        print("taille = "+str(len(gen2))+" "+str(len(gen1)))
+        #print("taille = "+str(len(gen2))+" "+str(len(gen1)))
         print(""+str(gene2[i][j][0]) +" "+str(gene2[i][j][1]))
         print(""+str(gene1[i][j][0]) +" "+str(gene1[i][j][1]))
 
@@ -73,24 +78,22 @@ for file in glob.glob("fastas/*.fasta"):
 
         #print("seq = "+str(m.get_sequence(sequence[i],gene1[i][j][0],(gene1[i][j][1]))))
 
-        print( " seq = "+str(bin(DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene1[i][j][0],gene1[i][j][1]- gene1[i][j][0])[0])))
+        #print( " seq = "+str(bin(DNA_bin.get_piece_binary_array(array.array('l',sequence[i]),gene1[i][j][0],gene1[i][j][1]- gene1[i][j][0])[0])))
 
-        if (len(gene1[i])-1 > 2):
-            for j in range((int((len(gene1[i]))/2)), -1, -1):
-                for k in range((int((len(gene1[i]))/2))):     
-                    res = (DNA.calculating_matching_score(array.array('H',sequence2[i][gene2[i][j][0]:gene2[i][j][1]]),array.array('H',sequence2[i][gene2[i][k][0]:gene2[i][k][1]])))
-                    print(" matching = "+str(res))
-                    res2 = DNA_bin.calculating_matching_score(array.array('l',sequence[i]),gene1[i][j][0],gene1[i][j][1]- gene1[i][j][0],array.array('l',sequence[i]),gene1[i][k][0],gene1[i][k][1]- gene1[i][k][0])
+       # if (len(gene1[i])-1 > 2):
+        #    for j in range((int((len(gene1[i]))/2)), -1, -1):
+        #        for k in range((int((len(gene1[i]))/2))):     
+                    #res = (DNA.calculating_matching_score(array.array('H',sequence2[i][gene2[i][j][0]:gene2[i][j][1]]),array.array('H',sequence2[i][gene2[i][k][0]:gene2[i][k][1]])))
+                    #print(" matching = "+str(res))
+                    #res2 = DNA_bin.calculating_matching_score(array.array('l',sequence[i]),gene1[i][j][0],gene1[i][j][1]- gene1[i][j][0],array.array('l',sequence[i]),gene1[i][k][0],gene1[i][k][1]- gene1[i][k][0])
 
-                    print(" matching 2 ="+str(res2))
+                    #print(" matching 2 ="+str(res2))
 
-                    print('#####')
+                    #print('#####')
 
 
     i = i+1
 
-    if i ==4:
-        break
 
 
 '''

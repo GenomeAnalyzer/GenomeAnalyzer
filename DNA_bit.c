@@ -28,13 +28,13 @@ static PyObject* DNAb_convert_to_binary(PyObject* self, PyObject* args) {
 	if (!PyArg_ParseTuple(args, "si", &seq_char, &seq_size))
 		return NULL;
 
-	long int* array = convert_to_binary(seq_char, seq_size);
+	_Bool* array = convert_to_binary(seq_char, seq_size);
 
 
 	PyObject* pylist = PyList_New(seq_size*2);
 
 	for (long int i = 0; i < seq_size*2; i++)
-		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
+		PyList_SetItem(pylist, i, PyBool_FromLong(array[i]));
 
 	return pylist;
 }
@@ -58,7 +58,7 @@ static PyObject* DNAb_binary_to_dna(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view_bin_dna_seq.format, "h")) {
+	if (strcmp(view_bin_dna_seq.format, "B")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view_bin_dna_seq);
 		return NULL;
@@ -74,8 +74,6 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 	Py_buffer view_gene_seq;
 	PyObject* obj_gene_seq = NULL;
 
-	int start_pos = 0;
-	int seq_size = 0;
 
 	//Get the parameters (1-dimensional array of long int, the start position and its length)
 	if (!PyArg_ParseTuple(args, "O", &obj_gene_seq))
@@ -91,7 +89,10 @@ static PyObject* DNAb_generating_mRNA(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view_gene_seq.format, "l")) {
+	printf("Format : %s\n",view_gene_seq.format);
+
+
+	if (strcmp(view_gene_seq.format, "B")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view_gene_seq);
 		return NULL;
@@ -120,7 +121,7 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view_gene.format, "h")) {
+	if (strcmp(view_gene.format, "B")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int");
 		PyBuffer_Release(&view_gene);
 		return NULL;
@@ -168,7 +169,7 @@ static PyObject* DNAb_generating_amino_acid_chain(PyObject* self, PyObject* args
 		return NULL;
 	}
 
-	if (strcmp(view_gene_seq.format, "h")) {
+	if (strcmp(view_gene_seq.format, "B")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view_gene_seq);
 		return NULL;
@@ -198,7 +199,7 @@ static PyObject* DNAb_detecting_mutations(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	if (strcmp(view_gene_seq.format, "h")) {
+	if (strcmp(view_gene_seq.format, "B")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
 		PyBuffer_Release(&view_gene_seq);
 		return NULL;
@@ -264,7 +265,7 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 		return NULL;
 	}
 
-	if (strcmp(view_seq_bin1.format, "h") || strcmp(view_seq_bin2.format, "h")) {
+	if (strcmp(view_seq_bin1.format, "B") || strcmp(view_seq_bin2.format, "B")) {
 		PyErr_SetString(PyExc_TypeError, "Expecting 2 1-dimensional array of long int.");
 		PyBuffer_Release(&view_seq_bin1);
 		PyBuffer_Release(&view_seq_bin2);

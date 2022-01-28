@@ -29,7 +29,7 @@ typedef struct mutation_map {
 
 /******** DNA & GENES FUNCTION *********/
 
-long int* convert_to_binary(const char* dna_seq, const unsigned size);
+_Bool* convert_to_binary(const char* dna_seq, const unsigned size);
 char* binary_to_dna(_Bool * bin_dna_seq, const unsigned size);
 char* generating_mRNA(const _Bool* gene_seq,const long int seq_size);
 void detecting_genes(const _Bool *gene, const long int gene_size,
