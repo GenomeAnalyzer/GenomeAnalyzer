@@ -119,133 +119,6 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
     return seq_bin;
 }
 
-/**
- * Xor two binary array sequences.
- * 
- * in : seq_bin1 : first sequence in binary array format to xor
- * in : seq_size1 : seq_bin1 length (number total of used bits)
- * in : seq_bin2 : first sequence in binary array format to xor
- * in : seq_size2 : seq_bin2 length (number total of used bits)
- * out : xor : binary array sequence resulting from the xor operation between seq1 and seq2
- * 
- * Iterates over sequences value per value. 
- * Xor the two sequences values since its value is the same length.
- * If one sequence is larger than the other, shift the last value of the smaller sequence to xor it with the other value.
- * Values from the largest binary array are assigned to the xor result. (x^0 = x)
- */
-long int* xor_binary_array(long int* const seq_bin1, const unsigned seq_size1,
-                           long int * const seq_bin2, const unsigned seq_size2){
-
-    // size of the binary array type used
-    long int intsize = int_SIZE + 1;
-
-    long int* s1, * s2;
-    long int ss1, ss2;
-    long int sbs1, sbs2;
-
-    // Find the greater binary array, and rename them
-    if (seq_size1 >= seq_size2) { // if s1 is greater or equal than s2
-        s1 = seq_bin1;
-        s2 = seq_bin2;
-        ss1 = seq_size1 / intsize + ((seq_size1 / intsize) % intsize != 0);
-        sbs1 = seq_size1;
-        ss2 = seq_size2 / intsize + ((seq_size2 / intsize) % intsize != 0);
-        sbs2 = seq_size2;
-    }
-    else { // else if s2 is greater or equal than s1
-        s1 = seq_bin2;
-        s2 = seq_bin1;
-        ss1 = seq_size2 / intsize + ((seq_size2 / intsize) % intsize != 0);
-        sbs1 = seq_size2;
-        ss2 = seq_size1 / intsize + ((seq_size1 / intsize) % intsize != 0);
-        sbs2 = seq_size1;
-    }
-
-    if (ss1 == 0) ss1 = 1;
-    if (ss2 == 0) ss2 = 1;
-
-    long int it = 0;
-
-    // Allocate memory and verify it has been allocated
-    long int* xor = NULL;
-    xor = calloc(ss1, sizeof(*xor));
-    if (!xor)
-        return printf("ERROR: xor_binary_array: cannot allocate memory.\n"), NULL;
-
-    // Xor the two sequences values since its value is the same length.
-    for (it = 0; it < ss2 - 1; it++)
-        xor[it] = s1[it] ^ s2[it];
-
-    // If one sequence is larger than the other, shift the last value of the smaller sequence toxor it with the other value.
-    xor[it] = s1[it] ^ ((s2[it] << ((sbs1 - sbs2) % intsize)));
-    it++;
-
-    // Values from the largest binary array are assigned to the xor result. (x^0 = x)
-    for (it = ss2; it < ss1; it++)
-        xor[it] = s1[it];
-
-    return xor;
-}
-
-/**
- * Popcount a binary array sequence.
- * 
- * in : seq_bin : sequence in binary array format
- * in : seq_size : seq_bin length (number total of used bits)
- * out : bin_popcount : popcount of the seq : number of '1'
- * 
- * Iterates on seq_bin and for each value, adds its popcount to bin_popcount.
- */
-int popcount_binary_array(const long int *seq_bin, const long int seq_size){
-    int bin_popcount = 0;
-
-    // Find the size of the binary array
-    long int array_size = seq_size / int_SIZE;
-    if(seq_size % int_SIZE != 0) array_size++;
-
-    // Parse the binary array
-    for (long int i = 0; i < array_size; ++i)
-        bin_popcount += __builtin_popcount(seq_bin[i]);
-
-    return bin_popcount;
-}
-
-/**
- * Retrieve a piece of the binary array sequence.
- * 
- * in : seq_bin : sequence in binary array format
- * in : size : size of the binary requested
- * out : piece_seq_bin : the requested part of seq_bin, from pos_start and size.
- * 
- * Iterates on seq_bin from pos_start, size times and gets for each iteration its binary value.
- */
-long int* get_piece_binary_array(const long int* seq_bin, const long int pos_start, const long int size){
-    //Find the size of the output
-    long int array_size = (size) / int_SIZE + (size % int_SIZE != 0);
-    
-    // Allocate memory and verify it has been allocated
-    long int *piece_seq_bin = NULL;
-    piece_seq_bin = calloc(array_size, sizeof(*seq_bin));
-    if(!piece_seq_bin) 
-        return printf("ERROR: get_piece_binary_array: cannot allocate memory.\n"), NULL;
-
-    // stop position.
-    long int stop_pos = pos_start + size;
-
-    long j = 0;
-
-    //Parse the binary array,
-    //from the bit at 'pos_start' position to 'pos_stop' position
-    for(long i = pos_start ; i < stop_pos; i++){
-        change_binary_value(piece_seq_bin, j, get_binary_value(seq_bin,i));
-        j++;
-    }
-
-    return piece_seq_bin;
-}
-
-
-
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
 /***************************************/
@@ -756,22 +629,19 @@ float calculating_matching_score(const long int *seq1, long int start_pos1,const
     if (!seq1 || !seq2)
         return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
 
-    // First step: apply the xor operation between both arrays 
-    long int *seq1tmp;
-    seq1tmp = get_piece_binary_array(seq1, start_pos1, seq_size1);
+    int size = (seq_size1 > seq_size2) ? seq_size1 : seq_size2;
 
-    long int *seq2tmp;
-    seq2tmp = get_piece_binary_array(seq2, start_pos2, seq_size2);    
+    // nombre d'éléments dans tableau
+    int nb = size/ int_SIZE;
+    if(size % int_SIZE != 0)
+        nb++;
 
-    long int *xor = NULL;
-    xor = xor_binary_array(seq1tmp, seq_size1, seq2tmp, seq_size2);
-    // xor_size = max size between 'seq_size1' and 'seq_size2'
-    int xor_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
+    long int x = 0, pop = 0;
+    for(int i = 0; i < nb; ++i)
+    {
+        x = seq1[i] ^ seq2[i];
+        pop += __builtin_popcountl(x);
+    }
 
-    //Second step: count the number of bits whose value is 1 on the result
-    int pop = popcount_binary_array(xor, xor_size);
-
-    //Last step: compute the percentage
-    float y = ((float)pop * 100.0) / (float)xor_size;
-    return 100.0 - y;
+    return 100.0 - (float)(pop * 100.0 / (size));
 }

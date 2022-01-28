@@ -54,34 +54,6 @@ def test_set_binary_array():
 	# assert resbin == [2101911378, 172292753, 4029142153] # unsigned int
 	assert resbin == [-3131702537379864750 , -9223372036849555181] # long int
 
-def test_xor_binary_array():
-  	# Test if the algorithm is OK
-	# 00000 xor 11111
-	assert [0] == DNA_bin.xor_binary_array(array.array('l', [31]), array.array('l', [31]))
-	assert [0b111] == DNA_bin.xor_binary_array(array.array('l', [0b111]), array.array('l', [0b000]))
-	assert [0b1111] == DNA_bin.xor_binary_array(array.array('l', [0b11111]), array.array('l', [0b100]))
-	assert [0b11] == DNA_bin.xor_binary_array(array.array('l', [0b11111]), array.array('l', [0b111]))
-	assert [0b1111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b1111111111111111111111111111111]), array.array('l', [0b0000000000000000000000000000000]))
-	# assert [0b111, 0b100] == DNA_bin.xor_binary_array(array.array('l', [0b111, 0b100]), array.array('l', [0b0]))
-	assert [0b111] == DNA_bin.xor_binary_array(array.array('l', [0b111, 0b100]), array.array('l', [0b0]))
-	assert [0b11111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b11111111111111111111111111111111]), array.array('l', [0b00000000000000000000000000000000]))
-	assert [0b11111111111111111111111111111111,  0b11111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b11111111111111111111111111111111, 0b11111111111111111111111111111111, 0b11111111111111111111111111111111]), array.array('l', [0b0]))
-	assert [0b111, 0b11111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b11111111111111111111111111111111, 0b11111111111111111111111111111111, 0b11111111111111111111111111111111]), array.array('l', [0b11111111111111111111111111111000, 0b0, 0b0]))
-	assert [0b111] == DNA_bin.xor_binary_array(array.array('l', [0b11111111111111111111111111111111, 0b11111111111111111111111111111000]), array.array('l', [0b11111111111111111111111111111000, 0b11111111111111111111111111111111]))
-	assert [0b11111111111111111111111111111111] == DNA_bin.xor_binary_array(array.array('l', [0b111, 0b11111111111111111111111111111000]), array.array('l', [0b11111111111111111111111111111000, 0b111]))
-	# 11111 xor 11111
-	assert [31] == DNA_bin.xor_binary_array(array.array('l', [0]), array.array('l', [31]))
-
-def test_popcount_binary_array():
-	# Test for all binaries from 00000 to 11111
-	for i in range(0,32):
-		popc_expected_result = int(i%2) + int(i/2%2) + int(i/4%2) + int(i/8%2) + int(i/16%2)
-		popc_result = DNA_bin.popcount_binary_array(array.array('l', [i]))
-		assert popc_expected_result == popc_result
-
-	# 9350764 = 001101100111010101110001
-	assert 13 == DNA_bin.popcount_binary_array(array.array('l', [9350764]))
-
 def test_convert_to_binary():
 	# Test if the algorithm is OK
 
@@ -132,10 +104,10 @@ def test_calculating_matching_score():
 	# --- With different size
 	#  GACCCGAC = 0100101010010010 = {18770}
 	#  TTTCAGGCTC = 11111110000101101110 = {485503}
-	assert 25.0 == DNA_bin.calculating_matching_score(array.array('l', [18770]), 0, 16, array.array('l', [485503]), 0, 20)
+	assert 55.0 == DNA_bin.calculating_matching_score(array.array('l', [18770]), 0, 16, array.array('l', [485503]), 0, 20)
 	#  TTTCAGGCTT = 11111110000101101111 = {1009791}
 	#  GACCTTCGA = 1001010111110010 = {40786}
-	assert 35.0 == DNA_bin.calculating_matching_score(array.array('l', [1009791]), 0, 20, array.array('l', [40786]), 0, 16)
+	assert 25.0 == DNA_bin.calculating_matching_score(array.array('l', [1009791]), 0, 20, array.array('l', [40786]), 0, 16)
 
 	# Test whether the function correctly detects errors:
 	# --- NULL error
