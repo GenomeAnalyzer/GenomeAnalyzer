@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "rdtsc.h"
-#include "../gene.h"
+#include "../versions/naive/headers/gene.h"
 #include <string.h>
 
 #define MAX 31000

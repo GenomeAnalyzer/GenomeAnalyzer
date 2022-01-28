@@ -19,7 +19,7 @@ else
 	GCCFLAGS = -g -march=native -mavx2 -Ofast -funroll-loops -finline-functions -ftree-vectorize
 	CLANGFLAGS = -g -march=native -mavx2 -Ofast -funroll-loops -finline-functions -ftree-vectorize
 	ICCFLAGS = -g -xhost -mavx2 -Ofast -funroll-all-loops -finline-functions
-endif 
+endif
 
 .PHONY: clean all check
 
@@ -32,28 +32,28 @@ else
 all: gcc_nobin gcc_bin llvm_nobin llvm_bin
 endif
 
-gcc_nobin: main.c ../gene.c
+gcc_nobin: main.c ../versions/naive/src/gene.c
 	$(GCC) $(GCCFLAGS) -o $@ $^
 	
-gcc_bin: main_bin.c ../gene_bin.c
+gcc_bin: main_bin.c ../versions/bin/src/gene_bin.c
 	$(GCC) $(GCCFLAGS) -o $@ $^
 
-llvm_nobin: main.c ../gene.c
+llvm_nobin: main.c ../versions/naive/src/gene.c
 	$(CLANG) $(CLANGFLAGS) -o $@ $^
 	
-llvm_bin: main_bin.c ../gene_bin.c
+llvm_bin: main_bin.c ../versions/bin/src/gene_bin.c
 	$(CLANG) $(CLANGFLAGS) -o $@ $^
 
-clang_nobin: main.c ../gene.c
+clang_nobin: main.c ../versions/naive/src/gene.c
 	$(CLANG) $(CLANGFLAGS) -o $@ $^
 	
-clang_bin: main_bin.c ../gene_bin.c
+clang_bin: main_bin.c ../versions/bin/src/gene_bin.c
 	$(CLANG) $(CLANGFLAGS) -o $@ $^
 
-icc_nobin: main.c ../gene.c
+icc_nobin: main.c ../versions/naive/src/gene.c
 	$(ICC) $(ICCFLAGS) -o $@ $^
 	
-icc_bin: main_bin.c ../gene_bin.c
+icc_bin: main_bin.c ../versions/bin/src/gene_bin.c
 	$(ICC) $(ICCFLAGS) -o $@ $^
 
 clean :
