@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	seq_short = convert_to_binary(seq_char, 2 * seq_char_size);
+    	seq_short = convert_to_binary(seq_char,  seq_char_size);
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		rna_seq_short = generating_mRNA(seq_short, 2 * seq_char_size);
+		rna_seq_short = generating_mRNA(seq_short,  seq_char_size);
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		detecting_genes(seq_long, 2 * seq_char_size, &g);
+		detecting_genes(seq_long,  seq_char_size, &g);
 	}
 	after = rdtsc();
 	elapsed = (double)(after - before);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		aa_seq_short = generating_amino_acid_chain(seq_short, 2 * seq_char_size);
+		aa_seq_short = generating_amino_acid_chain(seq_short,  seq_char_size);
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	detecting_mutations(seq_short, 2 * seq_char_size, m);;
+    	detecting_mutations(seq_short,  seq_char_size, m);;
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		cms = calculating_matching_score(seq_short, 2 * seq_char_size, seq_short2, 2 * seq_char_size2);
+		cms = calculating_matching_score(seq_short, 2 * seq_char_size, seq_short2,  seq_char_size2);
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
