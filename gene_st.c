@@ -181,7 +181,7 @@ char* generating_mRNA(const seq* gene_seq, const long int seq_size) {
     int j = 0;
     // Parse the binary DNA sequence two by two
     for (unsigned i = 0; i < seq_size; i += 2) {
-        printf("%d\n",gene_seq[i].bit);
+        //printf("%d\n",gene_seq[i].bit);
         switch (gene_seq[i].bit) {
         case 0:
             if (gene_seq[i + 1].bit == 0)

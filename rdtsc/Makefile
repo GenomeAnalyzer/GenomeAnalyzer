@@ -27,11 +27,14 @@ endif
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 ifeq ($(IFICC),icc)
-all: gcc_bit  clang_bit  icc_bit
+all: gcc_bit  clang_bit  icc_bit gcc_st clang_st icc_st
 else
-all:  gcc_bit  llvm_bit
+all:  gcc_bit  llvm_bit gcc_st llvm_st
 endif
 
+
+gcc_plot: main_plot.c ../gene_st.c
+	$(GCC) $(GCCFLAGS) -g -o $@ $^
 
 gcc_bit: main_bit.c ../gene_bit.c
 	$(GCC) $(GCCFLAGS) -g -o $@ $^
@@ -45,5 +48,17 @@ clang_bit: main_bit.c ../gene_bit.c
 icc_bit: main_bit.c ../gene_bit.c
 	$(ICC) $(ICCFLAGS) -o $@ $^
 
+gcc_st: main_st.c ../gene_st.c
+	$(GCC) $(GCCFLAGS) -g -o $@ $^
+
+llvm_st: main_st.c ../gene_st.c
+	$(CLANG) $(CLANGFLAGS) -o $@ $^
+
+clang_st: main_st.c ../gene_st.c
+	$(CLANG) $(CLANGFLAGS) -o $@ $^
+
+icc_st: main_st.c ../gene_st.c
+	$(ICC) $(ICCFLAGS) -o $@ $^	
+
 clean :
-	@rm -f *.o  gcc_bit clang_bit  llvm_bit icc_bit
+	@rm -f *.o  gcc_bit clang_bit  llvm_bit icc_bit gcc_st clang_st llvm_st icc_st
