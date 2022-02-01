@@ -33,6 +33,11 @@ endif
 #For all compiling, building and executing
 all: DNA check 
 
+#For installing python setup and setup_bin
+install:
+	sudo python3 $(V0PYTHON)/setup.py install
+	sudo python3 $(V1PYTHON)/setup_bin.py install
+
 #For only building and testing interface
 build: DNA DNA_bin
 
