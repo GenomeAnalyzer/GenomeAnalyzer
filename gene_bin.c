@@ -127,7 +127,15 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
     // Parse the DNA sequence, per nucleotides
     for (long int i = 0; i < seq_size; ++i){
 
-        int c = seq_char[i];
+        //Default char is put to A to handle the warning : wrong size input
+        //Add '00' bits in this case
+        int c = 'A';
+        if(!seq_char[i]){
+            printf("WARNING: set_binary_array: size input is different than the char sequence.\n");
+        }
+        else{
+            c = seq_char[i];
+        }
         //get the 2-bits value of char read
         int bit_value[2];
         bit_value[0] = L[c][0];

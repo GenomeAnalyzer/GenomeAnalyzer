@@ -58,7 +58,7 @@ static void test_convert_to_binary(void** state) {
 
   // Give a different size than the char sequence.
   assert_int_equal(0b011100, convert_to_binary("ATCG", 3)[0]);
-  //assert_int_equal(0b0010011100, convert_to_binary("ATCG", 5)[0]); // Expect 00 for high order bit
+  assert_int_equal(0b0010011100, convert_to_binary("ATCG", 5)[0]); // Expect 00 for high order bit
 
   char* seq_char = "ATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCG";
   assert_int_equal(0b10011100100111001001110010011100, convert_to_binary(seq_char, 16)[0]);
@@ -81,7 +81,7 @@ static void test_convert_to_binary(void** state) {
   // Test whether the function correctly detects errors:
   // --- Unknown letter in sequence
   long int* res2 = convert_to_binary("AK", 10);
-  //assert_ptr_equal(NULL, res2[2]);
+  assert_ptr_equal(NULL, res2[2]);
 }
 
 static void test_set_binary_array(void ** state){
