@@ -127,11 +127,11 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
     // Parse the DNA sequence, per nucleotides
     for (long int i = 0; i < seq_size; ++i){
 
+        int c = seq_char[i];
         //get the 2-bits value of char read
         int bit_value[2];
-        bit_value[0] = L[i][0];
-        bit_value[1] = L[i][1];
-        getbitsfromchar(&LUT,seq_char[i],&bit_value);
+        bit_value[0] = L[c][0];
+        bit_value[1] = L[c][1];
 
         if(bit_value[0] != -1){
             // Set seq_bin bit values according to the nucleotide read
