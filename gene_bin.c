@@ -140,7 +140,7 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
             pos += 2;
         }
         else{
-            return printf("ERROR: set_binary_array: wrong letter.\n"), NULL;
+            return printf("ERROR: set_binary_array: Unknown letter in sequence.\n"), NULL;
         }
     }
     return seq_bin;
