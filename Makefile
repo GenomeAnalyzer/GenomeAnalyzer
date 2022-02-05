@@ -25,7 +25,7 @@ BIN = ./bin
 OUTPUT = ./output
 BUILD = ./build
 
-$(shell mkdir -p $(BIN) $(OUTPUT))
+$(shell mkdir -p $(BIN) $(OUTPUT) $(BUILD))
 
 .PHONY: clean all check build
 
