@@ -27,7 +27,7 @@ BUILD = ./build
 
 $(shell mkdir -p $(BIN) $(OUTPUT) $(BUILD))
 
-.PHONY: clean all check build
+.PHONY: clean all check build install
 
 
 ifeq (run, $(firstword $(MAKECMDGOALS)))
@@ -39,9 +39,15 @@ endif
 all: DNA check 
 
 #For installing python setup and setup_bin
-install:
+install: setup_naive setup_bin setup_bool
+
+setup_naive:
 	sudo python3 $(V0PYTHON)/setup.py install
+
+setup_bin:
 	sudo python3 $(V1PYTHON)/setup_bin.py install
+
+setup_bool:
 	sudo python3 $(V2PYTHON)/setup_bool.py install	
 
 #For only building and testing interface
