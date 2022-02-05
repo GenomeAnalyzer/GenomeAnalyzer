@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "gene.h"
+#include "../headers/gene.h"
 
 /**
  * in : dna_seq : array of char

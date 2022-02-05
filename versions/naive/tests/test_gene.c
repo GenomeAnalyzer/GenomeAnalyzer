@@ -5,8 +5,8 @@
 #include <cmocka.h>
 #include <string.h>
 
-#include "gene.c"
-#include "gene.h"
+#include "../src/gene.c"
+#include "../headers/gene.h"
 
 static void test_generating_mRNA(void ** state){
   // Test if the algorithm is OK

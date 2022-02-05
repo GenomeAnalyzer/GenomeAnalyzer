@@ -5,8 +5,8 @@
 #include <stddef.h>
 #include <cmocka.h>
 
-#include "gene_bin.h"
-#include "gene_bin.c"
+#include "../headers/gene_bin.h"
+#include "../src/gene_bin.c"
 
 static void test_get_binary_value(void ** state){
   // Test if the algorithm is OK

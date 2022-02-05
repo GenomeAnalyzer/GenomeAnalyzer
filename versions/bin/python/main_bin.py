@@ -2,6 +2,7 @@
 import DNA_bin
 import array
 import glob
+import sys
 import moduleDNA as m
 import os
 import sys
@@ -57,16 +58,17 @@ def main():
   </head>
 
   """
-  try:
-    if not sys.argv[1].isnumeric():
-      raise NameError('nan')
+  try:  
+    if len(sys.argv) == 1:
+      fin = 25698  
+    else:    
+      if not sys.argv[1].isnumeric():
+        raise NameError('nan')
+      else:
+        fin = sys.argv[1]
   except NameError:
     print("Arg is not a number")
     raise
-  if len(sys.argv) == 1:
-    fin = 25698
-  else:
-    fin = sys.argv[1]
 
   fhc = open('output/comp_bin.html','w')
   messagematch = start+ "<h1>Comparaison entre séquences</h1><a href=\"rapport_bin.html\" target=\"_blank\"><input type=\"button\" value=\"Retour\"></a>"

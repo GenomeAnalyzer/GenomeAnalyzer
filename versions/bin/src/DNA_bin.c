@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "gene_bin.h"
+#include "../headers/gene_bin.h"
 
 
 /********** C-PYTHON INTERFACE DEFINTIONS **********/
