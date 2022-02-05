@@ -27,7 +27,7 @@ BUILD = ./build
 
 $(shell mkdir -p $(BIN) $(OUTPUT))
 
-.PHONY: clean all check
+.PHONY: clean all check build
 
 
 ifeq (run, $(firstword $(MAKECMDGOALS)))
