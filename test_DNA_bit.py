@@ -7,8 +7,26 @@ import moduleDNA as m
 ###### Verify if C extension in Python is working #####
 
 def test_DNA_convert_to_binary():
+  	# --- Test all valid letters
+  	# A 00 T 11 C 10 G 01
+
 	res = DNA_bit.convert_to_binary("AATTG",5)
 	assert res == [0,0,0,0,1,1,1,1,0,1]
+	res = DNA_bit.convert_to_binary("ATCGATCGATCG", 12)
+	assert res == [0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1]
+    # Give a different size than the char sequence.
+	res = DNA_bit.convert_to_binary("ATCG", 3)
+	assert res == [0,0,1 ,1,1,0]
+
+	res = DNA_bit.convert_to_binary("ATCG", 5)
+	assert res == [0,0,1 ,1,1,0,0,1,0,0]
+
+	res = DNA_bit.convert_to_binary("ATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCG", 16)
+	assert res == [0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1]	
+
+	res = DNA_bit.convert_to_binary("ATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCG", 32)
+	assert res == [0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1,0,0,1 ,1,1,0,0,1]	
+
 
 #def test_DNA_module_read_file():
 #	res = m.read_file("fastas/test.fasta")
