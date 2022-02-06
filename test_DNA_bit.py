@@ -57,6 +57,39 @@ def test_DNA_detecting_genes():
 	a = DNA_bit.detecting_genes(bytearray([0,0,1,1,0,1,0,0,1,1,0,1,1,1,0,0,0,0]))
 	assert a == [[6,17]]
 
+	# Test if the algorithm is OK in a basic case: xxxAUGxxxxUAAxxx
+  	#                                             AGC AUG AGGGCC UAA CGU
+  	# The algorithm should detect one gene from the start codon to the stop codon
+  
+	res = DNA_bit.detecting_genes(bytearray(DNA_bit.convert_to_binary("AGCATGAGGGCCTAACGT", 21)))
+	assert res == [[6,29]]
+
+  	# Test if the algorithm is OK in a multiple "start" case: xxxxAUGxxxxAUGxxxUAAxxx
+  	#                                                        AGC AUG AGGGCC AUG CGAACG UAA CGU
+  	# The algorithm should detect one gene from the 2nd start codon to the stop codon
+	
+	res =  DNA_bit.detecting_genes(bytearray(DNA_bit.convert_to_binary("AGCATGAGGGCCATGCGAACGTAACGT", 27)))
+	assert res == [[24,47]]
+
+  	# Test if the algorithm is OK in a multiple "stop" case: xxxxAUGxxxxUAAxxxUAAxxx
+  	#                                                         AGC AUG CACGCG UAA GCACTG UAA CGU
+  	# The algorithm should detect one gene from the start codon to the first stop codon
+	res =  DNA_bit.detecting_genes(bytearray(DNA_bit.convert_to_binary("AGCATGCACGCGTAAGCACTGTAACGT", 27)))
+	assert res == [[6,29]]
+
+	# Test if the algorithm is OK in a non presence of "start/stop" case: xxxxxxxxx
+    #                                                                   CGCCGCGCCGCGGGCG
+    # The algorithm should not detect any genes
+	res =  DNA_bit.detecting_genes(bytearray(DNA_bit.convert_to_binary("CGCCGCGCCGCGGGCG", 16)))
+	assert len(res) == 0
+
+	# Test if the algorithm is OK in a multiple gene case: xxxxAUGxxxxUAGxxxAUGxxxUAAxxx
+    #                                                    AGC AUG GCGCAC UAG CGCCCG AUG CUGGGG UAA CGU
+  	# The algorithm should detect two genes
+	res =  DNA_bit.detecting_genes(bytearray(DNA_bit.convert_to_binary("AGCATGGCGCACTAGCGCCCGATGCTGGGGTAACGT", 36)))
+	assert res == [[6,29],[42,65]]
+
+
 def test_DNA_generating_amino_acid_chain():
 	aa = "AATTGGCCA"
 
