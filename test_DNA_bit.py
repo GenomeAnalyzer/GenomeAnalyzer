@@ -33,8 +33,25 @@ def test_DNA_convert_to_binary():
 #	assert res == "AATTG"
 
 def test_DNA_generating_mRNA():
+  	# --- Test all valid letters
+  	# A 00 U 11 C 10 G 01	
 	res = DNA_bit.generating_mRNA(bytearray([0,1,0,0,1,1,0,0,0,1,1,0]))
 	assert res == b"GAUAGC"
+
+	res = DNA_bit.generating_mRNA(bytearray([0,0,1,1,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1]))
+	assert res == b"AUGCGUGGGUAG"	
+
+	res = DNA_bit.generating_mRNA(bytearray([0,0,1,1,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1,0,0,1,1,0,1,1,0]))
+	assert res == b"AUGCGUGGGUAGAUGC"	
+
+	res = DNA_bit.generating_mRNA(bytearray([0,0,1,1,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]))
+	assert res == b"AUGCGUGGGUAGAUGCAAAAAAAAAAAAAAAA"	
+
+	res = DNA_bit.generating_mRNA(bytearray([0,0,1,1,0,1,1,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]))
+	assert res == b"AUGCGUGGGUAGAUGCAAAAAAAAAAAAAAAAGUGGGUAGAAAAAAAAAAAAAAAAAAAAAAAA"	
+
+
+
 
 def test_DNA_detecting_genes():
 	a = DNA_bit.detecting_genes(bytearray([0,0,1,1,0,1,0,0,1,1,0,1,1,1,0,0,0,0]))
