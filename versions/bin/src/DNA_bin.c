@@ -65,81 +65,28 @@ static PyObject* DNAb_get_binary_value(PyObject* self, PyObject* args) {
 	return Py_BuildValue("l", get_binary_value(view_seq_bin.buf, pos));
 }
 
-static PyObject* DNAb_change_binary_value(PyObject* self, PyObject* args) {
-	Py_buffer view_seq_bin;
-	PyObject* obj_seq_bin = NULL;
-	int pos = 0;
-	int value = 0;
-
-	//Get the parameters (1-dimensional array of long int, int position, int value)
-	if (!PyArg_ParseTuple(args, "Oii", &obj_seq_bin, &pos, &value))
-		return NULL;
-
-	//Get the array memory view
-	if (PyObject_GetBuffer(obj_seq_bin, &view_seq_bin, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
-		return NULL;
-
-	if (view_seq_bin.ndim != 1) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array.");
-		PyBuffer_Release(&view_seq_bin);
-		return NULL;
-	}
-
-	if (strcmp(view_seq_bin.format, "l")) {
-		PyErr_SetString(PyExc_TypeError, "Expecting a 1-dimensional array of long int.");
-		PyBuffer_Release(&view_seq_bin);
-		return NULL;
-	}
-
-	long int* array = change_binary_value(view_seq_bin.buf, pos, value);
-
-	PyObject* pylist = PyList_New(view_seq_bin.shape[0]);
-	for (int i = 0; i < view_seq_bin.shape[0]; i++)
-		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
-
-	return pylist;
-}
-
-static PyObject* DNAb_set_binary_array(PyObject* self, PyObject* args) {
-	char* seq_char;
-	long int seq_size = 0;
-
-	//Get the parameters (1-dimensional array of char, and its length)
-	if (!PyArg_ParseTuple(args, "si", &seq_char, &seq_size))
-		return NULL;
-
-	long int* array = set_binary_array(seq_char, seq_size);
-	long int array_size = 2 * seq_size / int_SIZE;
-	array_size += (2 * seq_size % int_SIZE != 0);
-
-	PyObject* pylist = PyList_New(array_size);
-
-	for (long int i = 0; i < array_size; i++)
-		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
-
-	return pylist;
-}
-
 
 /******** DNA & GENES FUNCTIONS *********/
 
 //////////////// Convert to binary
 static PyObject* DNAb_convert_to_binary(PyObject* self, PyObject* args) {
 	char* seq_char;
-	long int seq_size = 0;
+	int seq_char_size = 0;
+	int seq_bin_size = 0;
 
 	//Get the parameters (1-dimensional array of char, and its length)
-	if (!PyArg_ParseTuple(args, "si", &seq_char, &seq_size))
+	if (!PyArg_ParseTuple(args, "sii", &seq_char, &seq_char_size, &seq_bin_size))
 		return NULL;
 
-	long int* array = set_binary_array(seq_char, seq_size);
-	long int array_size = 2 * seq_size / int_SIZE;
-	array_size += (2 * seq_size % int_SIZE != 0);
+	long int* array = calloc(seq_bin_size, sizeof(long int));
+	convert_to_binary(array, seq_char, seq_char_size);
 
-	PyObject* pylist = PyList_New(array_size);
+	PyObject* pylist = PyList_New(seq_bin_size);
 
-	for (long int i = 0; i < array_size; i++)
+	for (int i = 0; i < seq_bin_size; ++i)
 		PyList_SetItem(pylist, i, PyLong_FromLong(array[i]));
+
+	free(array);
 
 	return pylist;
 }
@@ -391,8 +338,6 @@ static PyObject* DNAb_calculating_matching_score(PyObject* self, PyObject* args)
 //Register the methods to be made available Python side
 static PyMethodDef DNAb_methods [] = {
 	{ "get_binary_value", DNAb_get_binary_value, METH_VARARGS, "Retrieve one bit from the binary array sequence"},
-	{ "change_binary_value", DNAb_change_binary_value, METH_VARARGS, "Change one bit in the binary array sequence"},
-	{ "set_binary_array", DNAb_set_binary_array, METH_VARARGS, "Convert a DNA base sequence to its binary array format"},
 	{ "convert_to_binary", DNAb_convert_to_binary, METH_VARARGS, "Convert a DNA base sequence to its binary array format"},
 	{ "binary_to_dna", DNAb_binary_to_dna, METH_VARARGS, "Convert a DNA sequence in binary array format to its DNA bases"},
 	{ "generating_mRNA", DNAb_generating_mRNA, METH_VARARGS, "Convert a DNA sequence in binary array format to its mRNA sequence"},

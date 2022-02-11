@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
+#include <ctype.h>
 
 #include "../headers/gene_bin.h"
 
@@ -24,100 +26,6 @@ int get_binary_value(const long int *seq_bin, const int pos){
     return seq_bin[new_pos] & ((long)1 << (pos - new_pos)) ? 1 : 0;
 }
 
-/**
- * Change one bit in the binary array sequence.
- * 
- * in : seq_bin : sequence in binary array format
- * in : pos : position of the bit to be replaced (0 <= pos < size_seq * 2)
- * in : value : new bit value
- * out : seq_bin : sequence in binary array format with the one bit changed
- * 
- * Set the bit value of seq_bin at pos position to value
- */
-long int* change_binary_value(long int *seq_bin, const int pos, const int value){
-    int new_pos = pos > int_SIZE ? pos / int_SIZE : 0;
-
-    if (value)
-        seq_bin[new_pos] |= ((long)1 << (pos - new_pos));
-    else
-        seq_bin[new_pos] &= ~((long)1 << (pos - new_pos));
-    return seq_bin;
-}
-
-/**
- * Convert a char formated DNA sequence to its binary array format.
- * 
- * in : seq_char : the DNA seq in it's char* mode
- * in : seq_size : size of the array 'seq_char' (number of nucleotides)
- * out : seq_bin : sequence in binary array format
- * 
- * Iterates over seq_char and sets seq_bin bit values according to the nucleotide read.
- * The non-ACGT nucleotides corresponding to several possible nucleotides are arbitrarily defined.
- */
-long int* set_binary_array(const char *seq_char, const unsigned seq_size){
-    // Number of bits needed to transform seq_char into a binary array.
-    int seq_bin_size = 2 * seq_size;
-
-    // Binary array new size
-    int nb = seq_bin_size / int_SIZE;
-    if(seq_bin_size % int_SIZE != 0)
-        nb++;
-
-    // Allocate memory and verify it has been allocated
-    long int* seq_bin = NULL;
-    seq_bin = calloc(nb, sizeof(long int));
-    if(!seq_bin)
-        return printf("ERROR: set_binary_array: cannot allocate memory.\n"), NULL;
-
-    int pos = 0;
-    // Parse the DNA sequence, per nucleotides
-    for (long int i = 0; i < seq_size; ++i){
-        // Set seq_bin bit values according to the nucleotide read
-        switch(seq_char[i]){
-        case 'A': // A = 00
-            break;
-        case 'T': // T = 11
-            change_binary_value(seq_bin, pos, 1);
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'G': // G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'C': // C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'N': // N = A = 00
-            break;
-        case 'R': // R = A = 00
-            break;
-        case 'Y': // Y = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'K': // K = G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'M': // M = A = 00
-            break;
-        case 'S': // S = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'W': // W = A = 00
-            break;
-        case 'B': // B = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'D': // D = A = 00
-            break;
-        case 'H': // H = G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'V': // V = A = 00
-            break;
-        }
-        pos += 2;
-    }
-    return seq_bin;
-}
 
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
@@ -127,14 +35,97 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
 /**
  * Convert a DNA base sequence to its binary array format.
  * 
- * in : dna_seq : DNA sequence in char array format
- * in : size : dna_seq length = number of nucleotides (= number of letters)
- * out : seq : DNA sequence in binary array format
+ * in : seq_char : DNA sequence in char array format
+ * in : seq_char_size : dna_seq length = number of nucleotides (= number of letters)
+ * in/out : seq_bin : DNA sequence in binary array format
  * 
- * Calls set_binary_array.
+ * Set each int64 element of seq_bin from bit values according to the nucleotide read.
+ * The non-ACGT nucleotides corresponding to several possible nucleotides are arbitrarily defined.
  */
-long int* convert_to_binary(const char* dna_seq, const unsigned size){
-    return set_binary_array(dna_seq, size);
+void convert_to_binary(long int *seq_bin, const char* seq_char, const unsigned seq_char_size)
+{     
+    int i_bin = 0;
+
+    //Initialisation of lookup table
+    typedef int lookuptable[2];
+
+    lookuptable L[90];
+    for(int i = 0; i < 90; ++i)
+    {
+        L[i][0] = -1;
+        L[i][1] = -1;
+    }
+
+    //Bit values according to ASCII code of nucleotides
+    L[65][0] = 0;
+    L[65][1] = 0;
+
+    L[66][0] = 1;
+    L[66][1] = 0;
+    
+    L[67][0] = 1;
+    L[67][1] = 0;
+    
+    L[68][0] = 0;
+    L[68][1] = 0;
+    
+    L[71][0] = 0;
+    L[71][1] = 1;
+    
+    L[72][0] = 0;
+    L[72][1] = 1;
+    
+    L[75][0] = 0;
+    L[75][1] = 1;
+    
+    L[77][0] = 0;
+    L[77][1] = 0;
+    
+    L[78][0] = 0;
+    L[78][1] = 0;
+    
+    L[82][0] = 0;
+    L[82][1] = 0;
+    
+    L[83][0] = 1;
+    L[83][1] = 0;
+    
+    L[84][0] = 1;
+    L[84][1] = 1;
+    
+    L[86][0] = 0;
+    L[86][1] = 0;
+    
+    L[87][0] = 0;
+    L[87][1] = 0;
+    
+    L[89][0] = 1;
+    L[89][1] = 0;
+
+    // Parse the DNA sequence, per nucleotides
+    for (unsigned i = 0; i < seq_char_size; ++i)
+    {
+        int c = seq_char[i];
+
+        //get the 2-bits value of char read
+        int bit_value[2];
+        bit_value[0] = L[c][0];
+        bit_value[1] = L[c][1];
+
+        if(bit_value[0]+1) //shift then add the first bit then shift then add the second bit
+        {   
+            seq_bin[i_bin] <<= 1;
+            seq_bin[i_bin] = ((long int)(seq_bin[i_bin] + bit_value[0]) << 1) + (long int)bit_value[1];
+        }
+        else if(!(c-10)) //if \n, set next element of seq_bin 
+            ++i_bin;
+        else if(isalpha(seq_char[i]))
+        {
+            printf("ERROR: convert_to_binary: Unknown letter in sequence.\n");
+            seq_bin[0] = -1;
+            break;
+        }
+    }
 }
 
 //////////////// Convert binary aa to codon
