@@ -27,9 +27,9 @@ endif
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 ifeq ($(IFICC),icc)
-all: gcc_nobin gcc_bin clang_nobin clang_bin icc_nobin icc_bin
+all: gcc_nobin gcc_bin gcc_bool clang_nobin clang_bin clang_bool icc_nobin icc_bin icc_bool
 else
-all: gcc_nobin gcc_bin llvm_nobin llvm_bin
+all: gcc_nobin gcc_bin gcc_bool llvm_nobin llvm_bin llvm_bool
 endif
 
 gcc_nobin: main.c ../versions/naive/src/gene.c
@@ -38,10 +38,16 @@ gcc_nobin: main.c ../versions/naive/src/gene.c
 gcc_bin: main_bin.c ../versions/bin/src/gene_bin.c
 	$(GCC) $(GCCFLAGS) -o $@ $^
 
+gcc_bool: main_bool.c ../versions/bool/src/gene_bool.c
+	$(GCC) $(GCCFLAGS) -o $@ $^
+
 llvm_nobin: main.c ../versions/naive/src/gene.c
 	$(CLANG) $(CLANGFLAGS) -o $@ $^
 	
 llvm_bin: main_bin.c ../versions/bin/src/gene_bin.c
+	$(CLANG) $(CLANGFLAGS) -o $@ $^
+
+llvm_bool: main_bool.c ../versions/bool/src/gene_bool.c
 	$(CLANG) $(CLANGFLAGS) -o $@ $^
 
 clang_nobin: main.c ../versions/naive/src/gene.c
@@ -50,11 +56,17 @@ clang_nobin: main.c ../versions/naive/src/gene.c
 clang_bin: main_bin.c ../versions/bin/src/gene_bin.c
 	$(CLANG) $(CLANGFLAGS) -o $@ $^
 
+clang_bool: main_bool.c ../versions/bool/src/gene_bool.c
+	$(CLANG) $(CLANGFLAGS) -o $@ $^
+
 icc_nobin: main.c ../versions/naive/src/gene.c
 	$(ICC) $(ICCFLAGS) -o $@ $^
 	
 icc_bin: main_bin.c ../versions/bin/src/gene_bin.c
 	$(ICC) $(ICCFLAGS) -o $@ $^
 
+icc_bool: main_bool.c ../versions/bool/src/gene_bool.c
+	$(ICC) $(ICCFLAGS) -o $@ $^
+
 clean :
-	@rm -f *.o gcc_nobin gcc_bin clang_nobin clang_bin llvm_nobin llvm_bin icc_nobin icc_bin
+	@rm -f *.o gcc_nobin gcc_bin clang_nobin clang_bin llvm_nobin llvm_bin icc_nobin icc_bin gcc_bool llvm_bool clang_bool icc_bool
