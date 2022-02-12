@@ -25,49 +25,19 @@ def test_get_binary_value():
 		assert int(i/8%2) == DNA_bin.get_binary_value(seq_bin,3)
 		assert int(i/16%2) == DNA_bin.get_binary_value(seq_bin,4)
 
-def test_change_binary_value():
-	# Test if the algorithm is OK
-
-  	# 85 = 1010101
-	seq_bin = array.array('l', [85])
-	# Invert values of seq_bin
-	for i in range(0,7): DNA_bin.change_binary_value(seq_bin, i, i%2)
-	# 42 = 0101010
-	assert 42 == seq_bin[0]
-	# Invert back values of seq_bin
-	for i in range(0,7): DNA_bin.change_binary_value(seq_bin, i, int((i+1)%2))
-	assert 85 == seq_bin[0]
-
-def test_set_binary_array():
-	# Test if the algorithm is OK
-
-	assert [85] == DNA_bin.set_binary_array("CCCC", 4)
-	assert [170] == DNA_bin.set_binary_array("GGGG", 4)
-
-	assert [255] == DNA_bin.set_binary_array("TTTT", 4)
-	assert [0] == DNA_bin.set_binary_array("AAAA", 4)
-	assert [0] == DNA_bin.set_binary_array("AAAA", 4)
-
-	seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA"
-
-	resbin = DNA_bin.set_binary_array(seq_char, len(seq_char))
-	# assert resbin == [2101911378, 172292753, 4029142153] # unsigned int
-	assert resbin == [-3131702537379864750 , -9223372036849555181] # long int
-
 def test_convert_to_binary():
 	# Test if the algorithm is OK
 
-	assert [85] == DNA_bin.convert_to_binary("CCCC", 4)
-	assert [170] == DNA_bin.convert_to_binary("GGGG", 4)
+	assert [170] == DNA_bin.convert_to_binary("CCCC", 4, 1)
+	assert [85] == DNA_bin.convert_to_binary("GGGG", 4, 1)
 
-	assert [255] == DNA_bin.convert_to_binary("TTTT", 4)
-	assert [0] == DNA_bin.convert_to_binary("AAAA", 4)
+	assert [255] == DNA_bin.convert_to_binary("TTTT", 4, 1)
+	assert [0] == DNA_bin.convert_to_binary("AAAA", 4, 1)
 
-	seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGAGACCTTCGA"
+	seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCT\nTCGAGACCTTCGA"
 
-	resbin = DNA_bin.convert_to_binary(seq_char, len(seq_char))
-	# assert resbin == [2101911378, 172292753, 4029142153] # if unsigned int
-	assert resbin == [-3131702537379864750, -9223372036849555181] # if long int
+	resbin = DNA_bin.convert_to_binary(seq_char, len(seq_char), 2)
+	assert resbin == [5402369836413063467, 59845604]
 
 def test_generating_mRNA():
 	# Test if the algorithm is OK
