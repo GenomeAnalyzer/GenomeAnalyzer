@@ -32,7 +32,7 @@ build: DNA DNA_bin DNA_bool
 #Clean compilation files & output result
 clean :
 	find . -type d  -name "__pycache__" -exec rm -rv {} +
-	@rm -rf  build bin .pytest_cache output versions/bin/python/*.so output versions/naive/python/*.so versions/bool/python/*.so
+	@rm -rf  build bin .pytest_cache output versions/bin/python/*.so output versions/naive/python/*.so versions/bool/python/*.so mytests/*.so
 
 #For only executing tests
 check: run_test_gene test_DNA run_test_gene_bin test_DNA_bin test_DNA_bool
@@ -98,3 +98,12 @@ DNA_bool :
 
 test_DNA_bool : 
 	python3 -m pytest -s $(V2)/tests/test_DNA_bool.py
+
+
+# Converter fasta file in text file of 32 letters per line
+converter:
+	python3 fasta_converter.py
+
+# My Tests
+mytest:
+	python3 mytests/mymain.py
