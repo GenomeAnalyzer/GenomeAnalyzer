@@ -17,7 +17,7 @@ def convertbin(seq_char):
 	
 	return seq_bin_list
 
-file = "fastas/MN908947.3.fasta.txt"
+file = "fastas/LC528232.1.fasta.txt"
 read = m.read_fasta_txt(file)
 
 # print(read)
@@ -36,3 +36,10 @@ print("Converter time in Python : ", end-start)
 for i in range(len(seq_bin2)):
 	if(seq_bin[i] ^ seq_bin2[i]):
 		print("NON EGAUX")
+
+readn = read.replace('\n','')
+genes = DNA_bin.detecting_genes(array.array('l',seq_bin))
+for i in genes:
+	i[0] = int(i[0] >> 1)
+	i[1] = int(i[1] >> 1)
+	print(readn[i[0]:i[1]+1])
