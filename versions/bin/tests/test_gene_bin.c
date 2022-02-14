@@ -33,49 +33,47 @@ static void test_convert_to_binary(void** state) {
     // Check all valid letters.
     // Binary sequence is inverted.
     long int* array = calloc(1, sizeof(long int));
-    convert_to_binary(array, "ATCG", 4);
-    assert_int_equal(0b00111001, array[0]);
+    convert_to_binary(array, "ATCG\n", 5);
+    assert_int_equal(0x3900000000000000, array[0]);
 
     array = calloc(1, sizeof(long int));
-    convert_to_binary(array, "ATCGATCGATCG", 12);
-    assert_int_equal(0b001110010011100100111001, array[0]);
+    convert_to_binary(array, "ATCGATCGATCG\n", 13);
+    assert_int_equal(0x3939390000000000, array[0]);
 
     // Give a different size than the char sequence.
     array = calloc(1, sizeof(long int));
-    convert_to_binary(array, "ATCG", 3);
-    assert_int_equal(0b001110, array[0]);
+    convert_to_binary(array, "ATCG\n", 5);
+    assert_int_equal(0x3900000000000000, array[0]);
 
     array = calloc(1, sizeof(long int));
-    convert_to_binary(array, "ATCG", 5);
-    assert_int_equal(0b00111001, array[0]); // Expect 00 for high order bit
+    convert_to_binary(array, "ATCG\n", 6);
+    assert_int_equal(0x39, array[0]); // Expect 00 for low order bit
 
     char* seq_char = "ATCGATCGATCGATCGATCGATCGATCGATCG\nATCGATCGATCGATCGATCGATCGATCGATCG\n";
     array = calloc(3, sizeof(long int));
-    convert_to_binary(array, seq_char, 16);
-    assert_int_equal(0b00111001001110010011100100111001, array[0]);
-
-    array = calloc(3, sizeof(long int));
     convert_to_binary(array, seq_char, 33);
-    assert_int_equal(0b0011100100111001001110010011100100111001001110010011100100111001, array[0]);
+    assert_int_equal(0x3939393939393939, array[0]);
 
     array = calloc(3, sizeof(long int));
     convert_to_binary(array, seq_char, 66);
-    assert_int_equal(0b0011100100111001001110010011100100111001001110010011100100111001, array[1]);
+    assert_int_equal(0x3939393939393939, array[1]);
 
     // Check of a random sequence
-    seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCT\nTCGAGACCTTCGA";
-    unsigned seq_size = 46;
+    seq_char = "GACCTTCGAGACCTTCGAGACCTTCGAGACCT\nTCGAGACCTTCGA\n";
+    unsigned seq_size = 47;
     array = calloc(2, sizeof(long int));
     convert_to_binary(array, seq_char, seq_size);
 
-    long int seq_sol[2] = {5402369836413063467, 59845604};
+    long int seq_sol[2] = {5402369836413063467, (long unsigned int)59845604 << 38};
     assert_int_equal(seq_sol[0], array[0]);
     assert_int_equal(seq_sol[1], array[1]);
 
     // Test whether the function correctly detects errors:
     // --- Unknown letter in sequence
-    convert_to_binary(array, "AJ", 10);
+    convert_to_binary(array, "AJ\n", 10);
     assert_int_equal(-1, array[0]);
+
+    free(array);
 }
 
 // static void test_binary_to_dna(void ** state){
@@ -157,65 +155,77 @@ static void test_convert_to_binary(void** state) {
 // }
 
 
-// static void test_detecting_genes(void ** state){
-//     gene_map_t *gene_map = NULL;
-//     gene_map = malloc(sizeof(*gene_map));
+static void test_detecting_genes(void ** state){
+    gene_map_t gene_map;
+    gene_map.gene_start = malloc(sizeof(*gene_map.gene_start) * 3);
+    gene_map.gene_end = malloc(sizeof(*gene_map.gene_end) * 3);
+    gene_map.gene_start[0] = 0;
+    gene_map.gene_end[0] = 0;
+    gene_map.gene_start[1] = 0;
+    gene_map.gene_end[1] = 0;
+    gene_map.gene_start[2] = 0;
+    gene_map.gene_end[2] = 0;
 
-//     // Test if the algorithm is OK in a basic case: xxxAUGxxxxUAAxxx
-//     //                                              AGC AUG AGGGCC UAA CGU
-//     // The algorithm should detect one gene from the start codon to the stop codon
+    // Test if the algorithm is OK in a basic case: xxxAUGxxxxUAAxxx
+    //                                              AGC AUG AGGGCC UAA CGU
+    // The algorithm should detect one gene from the start codon to the stop codon
 
-//     long int* seq_bin = convert_to_binary("AGCATGAGGGCCTAACGT", 21);
-//     // printf("sqe_bin : %s \n", seq_bin);
-//     detecting_genes(seq_bin, 21*2, gene_map);
-//     assert_int_equal(6, gene_map->gene_start[0]);
-//     assert_int_equal(29, gene_map->gene_end[0]);
-//     assert_int_equal(1, gene_map->genes_counter);
+    long int* seq_bin = calloc(1, sizeof(long int));
+    convert_to_binary(seq_bin, "AGCATGAGGGCCTAACGT\n", 19);
+    // printf("seq_bin : %s \n", seq_bin);
+    detecting_genes(seq_bin, 18*2, &gene_map);
+    assert_int_equal(6, gene_map.gene_start[0]);
+    assert_int_equal(29, gene_map.gene_end[0]);
+    assert_int_equal(1, gene_map.genes_counter);
 
-//     // Test if the algorithm is OK in a multiple "start" case: xxxxAUGxxxxAUGxxxUAAxxx
-//     //                                                         AGC AUG AGGGCC AUG CGAACG UAA CGU
-//     // The algorithm should detect one gene from the 2nd start codon to the stop codon
-//     seq_bin = convert_to_binary("AGCATGAGGGCCATGCGAACGTAACGT", 27);
-//     detecting_genes(seq_bin, 27*2, gene_map);
-//     assert_int_equal(24, gene_map->gene_start[0]);
-//     assert_int_equal(47, gene_map->gene_end[0]);
-//     assert_int_equal(1, gene_map->genes_counter);
+    // Test if the algorithm is OK in a multiple "start" case: xxxxAUGxxxxAUGxxxUAAxxx
+    //                                                         AGC AUG AGGGCC AUG CGAACG UAA CGU
+    // The algorithm should detect one gene from the 2nd start codon to the stop codon
+    seq_bin = calloc(1, sizeof(long int));
+    convert_to_binary(seq_bin, "AGCATGAGGGCCATGCGAACGTAACGT\n", 28);
+    detecting_genes(seq_bin, 27*2, &gene_map);
+    assert_int_equal(24, gene_map.gene_start[0]);
+    assert_int_equal(47, gene_map.gene_end[0]);
+    assert_int_equal(1, gene_map.genes_counter);
 
-//     // Test if the algorithm is OK in a multiple "stop" case: xxxxAUGxxxxUAAxxxUAAxxx
-//     //                                                         AGC AUG CACGCG UAA GCACTG UAA CGU
-//     // The algorithm should detect one gene from the start codon to the first stop codon
-//     seq_bin = convert_to_binary("AGCATGCACGCGTAAGCACTGTAACGT", 27);
-//     detecting_genes(seq_bin, 27*2, gene_map);
-//     assert_int_equal(6, gene_map->gene_start[0]);
-//     assert_int_equal(29, gene_map->gene_end[0]);
-//     assert_int_equal(1, gene_map->genes_counter);
+    // Test if the algorithm is OK in a multiple "stop" case: xxxxAUGxxxxUAAxxxUAAxxx
+    //                                                         AGC AUG CACGCG UAA GCACTG UAA CGU
+    // The algorithm should detect one gene from the start codon to the first stop codon
+    seq_bin = calloc(1, sizeof(long int));
+    convert_to_binary(seq_bin, "AGCATGCACGCGTAAGCACTGTAACGT\n", 28);
+    detecting_genes(seq_bin, 27*2, &gene_map);
+    assert_int_equal(6, gene_map.gene_start[0]);
+    assert_int_equal(29, gene_map.gene_end[0]);
+    assert_int_equal(1, gene_map.genes_counter);
 
-//     // Test if the algorithm is OK in a non presence of "start/stop" case: xxxxxxxxx
-//     //                                                                     CGCCGCGCCGCGGGCG
-//     // The algorithm should not detect any genes
-//     gene_map->gene_start[0] = 0;
-//     gene_map->gene_end[0] = 0;
-//     seq_bin = convert_to_binary("CGCCGCGCCGCGGGCG", 16);
-//     detecting_genes(seq_bin, 16*2, gene_map);
-//     assert_int_equal(0, gene_map->gene_start[0]);
-//     assert_int_equal(0, gene_map->gene_end[0]);
-//     assert_int_equal(0, gene_map->genes_counter);
+    // Test if the algorithm is OK in a non presence of "start/stop" case: xxxxxxxxx
+    //                                                                     CGCCGCGCCGCGGGCG
+    // The algorithm should not detect any genes
+    gene_map.gene_start[0] = 0;
+    gene_map.gene_end[0] = 0;
+    seq_bin = calloc(1, sizeof(long int));
+    convert_to_binary(seq_bin, "CGCCGCGCCGCGGGCG\n", 17);
+    detecting_genes(seq_bin, 16*2, &gene_map);
+    assert_int_equal(0, gene_map.gene_start[0]);
+    assert_int_equal(0, gene_map.gene_end[0]);
+    assert_int_equal(0, gene_map.genes_counter);
 
-//     // Test if the algorithm is OK in a multiple gene case: xxxxAUGxxxxUAGxxxAUGxxxUAAxxx
-//     //                                                      AGC AUG GCGCAC UAG CGCCCG AUG CUGGGG UAA CGU
-//     // The algorithm should detect two genes
-//     seq_bin = convert_to_binary("AGCATGGCGCACTAGCGCCCGATGCTGGGGTAACGT", 36);
-//     detecting_genes(seq_bin, 36*2, gene_map);
-//     assert_int_equal(6, gene_map->gene_start[0]);
-//     assert_int_equal(29, gene_map->gene_end[0]);
-//     assert_int_equal(42, gene_map->gene_start[1]);
-//     assert_int_equal(65, gene_map->gene_end[1]);
-//     assert_int_equal(2, gene_map->genes_counter);
+    // Test if the algorithm is OK in a multiple gene case: xxxxAUGxxxxUAGxxxAUGxxxUAAxxx
+    //                                                      AGC AUG GCGCAC UAG CGCCCG AUG CUGGGG UAA CGU
+    // The algorithm should detect two genes
+    seq_bin = calloc(1, sizeof(long int));
+    convert_to_binary(seq_bin, "AGCATGGCGCACTAGCGCCCGATGCTGGGGTA\nACGT\n", 38);
+    detecting_genes(seq_bin, 36*2, &gene_map);
+    assert_int_equal(6, gene_map.gene_start[0]);
+    assert_int_equal(29, gene_map.gene_end[0]);
+    assert_int_equal(42, gene_map.gene_start[1]);
+    assert_int_equal(65, gene_map.gene_end[1]);
+    assert_int_equal(2, gene_map.genes_counter);
 
-//     free(gene_map->gene_start);
-//     free(gene_map->gene_end);
-//     free(gene_map);
-// }
+    free(gene_map.gene_start);
+    free(gene_map.gene_end);
+    free(seq_bin);
+}
 
 // static void test_generating_aa_chain(void ** state){
 //     // Test if the algorithm is OK
@@ -402,7 +412,7 @@ int main(void) {
         cmocka_unit_test(test_convert_to_binary),
         // cmocka_unit_test(test_binary_to_dna),
         // cmocka_unit_test(test_generating_mRNA),
-        // cmocka_unit_test(test_detecting_genes),
+        cmocka_unit_test(test_detecting_genes),
         // cmocka_unit_test(test_generating_aa_chain),
         // cmocka_unit_test(test_detecting_mutations),
         cmocka_unit_test(test_calculating_matching_score),
