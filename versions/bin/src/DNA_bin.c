@@ -179,11 +179,13 @@ static PyObject* DNAb_detecting_genes(PyObject* self, PyObject* args) {
 		return NULL;
 	}
 
-	unsigned long gene_size = view_gene.shape[0] * int_SIZE;
+	unsigned long gene_size = view_gene.shape[0] * 64;
 
 	gene_map_t g;
-	g.gene_start = malloc(sizeof(*g.gene_start) * gene_size);
-	g.gene_end = malloc(sizeof(*g.gene_end) * gene_size);
+	g.gene_start = malloc(sizeof(unsigned long long) * gene_size);
+	g.gene_end = malloc(sizeof(unsigned long long) * gene_size);
+	memset(g.gene_start, 0, sizeof(unsigned long long) * gene_size);
+	memset(g.gene_end, 0, sizeof(unsigned long long) * gene_size);
 
 	detecting_genes(view_gene.buf, gene_size, &g);
 

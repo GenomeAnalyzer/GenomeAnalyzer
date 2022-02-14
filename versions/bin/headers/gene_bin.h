@@ -34,8 +34,7 @@ int get_binary_value(const long int *seq_bin, const int pos);
 void convert_to_binary(long int *seq_bin, const char* seq_char, const unsigned seq_char_size);
 char* binary_to_dna(long int* bin_dna_seq, const unsigned size);
 char* generating_mRNA(const long int* gene_seq, const long start_pos,const long int seq_size);
-void detecting_genes(const long int *gene, const long int gene_size,
-                     gene_map_t* gene_map);
+void detecting_genes(const long int *gene, const long int gene_size, gene_map_t* gene_map);
 char* generating_amino_acid_chain(const long int *gene_seq,const long int start_pos, const long int seq_size);
 void detecting_mutations(const long int *gene_seq,const long int start_pos, const long int size_sequence,
                          mutation_map mut_m);

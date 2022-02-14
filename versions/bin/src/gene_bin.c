@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <ctype.h>
+#include <x86intrin.h>
 
 #include "../headers/gene_bin.h"
 
@@ -22,8 +23,8 @@
  * Shifts the seq_bin by pos.
  */
 int get_binary_value(const long int *seq_bin, const int pos){
-    int new_pos = pos > int_SIZE ? pos / int_SIZE : 0;
-    return seq_bin[new_pos] & ((long)1 << (pos - new_pos)) ? 1 : 0;
+    int new_pos = pos / 64;
+    return __rolq(seq_bin[new_pos], pos+1) & 1;
 }
 
 
@@ -117,15 +118,16 @@ void convert_to_binary(long int *seq_bin, const char* seq_char, const unsigned s
             seq_bin[i_bin] <<= 1;
             seq_bin[i_bin] = ((long int)(seq_bin[i_bin] + bit_value[0]) << 1) + (long int)bit_value[1];
         }
-        else if(!(c-10)) //if \n, set next element of seq_bin 
+        else if(!(c-10) && seq_char_size-i != 1) //if '\n', set next element of seq_bin 
             ++i_bin;
         else if(isalpha(seq_char[i]))
         {
             printf("ERROR: convert_to_binary: Unknown letter in sequence.\n");
             seq_bin[0] = -1;
-            break;
+            return;
         }
     }
+    seq_bin[i_bin] <<= ((i_bin+1)*64 - (seq_char_size-i_bin-1)*2);
 }
 
 //////////////// Convert binary aa to codon
@@ -240,18 +242,14 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
  * 
  * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
  */
-void detecting_genes(const long int *gene, const long int gene_size, gene_map_t* gene_map) {
+void detecting_genes(const long int *gene, const long int gene_size, gene_map_t* gene_map)
+{
     gene_map->genes_counter = 0;
 
-    // Check if memory ever have been allocated and allocate it if not
-    if(!gene_map->gene_start || !gene_map->gene_end){
-        gene_map->gene_start = malloc(sizeof(*gene_map->gene_start) * MAX_GENES);
-        gene_map->gene_end = malloc(sizeof(*gene_map->gene_end) * MAX_GENES);
-
-        if (!gene_map->gene_start || !gene_map->gene_end){
-            printf("ERROR: detecting_genes: cannot allocate memory\n");
-            return;
-        }
+    if (!gene_map->gene_start || !gene_map->gene_end)
+    {
+        printf("ERROR: detecting_genes: cannot allocate memory\n");
+        return;
     }
 
     int start_pos = -1;
@@ -259,42 +257,38 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t*
     long int i = 0;
 
     //Parse the binary array, and find all the start and stop codons
-    while ((i + 6) <= gene_size) {
+    while ((i + 6) <= gene_size)
+    {
+        int nucl = 0;
         // Each nucleotides can be A, U, G or C
-        int nucl1 = get_binary_value(gene, i);
-        int nucl2 = get_binary_value(gene, i + 1);
-        int nucl3 = get_binary_value(gene, i + 2);
-        int nucl4 = get_binary_value(gene, i + 3);
-        int nucl5 = get_binary_value(gene, i + 4);
-        int nucl6 = get_binary_value(gene, i + 5);
+        nucl = (nucl + get_binary_value(gene, i)) << 1;
+        nucl = (nucl + get_binary_value(gene, i + 1)) << 1;
+        nucl = (nucl + get_binary_value(gene, i + 2)) << 1;
+        nucl = (nucl + get_binary_value(gene, i + 3)) << 1;
+        nucl = (nucl + get_binary_value(gene, i + 4)) << 1;
+        nucl = (nucl + get_binary_value(gene, i + 5));
 
         //If a start pos and a stop pos doesn't exist, search for AUG
-        if (nucl1 == 0 && nucl2 == 0 && nucl3 == 1 
-            && nucl4 == 1 && nucl5 == 0 && nucl6 == 1) {
+        if (nucl == 13)
+        {
         //if AUG, it's the start of a gene
             start_pos = i;
             i += 6;
         }
-        else{
+        else
+        {
+            //if a start pos exists , search for UAA / UAG / UGA
+            if (start_pos != -1 && (nucl == 48 || nucl == 49 || nucl == 52))
+            {
+               //It's the end of a gene          
+               //If a start pos and an stop pos has been found, a gene exists so we save it in the struc
+                gene_map->gene_start[gene_map->genes_counter] = start_pos;
+                gene_map->gene_end[gene_map->genes_counter] = i+5;
 
-            if (start_pos != -1 ) {
-                //if a start pos exists , search for UAA / UAG / UGA
-                if ((nucl1 == 1 && nucl2 == 1 && nucl3 == 0) 
-                    && ((nucl4 == 0 && nucl5 == 0 && nucl6 == 0)
-                        || (nucl4 == 0 && nucl5 == 0 && nucl6 == 1)
-                        || (nucl4 == 1 && nucl5 == 0 && nucl6 == 0))) {
-                   //It's the end of a gene          
-                   //If a start pos and an stop pos has been found, a gene exists so we save it in the struc
-                    gene_map->gene_start[gene_map->genes_counter] = start_pos;
-                    gene_map->gene_end[gene_map->genes_counter] = i+5;
+                gene_map->genes_counter++;
 
-                    gene_map->genes_counter++;
-
-                    start_pos = -1;
-                    i += 6;
-                }
-                else
-                    i += 2;
+                start_pos = -1;
+                i += 6;
             }
             else
                 i += 2;
