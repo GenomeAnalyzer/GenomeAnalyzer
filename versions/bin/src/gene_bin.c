@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "../headers/gene_bin.h"
 
@@ -482,8 +483,7 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
         return NULL;
 
     // Allocate memory and verify it has been allocated
-    char* aa_seq = NULL;
-     aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    char* aa_seq = calloc(sizeof(char), sizeof(*aa_seq) * (seq_size / codon_size) + 1);
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
@@ -491,214 +491,89 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
 
     long size = start_pos+seq_size;
 
+    //Lookup Table Initialization
+    char LUT[64];
+
+    LUT[0] = 'K';
+    LUT[1] = 'K';
+    LUT[2] = 'N';
+    LUT[3] = 'N';
+    LUT[4] = 'R';
+    LUT[5] = 'R';
+    LUT[6] = 'S';
+    LUT[7] = 'S';
+    LUT[8] = 'T';
+    LUT[9] = 'T';
+    LUT[10] = 'T';
+    LUT[11] = 'T';
+    LUT[12] = 'I';
+    LUT[13] = 'M';
+    LUT[14] = 'I';
+    LUT[15] = 'I';
+    LUT[16] = 'E';
+    LUT[17] = 'E';
+    LUT[18] = 'D';
+    LUT[19] = 'D';
+    LUT[20] = 'G';
+    LUT[21] = 'G';
+    LUT[22] = 'G';
+    LUT[23] = 'G';
+    LUT[24] = 'A';
+    LUT[25] = 'A';
+    LUT[26] = 'A';
+    LUT[27] = 'A';
+    LUT[28] = 'V';
+    LUT[29] = 'V';
+    LUT[30] = 'V';
+    LUT[31] = 'V';
+    LUT[32] = 'Q';
+    LUT[33] = 'Q';
+    LUT[34] = 'H';
+    LUT[35] = 'H';
+    LUT[36] = 'R';
+    LUT[37] = 'R';
+    LUT[38] = 'R';
+    LUT[39] = 'R';
+    LUT[40] = 'P';
+    LUT[41] = 'P';
+    LUT[42] = 'P';
+    LUT[43] = 'P';
+    LUT[44] = 'L';
+    LUT[45] = 'L';
+    LUT[46] = 'L';
+    LUT[47] = 'L';
+    LUT[48] = 'O';
+    LUT[49] = 'O';
+    LUT[50] = 'Y';
+    LUT[51] = 'Y';
+    LUT[52] = 'O';
+    LUT[53] = 'W';
+    LUT[54] = 'C';
+    LUT[55] = 'C';
+    LUT[56] = 'S';
+    LUT[57] = 'S';
+    LUT[58] = 'S';
+    LUT[59] = 'S';
+    LUT[60] = 'L';
+    LUT[61] = 'L';
+    LUT[62] = 'F';
+    LUT[63] = 'F';
+
     //Parse the binary array, six bits by six (to parse three nucleotides per three)
     for (long int i = start_pos; i < size; i += codon_size) {
-        // The hash functions, takes the 6 bits, and transform the array into an integer.
-        // The integer first char is a 2, for hash generation purposes.
-        int hash = 2;
+
+        //Get the decimal value of the 6 bits
+        int tmp = 0;
+        int pow_bit = 5;
         for(long int k = i; k < i + codon_size; k++){
-            hash = 10 * hash + get_binary_value(gene_seq, k);
+            int get_bin = get_binary_value(gene_seq, k);
+            tmp += (get_bin * (int)pow(2, pow_bit));
+            pow_bit--;
         }
+        
+        //Get the corresponding protein from the lookup table
+        aa_seq[temp] = LUT[tmp];
 
-        // Switch over the hash.
-        switch(hash){
-        case 2000000 :
-            aa_seq[temp] = 'K';
-            break;
-        case 2000001 :
-            aa_seq[temp] = 'K';
-            break;
-        case 2000010 :
-            aa_seq[temp] = 'N';
-            break;
-        case 2000011 :
-            aa_seq[temp] = 'N';
-            break;
-        case 2000100 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2000101 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2000110 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2000111 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2001000 :
-            aa_seq[temp] = 'T';
-            break;
-        case 2001001 :
-            aa_seq[temp] = 'T';
-            break;
-        case 2001010 :
-            aa_seq[temp] = 'T';
-            break;
-        case 2001011 :
-            aa_seq[temp] = 'T';
-            break;
-        case 2001100 :
-            aa_seq[temp] = 'I';
-            break;
-        case 2001101 :
-            aa_seq[temp] = 'M';
-            break;
-        case 2001110 :
-            aa_seq[temp] = 'I';
-            break;
-        case 2001111 :
-            aa_seq[temp] = 'I';
-            break;
-        case 2010000 :
-            aa_seq[temp] = 'E';
-            break;
-        case 2010001 :
-            aa_seq[temp] = 'E';
-            break;
-        case 2010010 :
-            aa_seq[temp] = 'D';
-            break;
-        case 2010011 :
-            aa_seq[temp] = 'D';
-            break;
-        case 2010100 :
-            aa_seq[temp] = 'G';
-            break;
-        case 2010101 :
-            aa_seq[temp] = 'G';
-            break;
-        case 2010110 :
-            aa_seq[temp] = 'G';
-            break;
-        case 2010111 :
-            aa_seq[temp] = 'G';
-            break;
-        case 2011000 :
-            aa_seq[temp] = 'A';
-            break;
-        case 2011001 :
-            aa_seq[temp] = 'A';
-            break;
-        case 2011010 :
-            aa_seq[temp] = 'A';
-            break;
-        case 2011011 :
-            aa_seq[temp] = 'A';
-            break;
-        case 2011100 :
-            aa_seq[temp] = 'V';
-            break;
-        case 2011101 :
-            aa_seq[temp] = 'V';
-            break;
-        case 2011110 :
-            aa_seq[temp] = 'V';
-            break;
-        case 2011111 :
-            aa_seq[temp] = 'V';
-            break;
-        case 2100000 :
-            aa_seq[temp] = 'Q';
-            break;
-        case 2100001 :
-            aa_seq[temp] = 'Q';
-            break;
-        case 2100010 :
-            aa_seq[temp] = 'H';
-            break;
-        case 2100011 :
-            aa_seq[temp] = 'H';
-            break;
-        case 2100100 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2100101 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2100110 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2100111 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2101000 :
-            aa_seq[temp] = 'P';
-            break;
-        case 2101001 :
-            aa_seq[temp] = 'P';
-            break;
-        case 2101010 :
-            aa_seq[temp] = 'P';
-            break;
-        case 2101011 :
-            aa_seq[temp] = 'P';
-            break;
-        case 2101100 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2101101 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2101110 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2101111 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2110000 :
-            aa_seq[temp] = 'O';
-            break;
-        case 2110001 :
-            aa_seq[temp] = 'O';
-            break;
-        case 2110010 :
-            aa_seq[temp] = 'Y';
-            break;
-        case 2110011 :
-            aa_seq[temp] = 'Y';
-            break;
-        case 2110100 :
-            aa_seq[temp] = 'O';
-            break;
-        case 2110101 :
-            aa_seq[temp] = 'W';
-            break;
-        case 2110110 :
-            aa_seq[temp] = 'C';
-            break;
-        case 2110111 :
-            aa_seq[temp] = 'C';
-            break;
-        case 2111000 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2111001 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2111010 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2111011 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2111100 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2111101 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2111110 :
-            aa_seq[temp] = 'F';
-            break;
-        case 2111111 :
-            aa_seq[temp] = 'F';
-            break;
-
-        default:
-            return NULL;
-        }
-    
         temp++;
     }
 

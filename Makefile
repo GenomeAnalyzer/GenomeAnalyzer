@@ -75,7 +75,7 @@ run_bin:
 
 
 %.o:
-	$(CC) $(CFLAGS) -c -o $(BUILD)/$(*F).o $(*D)/$(*F).c
+	$(CC) $(CFLAGS) -c -o $(BUILD)/$(*F).o $(*D)/$(*F).c -lm
 
 
 # Naive library
@@ -103,7 +103,7 @@ test_DNA :
 gene_bin: $(V1SRC)/gene_bin.o
 
 test_gene_bin: gene_bin $(V1TESTS)/test_gene_bin.o
-	$(CC) $(CFLAGS) -o $(BIN)/$@ $(BUILD)/$@.o $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $(BIN)/$@ $(BUILD)/$@.o $(LDFLAGS) -lm
 
 run_test_gene_bin: test_gene_bin
 	$(BIN)/test_gene_bin &
