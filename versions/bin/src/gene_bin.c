@@ -3,10 +3,6 @@
 #include <stdbool.h>
 
 #include "../headers/gene_bin.h"
-<<<<<<< HEAD:versions/bin/src/gene_bin.c
-
-=======
->>>>>>> dev-gui:gene_bin.c
 
 /***************************************/
 /********** BINARIES FUNCTION **********/
