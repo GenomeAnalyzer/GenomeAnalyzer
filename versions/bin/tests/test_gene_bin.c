@@ -4,7 +4,6 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <cmocka.h>
-#include <math.h>
 
 #include "../headers/gene_bin.h"
 #include "../src/gene_bin.c"

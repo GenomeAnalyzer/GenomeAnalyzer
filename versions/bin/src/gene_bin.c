@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <math.h>
 
 #include "../headers/gene_bin.h"
 
@@ -567,7 +566,7 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
         int pow_bit = 5;
         for(long int k = i; k < i + codon_size; k++){
             int get_bin = get_binary_value(gene_seq, k);
-            tmp += (get_bin * (int)pow(2, pow_bit));
+            tmp += get_bin << pow_bit;
             pow_bit--;
         }
         
