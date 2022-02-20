@@ -2,12 +2,42 @@
 import DNA_bin
 import array
 import glob
-import sys
 import moduleDNA as m
 import os
-import sys
+import getopt, sys
 
 def main():
+
+  short_options = "hos:"
+  long_options = ["help", "output", "sequences"] 
+  full_cmd_arguments = sys.argv
+  argument_list = full_cmd_arguments[1:]
+
+  find = False
+  output = False
+  try:
+      arguments, values = getopt.getopt(argument_list, short_options, long_options)
+  except getopt.error as err:
+      print (str(err))
+      sys.exit(2)
+  for current_argument, current_value in arguments:
+      if current_argument in ("-h", "--help"):
+          print ("usages:\n\t-h/--help  help\n\t-o/--output the program will output htmls \n\t-s/--sequences set how many sequences will be analyzed (without = max) ")
+          return
+      elif current_argument in ("-s", "--sequences"):
+        try:
+              if not current_value.isnumeric():
+                raise NameError('nan')
+              else:
+                fin = current_value
+                find = True
+        except NameError:
+            print("Arg is not a number")
+            raise
+      elif current_argument in ("-o", "--output"):
+          output = True
+  if find == False:
+    fin = 25698
   read = list()
   sequence = list()
   i = 0
@@ -58,22 +88,11 @@ def main():
   </head>
 
   """
-  try:  
-    if len(sys.argv) == 1:
-      fin = 25698  
-    else:    
-      if not sys.argv[1].isnumeric():
-        raise NameError('nan')
-      else:
-        fin = sys.argv[1]
-  except NameError:
-    print("Arg is not a number")
-    raise
 
-  fhc = open('output/comp_bin.html','w')
+  if output: fhc = open('output/comp_bin.html','w')
   messagematch = start+ "<h1>Comparaison entre séquences</h1><a href=\"rapport_bin.html\" target=\"_blank\"><input type=\"button\" value=\"Retour\"></a>"
 
-  fh.write(start)
+  if output: fh.write(start)
   for file in glob.glob("fastas/*.fasta"):
       
       fhtmp = open("output/sequences/"+str(file).replace("fastas/","")+'_bin.html','w')
@@ -90,7 +109,7 @@ def main():
 
       gene.append(DNA_bin.detecting_genes(array.array('l',sequence[i])))
 
-      fh.write("<details><summary>"+str(file.replace("fastas/","").replace(".fasta",""))+"</summary>"+message+"<a href=\"sequences/"+str(file).replace("fastas/","")+"_bin.html\">"+str(file.replace("fastas/","").replace(".fasta",""))+"</a></details>")
+      if output: fh.write("<details><summary>"+str(file.replace("fastas/","").replace(".fasta",""))+"</summary>"+message+"<a href=\"sequences/"+str(file).replace("fastas/","")+"_bin.html\">"+str(file.replace("fastas/","").replace(".fasta",""))+"</a></details>")
 
       for j in range(len(gene[i])-1):
 
@@ -129,11 +148,12 @@ def main():
                   message+="<tr><td>Sequence ["+str(gene[i][j][0])+":"+str(gene[i][j][1])+"] - ["+str(gene[i][k][0])+":"+str(gene[i][k][1])+"]</td>\n"
                   message+="<td>"+str(res)+ "</td> \n</tr>\n"
       message+= "</tbody>\n</table>\n</details>\n </html>" 
-      fhtmp.write(message)
-      fhtmp.close()    
+      if output:
+      	fhtmp.write(message)
+      	fhtmp.close()    
 
       for c in range(i-1, -1, -1): 
-          fhtmp2 = open("output/sequences/cmp"+str(i)+"-"+str(c)+'_bin.html','w')
+          if output: fhtmp2 = open("output/sequences/cmp"+str(i)+"-"+str(c)+'_bin.html','w')
           messagematch+="<details><summary>Sequence "+str(i)+" - "+str(c)+"</summary><a href=\"sequences/cmp"+str(i)+"-"+str(c)+"_bin.html\">Comparaison "+str(i)+"-"+str(c)+"</a></details>\n"
 
           msgtmp = "<table>\n<tr>\n<th class = \"title\">Sequence</th>\n<th class = \"title\">Matching</th>\n</tr>\n<tbody>"
@@ -142,21 +162,24 @@ def main():
                   res = DNA_bin.calculating_matching_score(array.array('l',sequence[i]),gene[i][j][0],(gene[i][j][1]- gene[i][j][0])+1,array.array('l',sequence[c]),gene[c][k][0],(gene[c][k][1]- gene[c][k][0])+1)       
                   msgtmp+="<tr><td>Sequence ["+str(gene[i][j][0])+":"+str(gene[i][j][1])+"] - ["+str(gene[c][k][0])+":"+str(gene[c][k][1])+"]</td>\n"
                   msgtmp+="<td>"+str(res)+ "</td> \n</tr>\n"
-          fhtmp2.write(msgtmp)
-          fhtmp2.close()
+          if output:
+          	fhtmp2.write(msgtmp)
+          	fhtmp2.close()
 
       i=i+1
       if i == int(fin):
         break
   message= " <a href=\"comp_bin.html\">Comparaison séquences</a></details></html>"  
-  fh.write(message)
-  fh.close()
+  if output:
+  	fh.write(message)
+  	fh.close()
 
   messagematch+= "</tbody>\n</table>\n\n </html>"  
 
 
-  fhc.write(messagematch)
-  fhc.close()
+  if output:
+  	fhc.write(messagematch)
+  	fhc.close()
 
 
 
