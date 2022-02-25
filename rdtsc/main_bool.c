@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "rdtsc.h"
-#include "../gene_bool.h"
+#include "../versions/bool/headers/gene_bool.h"
 #include <string.h>
 
 #define MAX 31000
