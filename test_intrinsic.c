@@ -64,11 +64,11 @@ void detecting_genes_2(const long int *gene, const long int gene_size, gene_map_
     }
 
     // Start codon
-    __m128i AUG = _mm_set_epi16(0, 0, 1, 1, 0, 1, 0, 0);
+    const __m128i AUG = _mm_set_epi16(0, 0, 1, 1, 0, 1, 0, 0);
     // Stop codons
-    __m128i UAA = _mm_set_epi16(1, 1, 0, 0, 0, 0, 0, 0);
-    __m128i UGA = _mm_set_epi16(1, 1, 0, 1, 0, 0, 0, 0);
-    __m128i UAG = _mm_set_epi16(1, 1, 0, 0, 0, 1, 0, 0);
+    const __m128i UAA = _mm_set_epi16(1, 1, 0, 0, 0, 0, 0, 0);
+    const __m128i UGA = _mm_set_epi16(1, 1, 0, 1, 0, 0, 0, 0);
+    const __m128i UAG = _mm_set_epi16(1, 1, 0, 0, 0, 1, 0, 0);
 
     __m128i codon_to_test = _mm_setzero_si128();
 
@@ -85,11 +85,11 @@ void detecting_genes_2(const long int *gene, const long int gene_size, gene_map_
                                         get_binary_value(gene, i + 5),
                                         0, 0);
 
-        __m128i cmp_AUG = _mm_xor_si128(codon_to_test, AUG);
+        const __m128i cmp_AUG = _mm_xor_si128(codon_to_test, AUG);
 
-	__m128i cmp_UAA = _mm_xor_si128(codon_to_test, UAA);
-        __m128i cmp_UAG = _mm_xor_si128(codon_to_test, UAG);
-        __m128i cmp_UGA = _mm_xor_si128(codon_to_test, UGA);
+	    const __m128i cmp_UAA = _mm_xor_si128(codon_to_test, UAA);
+        const __m128i cmp_UAG = _mm_xor_si128(codon_to_test, UAG);
+        const __m128i cmp_UGA = _mm_xor_si128(codon_to_test, UGA);
 
         //If a start pos and a stop pos doesn't exist, search for AUG
         if (_mm_testz_si128(cmp_AUG, cmp_AUG)) {
@@ -138,7 +138,7 @@ void test_m128i()
         printf("different: %d\n\n", test);
 }
 
-unsigned long long test1(unsigned long long seq_char_size, long int *seq_long)
+unsigned long long test1_genes(unsigned long long seq_char_size, long int *seq_long)
 {
     gene_map_t g;
     g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * int_SIZE);
@@ -152,7 +152,7 @@ unsigned long long test1(unsigned long long seq_char_size, long int *seq_long)
     return g.genes_counter;
 }
 
-unsigned long long test2(unsigned long long seq_char_size, long int *seq_long)
+unsigned long long test2_genes(unsigned long long seq_char_size, long int *seq_long)
 {
     gene_map_t g;
     g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * int_SIZE);
@@ -166,12 +166,102 @@ unsigned long long test2(unsigned long long seq_char_size, long int *seq_long)
     return g.genes_counter;
 }
 
+#pragma GCC target("avx2")
+void detecting_mutations_2(const long int *gene_seq, const long int start_pos,
+                           const long int size_sequence, mutation_map mut_m) {
+    long int detect_mut = 0;  //Counting size of GC sequence
+    unsigned short tmp_start_mut = 0;   //stock start mutation
+    unsigned cmp = 0;   //counter of all mutation zones
+
+    const __m128i G = _mm_set_epi64x((long) 0, (long) 1);
+    const __m128i C = _mm_set_epi64x((long) 1, (long) 0);
+
+    long size = start_pos + size_sequence;
+    //Parse the binary array, from the 'start_pos' bit to the end
+    for (long int i = start_pos; i < size; i += 2) {
+
+        // each nucleotides can be  A, U, G or C
+        const long bit1 = (long) get_binary_value(gene_seq, i);
+        const long bit2 = (long) get_binary_value(gene_seq, i + 1);
+
+        const __m128i nucl = _mm_set_epi64x(bit1, bit2);
+        const __m128i cmp_G = _mm_xor_si128(nucl, G);
+        const __m128i cmp_C = _mm_xor_si128(nucl, G);
+
+        //Increment detect_mut if find a C or G nucl
+        if (_mm_testz_si128(cmp_G, cmp_G) || _mm_testz_si128(cmp_C, cmp_C)) {
+            if(detect_mut == 0)
+                tmp_start_mut = i-start_pos;
+            detect_mut+=2;
+        }
+        //Put detect_mut to 0 if find a A or T nucl
+        else {
+            //Check if previous GC sequence is a probable mutation zone
+            if (detect_mut >= (size_sequence / 5)) {
+                mut_m.start_mut[cmp] = tmp_start_mut;
+                mut_m.end_mut[cmp] = (i)-start_pos;
+                mut_m.size[cmp] = detect_mut-1;
+                cmp++;
+            }
+            detect_mut = 0;
+        }
+    }
+    //Check if ending sequence is a probable mutation zone
+    if (detect_mut >= (size_sequence / 5)) {
+        mut_m.start_mut[cmp] = tmp_start_mut;
+        mut_m.end_mut[cmp] = size_sequence;
+        mut_m.size[cmp] = detect_mut-1;
+
+        //TMP//TMP//TMP
+        cmp++;
+        printf("cmp = %d\n", cmp);
+        //TMP//TMP//TMP
+    }
+    else
+        printf("cmp = %d\n", cmp);
+}
+
+unsigned long long test1_mutations(unsigned long long seq_char_size, long int *seq_long)
+{
+    mutation_map mut_m;
+    mut_m.size = malloc(sizeof(*mut_m.size) * (seq_char_size/5) * int_SIZE);
+    mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * (seq_char_size/5) * int_SIZE);
+    mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * (seq_char_size/5) * int_SIZE);
+
+    detecting_mutations(seq_long, 0, 2 * seq_char_size, mut_m);
+    //printf("%llu genes\n\n", g.genes_counter);
+
+    free(mut_m.start_mut);
+    free(mut_m.end_mut);
+    return 0;
+}
+
+unsigned long long test2_mutations(unsigned long long seq_char_size, long int *seq_long)
+{
+    mutation_map mut_m;
+    mut_m.size = malloc(sizeof(*mut_m.size) * (seq_char_size/5) * int_SIZE);
+    mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * (seq_char_size/5 + 1) * int_SIZE);
+    mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * (seq_char_size/5 + 1) * int_SIZE);
+
+    detecting_mutations_2(seq_long, 0, 2 * seq_char_size, mut_m);
+    //printf("%llu genes\n\n", g.genes_counter);
+
+    free(mut_m.start_mut);
+    free(mut_m.end_mut);
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
-    // --- TEST AVX2 --- //
+    // ------------------- //
+    // ---- TEST AVX2 ---- //
+    // ------------------- //
     test_m128i();
 
-    // --- TESTS DETECTING GENES --- //
+
+    // ------------------------------- //
+    // ---- TESTS DETECTING GENES ---- //
+    // ------------------------------- //
     char *seq_char = NULL;
     unsigned long long seq_char_size = 0;
     long int *seq_long = NULL;
@@ -179,7 +269,7 @@ int main(int argc, char *argv[])
     seq_char = malloc(sizeof(*seq_char) * MAX_ADN);
     if(!seq_char)
 	    return printf("error malloc\n"), 1;
-    seq_char_size = load_from_file("seq_test_intrinsic.txt", seq_char);
+    seq_char_size = load_from_file("seq_test_intrinsic_2.txt", seq_char);
 
     seq_long = convert_to_binary(seq_char, seq_char_size);
 
@@ -191,7 +281,7 @@ int main(int argc, char *argv[])
     while(cycles <= 500)
     {
     	double before = (double)rdtsc();
-    	cnt = test1(seq_char_size, seq_long);
+        cnt = test1_genes(seq_char_size, seq_long);
     	double after = (double)rdtsc();
 
     	cycles += (after - before);
@@ -206,13 +296,51 @@ int main(int argc, char *argv[])
     while(cycles <= 500)
     {
         double before = (double)rdtsc();
-        cnt = test2(seq_char_size, seq_long);
+        cnt = test2_genes(seq_char_size, seq_long);
         double after = (double)rdtsc();
 
         cycles += (after - before);
         boucles++;
     }
     printf("intrinsic detecting genes : %lf cycles, %0.1lf boucles, genes cnt = %llu\n", cycles / boucles, boucles, cnt);
+
+
+
+
+    // ----------------------------------- //
+    // ---- TESTS DETECTING MUTATIONS ---- //
+    // ----------------------------------- //
+
+    cycles = 0.0;
+    boucles = 0.0;
+    cnt = 0;
+
+    // real detecting mutations
+    while(cycles <= 500)
+    {
+        double before = (double)rdtsc();
+        cnt = test1_mutations(seq_char_size, seq_long);
+        double after = (double)rdtsc();
+
+        cycles += (after - before);
+        boucles++;
+    }
+    printf("real detecting mutations : %lf cycles, %0.1lf boucles, mutations cnt = %llu\n", cycles / boucles, boucles, cnt);
+
+    // intrinsic detecting genes
+    cycles = 0.0;
+    boucles = 0.0;
+    cnt = 0;
+    while(cycles <= 500)
+    {
+        double before = (double)rdtsc();
+        cnt = test2_mutations(seq_char_size, seq_long);
+        double after = (double)rdtsc();
+
+        cycles += (after - before);
+        boucles++;
+    }
+    printf("intrinsic detecting mutations : %lf cycles, %0.1lf boucles, mutations cnt = %llu\n", cycles / boucles, boucles, cnt);
 
     free(seq_char);
     free(seq_long);
