@@ -349,6 +349,7 @@ int main(int argc, char *argv[])
     seq_char_size2 = load_from_file("seq_test_intrinsic_2.txt", seq_char2);
     seq_long2 = convert_to_binary(seq_char2, seq_char_size2);
 
+
     double cycles = 0.0;
     double boucles = 0.0;
     unsigned long long cnt = 0;
@@ -379,7 +380,6 @@ int main(int argc, char *argv[])
         boucles++;
     }
     printf("intrinsic detecting genes : %lf cycles, %0.1lf boucles, genes cnt = %llu\n\n", cycles / boucles, boucles, cnt);
-
 
 
 
@@ -435,7 +435,7 @@ int main(int argc, char *argv[])
     while(cycles <= 500)
     {
         double before = (double)rdtsc();
-        MS = calculating_matching_score(seq_long, 0, 2 * seq_char_size, seq_long2, 0, 2*seq_char_size2);
+        MS = calculating_matching_score(seq_long, 0, 2*seq_char_size, seq_long2, 0, 2*seq_char_size2);
         double after = (double)rdtsc();
 
         cycles += (after - before);
@@ -451,7 +451,7 @@ int main(int argc, char *argv[])
     while(cycles <= 500)
     {
         double before = (double)rdtsc();
-        MS = calculating_matching_score_2(seq_long, 2 * seq_char_size, seq_long2, 2*seq_char_size2);
+        MS = calculating_matching_score_2(seq_long, 2*seq_char_size, seq_long2, 2*seq_char_size2);
         double after = (double)rdtsc();
 
         cycles += (after - before);
