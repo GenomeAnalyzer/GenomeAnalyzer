@@ -133,7 +133,7 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
     int pos = 0;
 
     struct thbin* thread = malloc(sizeof(struct thbin*));
-
+    thread->seq_char = malloc(sizeof(strlen(seq_char)));
     strcpy(thread->seq_char,seq_char);
     thread->seq_size = seq_size;
     thread->seq_bin = seq_bin;
@@ -141,11 +141,11 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
     for (int i = 0; i < 2; i++)
     {
         thread->pos = seq_bin_size*(i*1/2);
-        pthread_create(&thread_id, NULL, threadSetbinaryarray, NULL);
+        pthread_create(&thread_id, NULL, threadSetbinaryarray, (void *)thread);
     }
     pthread_exit(NULL);
 
-    return seq_bin;
+    return thread->seq_bin;
 }
 
 /**
