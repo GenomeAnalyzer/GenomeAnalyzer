@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <omp.h>
+#include <pthread.h>
+#include <string.h>
 
 #include "gene_bin.h"
 
@@ -44,6 +47,64 @@ long int* change_binary_value(long int *seq_bin, const int pos, const int value)
     return seq_bin;
 }
 
+struct thbin{
+    unsigned seq_size;
+    char *seq_char;
+    int pos;
+    long int* seq_bin;    
+};
+void *threadSetbinaryarray(void *var)
+{
+    struct thbin *mystruct = (struct thbin *)var;    
+    // Parse the DNA sequence, per nucleotides
+    for (long int i = 0; i < mystruct->seq_size; ++i){
+        // Set seq_bin bit values according to the nucleotide read
+        switch(mystruct->seq_char[i]){
+        case 'A': // A = 00
+            break;
+        case 'T': // T = 11
+            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
+            change_binary_value(mystruct->seq_bin, mystruct->pos + 1, 1);
+            break;
+        case 'G': // G = 01
+            change_binary_value(mystruct->seq_bin, mystruct->pos + 1, 1);
+            break;
+        case 'C': // C = 10
+            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
+            break;
+        case 'N': // N = A = 00
+            break;
+        case 'R': // R = A = 00
+            break;
+        case 'Y': // Y = C = 10
+            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
+            break;
+        case 'K': // K = G = 01
+            change_binary_value(mystruct->seq_bin, mystruct->pos + 1, 1);
+            break;
+        case 'M': // M = A = 00
+            break;
+        case 'S': // S = C = 10
+            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
+            break;
+        case 'W': // W = A = 00
+            break;
+        case 'B': // B = C = 10
+            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
+            break;
+        case 'D': // D = A = 00
+            break;
+        case 'H': // H = G = 01
+            change_binary_value(mystruct->seq_bin, mystruct->pos + 1, 1);
+            break;
+        case 'V': // V = A = 00
+            break;
+        }
+        mystruct->pos += 2;
+    }
+    return NULL;
+}
+
 /**
  * Convert a char formated DNA sequence to its binary array format.
  * 
@@ -57,7 +118,7 @@ long int* change_binary_value(long int *seq_bin, const int pos, const int value)
 long int* set_binary_array(const char *seq_char, const unsigned seq_size){
     // Number of bits needed to transform seq_char into a binary array.
     int seq_bin_size = 2 * seq_size;
-
+    pthread_t thread_id;
     // Binary array new size
     int nb = seq_bin_size / int_SIZE;
     if(seq_bin_size % int_SIZE != 0)
@@ -70,52 +131,20 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
         return printf("ERROR: set_binary_array: cannot allocate memory.\n"), NULL;
 
     int pos = 0;
-    // Parse the DNA sequence, per nucleotides
-    for (long int i = 0; i < seq_size; ++i){
-        // Set seq_bin bit values according to the nucleotide read
-        switch(seq_char[i]){
-        case 'A': // A = 00
-            break;
-        case 'T': // T = 11
-            change_binary_value(seq_bin, pos, 1);
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'G': // G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'C': // C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'N': // N = A = 00
-            break;
-        case 'R': // R = A = 00
-            break;
-        case 'Y': // Y = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'K': // K = G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'M': // M = A = 00
-            break;
-        case 'S': // S = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'W': // W = A = 00
-            break;
-        case 'B': // B = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'D': // D = A = 00
-            break;
-        case 'H': // H = G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'V': // V = A = 00
-            break;
-        }
-        pos += 2;
+
+    struct thbin* thread = malloc(sizeof(struct thbin*));
+
+    strcpy(thread->seq_char,seq_char);
+    thread->seq_size = seq_size;
+    thread->seq_bin = seq_bin;
+
+    for (int i = 0; i < 2; i++)
+    {
+        thread->pos = seq_bin_size*(i*1/2);
+        pthread_create(&thread_id, NULL, threadSetbinaryarray, NULL);
     }
+    pthread_exit(NULL);
+
     return seq_bin;
 }
 
@@ -210,6 +239,8 @@ int popcount_binary_array(const long int *seq_bin, const long int seq_size){
     return bin_popcount;
 }
 
+
+
 /**
  * Retrieve a piece of the binary array sequence.
  * 
@@ -218,7 +249,7 @@ int popcount_binary_array(const long int *seq_bin, const long int seq_size){
  * out : piece_seq_bin : the requested part of seq_bin, from pos_start and size.
  * 
  * Iterates on seq_bin from pos_start, size times and gets for each iteration its binary value.
- */
+ */    pthread_t thread_id;
 long int* get_piece_binary_array(const long int* seq_bin, const long int pos_start, const long int size){
     //Find the size of the output
     long int array_size = (size) / int_SIZE + (size % int_SIZE != 0);
@@ -334,6 +365,8 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
     int j = 0;
 
     long stop = seq_size+start_pos;
+
+
     // Parse the binary DNA sequence, two bits per iteration
     for (long int i = start_pos; i < stop; i += 2) {
 
