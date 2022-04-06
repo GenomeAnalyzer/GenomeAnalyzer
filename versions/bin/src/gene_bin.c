@@ -5,6 +5,56 @@
 #include "../headers/gene_bin.h"
 
 /***************************************/
+//Initialisation of lookup table
+    typedef int lookuptable[2];
+
+    //Bit values according to ASCII code of nucleotides - 65
+    static lookuptable L[25] = {
+        {0,0},
+        {1,0},
+        {1,0},
+        {0,0},
+        {-1,-1},
+        {-1,-1},
+        {0,1},
+        {0,1},
+        {-1,-1},
+        {-1,-1},
+        {0,1},
+        {-1,-1},
+        {0,0},
+        {0,0},//13
+        {-1,-1},
+        {-1,-1},
+        {-1,-1},
+        {0,0},
+        {1,0},
+        {1,1},
+        {-1,-1},
+        {0,0},
+        {0,0},
+        {-1,-1},
+        {1,0}
+    };
+
+//******************************
+//Code ASCII de A,G,C,T
+    int bitstocharDNA[4] = {65,71,67,84};
+//******************************
+//Code ASCII de A,G,C,U
+    int bitstocharmRNA[4] = {65,71,67,85};
+//******************************
+    //Lookup Table Initialization
+    static char LUT[64] = { 'K','K','N','N','R','R','S','S','T','T',
+                            'T','T','I','M','I','I','E','E','D','D',
+                            'G','G','G','G','A','A','A','A','V','V',
+                            'V','V','Q','Q','H','H','R','R','R','R',
+                            'P','P','P','P','L','L','L','L','O','O',
+                            'Y','Y','O','W','C','C','S','S','S','S',
+                            'L','L','F','F'
+                        };
+
+/***************************************/
 /********** BINARIES FUNCTION **********/
 /***************************************/
 
@@ -68,83 +118,28 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
         return printf("ERROR: set_binary_array: cannot allocate memory.\n"), NULL;
 
     int pos = 0;
-    
-    //Initialisation of lookup table
-    typedef int lookuptable[2];
-
-    lookuptable L[128];
-    for(int i=0; i<128;++i){
-        L[i][0] = -1;
-        L[i][1] = -1;
-    }
-
-    //Bit values according to ASCII code of nucleotides
-    L[65][0] = 0;
-    L[65][1] = 0;
-
-    L[66][0] = 1;
-    L[66][1] = 0;
-    
-    L[67][0] = 1;
-    L[67][1] = 0;
-    
-    L[68][0] = 0;
-    L[68][1] = 0;
-    
-    L[71][0] = 0;
-    L[71][1] = 1;
-    
-    L[72][0] = 0;
-    L[72][1] = 1;
-    
-    L[75][0] = 0;
-    L[75][1] = 1;
-    
-    L[77][0] = 0;
-    L[77][1] = 0;
-    
-    L[78][0] = 0;
-    L[78][1] = 0;
-    
-    L[82][0] = 0;
-    L[82][1] = 0;
-    
-    L[83][0] = 1;
-    L[83][1] = 0;
-    
-    L[84][0] = 1;
-    L[84][1] = 1;
-    
-    L[86][0] = 0;
-    L[86][1] = 0;
-    
-    L[87][0] = 0;
-    L[87][1] = 0;
-    
-    L[89][0] = 1;
-    L[89][1] = 0;
 
     // Parse the DNA sequence, per nucleotides
     for (long int i = 0; i < seq_size; ++i){
 
         //Default char is put to A to handle the warning : wrong size input
         //Add '00' bits in this case
-        int c = 'A';
+        int c = 0;
         if(!seq_char[i]){
             printf("WARNING: set_binary_array: size input is different than the char sequence.\n");
         }
         else{
-            c = seq_char[i];
+            c = seq_char[i] - 65;
         }
         //get the 2-bits value of char read
-        int bit_value[2];
-        bit_value[0] = L[c][0];
-        bit_value[1] = L[c][1];
+        int bit1, bit2;
+        bit1 = L[c][0];
+        bit2 = L[c][1];
 
-        if(bit_value[0] != -1){
+        if(bit1 != -1){
             // Set seq_bin bit values according to the nucleotide read
-            change_binary_value(seq_bin, pos, bit_value[0]);
-            change_binary_value(seq_bin, pos + 1, bit_value[1]);
+            change_binary_value(seq_bin, pos, bit1);
+            change_binary_value(seq_bin, pos + 1, bit2);
             pos += 2;
         }
         else{
@@ -320,10 +315,6 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
 
     int j = 0;
 
-    //Code ASCII de A,G,C,T
-    int bitstochar[4] = {65,71,67,84};
-
-
     //Parse the binary array, two bits per iteration
     for (unsigned i = 0; i < size; i += 2){
         // nucleotides = A, T, G, C
@@ -331,7 +322,7 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
         int nucl2 = get_binary_value(bin_dna_seq, i + 1);
 
         //get the ASCII value according to bits value
-        char value = bitstochar[nucl2 + 2*nucl1];
+        char value = bitstocharDNA[nucl2 + 2*nucl1];
         dna_seq[j] = value;
         j++;
     }
@@ -364,9 +355,6 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
 
     long stop = seq_size+start_pos;
 
-    //Code ASCII de A,G,C,U
-    int bitstochar[4] = {65,71,67,85};
-
     // Parse the binary DNA sequence, two bits per iteration
     for (long int i = start_pos; i < stop; i += 2) {
 
@@ -375,7 +363,7 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
         int nucl2 = get_binary_value(gene_seq, i + 1);
 
         //get the ASCII value according to bits value
-        char value = bitstochar[nucl2 + 2*nucl1];
+        char value = bitstocharmRNA[nucl2 + 2*nucl1];
         rna_seq[j] = value;
         j++;
     }
@@ -489,74 +477,6 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
     unsigned temp = 0;
 
     long size = start_pos+seq_size;
-
-    //Lookup Table Initialization
-    char LUT[64];
-
-    LUT[0] = 'K';
-    LUT[1] = 'K';
-    LUT[2] = 'N';
-    LUT[3] = 'N';
-    LUT[4] = 'R';
-    LUT[5] = 'R';
-    LUT[6] = 'S';
-    LUT[7] = 'S';
-    LUT[8] = 'T';
-    LUT[9] = 'T';
-    LUT[10] = 'T';
-    LUT[11] = 'T';
-    LUT[12] = 'I';
-    LUT[13] = 'M';
-    LUT[14] = 'I';
-    LUT[15] = 'I';
-    LUT[16] = 'E';
-    LUT[17] = 'E';
-    LUT[18] = 'D';
-    LUT[19] = 'D';
-    LUT[20] = 'G';
-    LUT[21] = 'G';
-    LUT[22] = 'G';
-    LUT[23] = 'G';
-    LUT[24] = 'A';
-    LUT[25] = 'A';
-    LUT[26] = 'A';
-    LUT[27] = 'A';
-    LUT[28] = 'V';
-    LUT[29] = 'V';
-    LUT[30] = 'V';
-    LUT[31] = 'V';
-    LUT[32] = 'Q';
-    LUT[33] = 'Q';
-    LUT[34] = 'H';
-    LUT[35] = 'H';
-    LUT[36] = 'R';
-    LUT[37] = 'R';
-    LUT[38] = 'R';
-    LUT[39] = 'R';
-    LUT[40] = 'P';
-    LUT[41] = 'P';
-    LUT[42] = 'P';
-    LUT[43] = 'P';
-    LUT[44] = 'L';
-    LUT[45] = 'L';
-    LUT[46] = 'L';
-    LUT[47] = 'L';
-    LUT[48] = 'O';
-    LUT[49] = 'O';
-    LUT[50] = 'Y';
-    LUT[51] = 'Y';
-    LUT[52] = 'O';
-    LUT[53] = 'W';
-    LUT[54] = 'C';
-    LUT[55] = 'C';
-    LUT[56] = 'S';
-    LUT[57] = 'S';
-    LUT[58] = 'S';
-    LUT[59] = 'S';
-    LUT[60] = 'L';
-    LUT[61] = 'L';
-    LUT[62] = 'F';
-    LUT[63] = 'F';
 
     //Parse the binary array, six bits by six (to parse three nucleotides per three)
     for (long int i = start_pos; i < size; i += codon_size) {
