@@ -6,23 +6,28 @@ LDFLAGS = -lcmocka
 
 V0 = ./versions/naive
 V1 = ./versions/bin
+V2 = ./versions/bool
 
 V0SRC=$(V0)/src
 V1SRC=$(V1)/src
+V2SRC=$(V2)/src
 
 V0TESTS=$(V0)/tests
 V1TESTS=$(V1)/tests
+V2TESTS=$(V2)/tests
+
 
 V0PYTHON=$(V0)/python
 V1PYTHON=$(V1)/python
+V2PYTHON=$(V2)/python
 
 BIN = ./bin
 OUTPUT = ./output
 BUILD = ./build
 
-$(shell mkdir -p $(BIN) $(OUTPUT))
+$(shell mkdir -p $(BIN) $(OUTPUT) $(BUILD))
 
-.PHONY: clean all check
+.PHONY: clean all check build install
 
 
 ifeq (run, $(firstword $(MAKECMDGOALS)))
@@ -33,8 +38,20 @@ endif
 #For all compiling, building and executing
 all: DNA check 
 
+#For installing python setup and setup_bin
+install: setup_naive setup_bin setup_bool
+
+setup_naive:
+	sudo python3 $(V0PYTHON)/setup.py install
+
+setup_bin:
+	sudo python3 $(V1PYTHON)/setup_bin.py install
+
+setup_bool:
+	sudo python3 $(V2PYTHON)/setup_bool.py install	
+
 #For only building and testing interface
-build: DNA DNA_bin
+build: DNA DNA_bin DNA_bool
 
 #Clean compilation files & output result
 clean :
@@ -43,7 +60,7 @@ clean :
 	rm -rf $(BUILD) $(BIN)/*
 
 #For only executing tests
-check: run_test_gene test_DNA run_test_gene_bin test_DNA_bin
+check: run_test_gene test_DNA run_test_gene_bin test_DNA_bin test_DNA_bool
 
 #For only running the non-binary program
 run:
@@ -58,14 +75,7 @@ run_bin:
 
 
 %.o:
-	# echo "1"
-	# echo command : $@
-	# echo folder  : $(*D)
-	# echo file    : $(*F)
 	$(CC) $(CFLAGS) -c -o $(BUILD)/$(*F).o $(*D)/$(*F).c
-
-# %: %.o
-# 	$(CC) $(CFLAGS) -o $(BIN)/$@ $(BUILD)/$@.o $(LDFLAGS)
 
 
 # Naive library
@@ -104,3 +114,22 @@ DNA_bin :
 
 test_DNA_bin : 
 	python3 -m pytest -s $(V1TESTS)/test_DNA_bin.py
+	
+# Boolean version
+
+.PHONY: gene_bool
+
+gene_bool: $(V2SRC)/gene_bool.o
+
+#test_gene_bool: gene_bool $(V2TESTS)/test_gene_bool.o
+#	$(CC) $(CFLAGS) -o $(BIN)/$@ $(BUILD)/$@.o $(LDFLAGS)
+
+run_test_gene_bool: test_gene_bool
+	$(BIN)/test_gene_bool &
+
+DNA_bool : 
+	python3 $(V2PYTHON)/setup_bool.py build
+	cp build/lib*/*.so $(BIN)
+
+test_DNA_bool : 
+	python3 -m pytest -s $(V2TESTS)/test_DNA_bool.py

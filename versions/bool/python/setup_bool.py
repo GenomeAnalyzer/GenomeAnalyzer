@@ -13,11 +13,11 @@ if _DEBUG:
 else:
     extra_compile_args += ["-DNDEBUG", "-O3"]
 
+
 #TODO add ,"-fopenmp"
+DNAbi_module = Extension("DNA_bool", sources = [ "./versions/bool/src/gene_bool.c", "./versions/bool/src/DNA_bool.c" ],extra_compile_args = extra_compile_args)
 
-DNA_module = Extension("DNA", sources = [ "./versions/naive/src/gene.c", "./versions/naive/src/DNA.c" ],extra_compile_args = extra_compile_args)
-
-setup(name        = "DNA",
-      version     = "1.0",
+setup(name        = "DNA_bool",
+      version     = "2.0",
       description = "Genome analyser", 
-      ext_modules = [ DNA_module ])
+      ext_modules = [ DNAbi_module ])

@@ -4,11 +4,9 @@
 
 #include "../headers/gene_bin.h"
 
-
 /***************************************/
 /********** BINARIES FUNCTION **********/
 /***************************************/
-
 
 /**
  * Retrieve one bit from the binary array sequence.
@@ -70,51 +68,33 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
         return printf("ERROR: set_binary_array: cannot allocate memory.\n"), NULL;
 
     int pos = 0;
+
     // Parse the DNA sequence, per nucleotides
     for (long int i = 0; i < seq_size; ++i){
-        // Set seq_bin bit values according to the nucleotide read
-        switch(seq_char[i]){
-        case 'A': // A = 00
-            break;
-        case 'T': // T = 11
-            change_binary_value(seq_bin, pos, 1);
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'G': // G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'C': // C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'N': // N = A = 00
-            break;
-        case 'R': // R = A = 00
-            break;
-        case 'Y': // Y = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'K': // K = G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'M': // M = A = 00
-            break;
-        case 'S': // S = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'W': // W = A = 00
-            break;
-        case 'B': // B = C = 10
-            change_binary_value(seq_bin, pos, 1);
-            break;
-        case 'D': // D = A = 00
-            break;
-        case 'H': // H = G = 01
-            change_binary_value(seq_bin, pos + 1, 1);
-            break;
-        case 'V': // V = A = 00
-            break;
+
+        //Default char is put to A to handle the warning : wrong size input
+        //Add '00' bits in this case
+        int c = 0;
+        if(!seq_char[i]){
+            printf("WARNING: set_binary_array: size input is different than the char sequence.\n");
         }
-        pos += 2;
+        else{
+            c = seq_char[i] - 65;
+        }
+        //get the 2-bits value of char read
+        int bit1, bit2;
+        bit1 = L[c][0];
+        bit2 = L[c][1];
+
+        if(bit1 != -1){
+            // Set seq_bin bit values according to the nucleotide read
+            change_binary_value(seq_bin, pos, bit1);
+            change_binary_value(seq_bin, pos + 1, bit2);
+            pos += 2;
+        }
+        else{
+            return printf("ERROR: set_binary_array: Unknown letter in sequence.\n"), NULL;
+        }
     }
     return seq_bin;
 }
@@ -244,8 +224,6 @@ long int* get_piece_binary_array(const long int* seq_bin, const long int pos_sta
     return piece_seq_bin;
 }
 
-
-
 /***************************************/
 /******** DNA & GENES FUNCTION *********/
 /***************************************/
@@ -286,24 +264,16 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
         return printf("ERROR: binary_to_dna: cannot allocate memory.\n"), NULL;
 
     int j = 0;
+
     //Parse the binary array, two bits per iteration
     for (unsigned i = 0; i < size; i += 2){
         // nucleotides = A, T, G, C
         int nucl1 = get_binary_value(bin_dna_seq, i);
         int nucl2 = get_binary_value(bin_dna_seq, i + 1);
 
-        if (nucl1 == 0 && nucl2 == 0)
-            // 00 = A/N
-            dna_seq[j] = 'A';
-        else if (nucl1 == 1 && nucl2 == 1)
-            // 11 = T
-            dna_seq[j] = 'T';
-        else if (nucl1 == 1 && nucl2 == 0)
-            // 10 = C
-            dna_seq[j] = 'C';
-        else if (nucl1 == 0 && nucl2 == 1)
-            // 01 = G
-            dna_seq[j] = 'G';
+        //get the ASCII value according to bits value
+        char value = bitstocharDNA[nucl2 + 2*nucl1];
+        dna_seq[j] = value;
         j++;
     }
     return dna_seq;
@@ -334,6 +304,7 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
     int j = 0;
 
     long stop = seq_size+start_pos;
+
     // Parse the binary DNA sequence, two bits per iteration
     for (long int i = start_pos; i < stop; i += 2) {
 
@@ -341,20 +312,9 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
         int nucl1 = get_binary_value(gene_seq, i);
         int nucl2 = get_binary_value(gene_seq, i + 1);
 
-        if (nucl1 == 0 && nucl2 == 0)
-            // 00 = A
-            rna_seq[j] = 'A';
-        else if (nucl1 == 1 && nucl2 == 1)
-            // 11 = U
-            rna_seq[j] = 'U';
-        else if (nucl1 == 1 && nucl2 == 0)
-            // 10 = C
-            rna_seq[j] = 'C';
-        else if (nucl1 == 0 && nucl2 == 1)
-            // 01 = G
-            rna_seq[j] = 'G';
-        else
-            return printf("ERROR: generating_mRNA: invalid value in DNA sequence\n"), NULL;
+        //get the ASCII value according to bits value
+        char value = bitstocharmRNA[nucl2 + 2*nucl1];
+        rna_seq[j] = value;
         j++;
     }
     rna_seq[j] = '\0';
@@ -460,8 +420,7 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
         return NULL;
 
     // Allocate memory and verify it has been allocated
-    char* aa_seq = NULL;
-     aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    char* aa_seq = calloc(sizeof(char), sizeof(*aa_seq) * (seq_size / codon_size) + 1);
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
@@ -471,212 +430,19 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
 
     //Parse the binary array, six bits by six (to parse three nucleotides per three)
     for (long int i = start_pos; i < size; i += codon_size) {
-        // The hash functions, takes the 6 bits, and transform the array into an integer.
-        // The integer first char is a 2, for hash generation purposes.
-        int hash = 2;
+
+        //Get the decimal value of the 6 bits
+        int tmp = 0;
+        int pow_bit = 5;
         for(long int k = i; k < i + codon_size; k++){
-            hash = 10 * hash + get_binary_value(gene_seq, k);
+            int get_bin = get_binary_value(gene_seq, k);
+            tmp += get_bin << pow_bit;
+            pow_bit--;
         }
+        
+        //Get the corresponding protein from the lookup table
+        aa_seq[temp] = LUT[tmp];
 
-        // Switch over the hash.
-        switch(hash){
-        case 2000000 :
-            aa_seq[temp] = 'K';
-            break;
-        case 2000001 :
-            aa_seq[temp] = 'K';
-            break;
-        case 2000010 :
-            aa_seq[temp] = 'N';
-            break;
-        case 2000011 :
-            aa_seq[temp] = 'N';
-            break;
-        case 2000100 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2000101 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2000110 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2000111 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2001000 :
-            aa_seq[temp] = 'T';
-            break;
-        case 2001001 :
-            aa_seq[temp] = 'T';
-            break;
-        case 2001010 :
-            aa_seq[temp] = 'T';
-            break;
-        case 2001011 :
-            aa_seq[temp] = 'T';
-            break;
-        case 2001100 :
-            aa_seq[temp] = 'I';
-            break;
-        case 2001101 :
-            aa_seq[temp] = 'M';
-            break;
-        case 2001110 :
-            aa_seq[temp] = 'I';
-            break;
-        case 2001111 :
-            aa_seq[temp] = 'I';
-            break;
-        case 2010000 :
-            aa_seq[temp] = 'E';
-            break;
-        case 2010001 :
-            aa_seq[temp] = 'E';
-            break;
-        case 2010010 :
-            aa_seq[temp] = 'D';
-            break;
-        case 2010011 :
-            aa_seq[temp] = 'D';
-            break;
-        case 2010100 :
-            aa_seq[temp] = 'G';
-            break;
-        case 2010101 :
-            aa_seq[temp] = 'G';
-            break;
-        case 2010110 :
-            aa_seq[temp] = 'G';
-            break;
-        case 2010111 :
-            aa_seq[temp] = 'G';
-            break;
-        case 2011000 :
-            aa_seq[temp] = 'A';
-            break;
-        case 2011001 :
-            aa_seq[temp] = 'A';
-            break;
-        case 2011010 :
-            aa_seq[temp] = 'A';
-            break;
-        case 2011011 :
-            aa_seq[temp] = 'A';
-            break;
-        case 2011100 :
-            aa_seq[temp] = 'V';
-            break;
-        case 2011101 :
-            aa_seq[temp] = 'V';
-            break;
-        case 2011110 :
-            aa_seq[temp] = 'V';
-            break;
-        case 2011111 :
-            aa_seq[temp] = 'V';
-            break;
-        case 2100000 :
-            aa_seq[temp] = 'Q';
-            break;
-        case 2100001 :
-            aa_seq[temp] = 'Q';
-            break;
-        case 2100010 :
-            aa_seq[temp] = 'H';
-            break;
-        case 2100011 :
-            aa_seq[temp] = 'H';
-            break;
-        case 2100100 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2100101 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2100110 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2100111 :
-            aa_seq[temp] = 'R';
-            break;
-        case 2101000 :
-            aa_seq[temp] = 'P';
-            break;
-        case 2101001 :
-            aa_seq[temp] = 'P';
-            break;
-        case 2101010 :
-            aa_seq[temp] = 'P';
-            break;
-        case 2101011 :
-            aa_seq[temp] = 'P';
-            break;
-        case 2101100 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2101101 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2101110 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2101111 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2110000 :
-            aa_seq[temp] = 'O';
-            break;
-        case 2110001 :
-            aa_seq[temp] = 'O';
-            break;
-        case 2110010 :
-            aa_seq[temp] = 'Y';
-            break;
-        case 2110011 :
-            aa_seq[temp] = 'Y';
-            break;
-        case 2110100 :
-            aa_seq[temp] = 'O';
-            break;
-        case 2110101 :
-            aa_seq[temp] = 'W';
-            break;
-        case 2110110 :
-            aa_seq[temp] = 'C';
-            break;
-        case 2110111 :
-            aa_seq[temp] = 'C';
-            break;
-        case 2111000 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2111001 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2111010 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2111011 :
-            aa_seq[temp] = 'S';
-            break;
-        case 2111100 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2111101 :
-            aa_seq[temp] = 'L';
-            break;
-        case 2111110 :
-            aa_seq[temp] = 'F';
-            break;
-        case 2111111 :
-            aa_seq[temp] = 'F';
-            break;
-
-        default:
-            return NULL;
-        }
-    
         temp++;
     }
 

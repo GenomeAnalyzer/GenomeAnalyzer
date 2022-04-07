@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "rdtsc.h"
-#include "../versions/naive/headers/gene.h"
+#include "../versions/bool/headers/gene_bool.h"
 #include <string.h>
 
 #define MAX 31000
@@ -25,7 +25,7 @@ void load_gene(char *filename, char *seq_char)
         	strcat(seq_char, temp);
         }
     }
-	//fscanf(file, "%s", seq_char);
+	//printf("%s\n",seq_char);
 
 	fclose(file);
 }
@@ -48,18 +48,18 @@ int main(int argc, char *argv[])
 
 
 	// Variable used for function
-	unsigned short int *seq_short = NULL;
-	unsigned long *seq_long = malloc(sizeof(unsigned long) * 2 * seq_char_size);
-	unsigned short int *seq_short2 = NULL;
+	_Bool *seq_short = NULL;
+	_Bool *seq_long = malloc(sizeof(_Bool) * 2 * seq_char_size);
+	_Bool *seq_short2 = NULL;
 	float cms = 0;
 	char *rna_seq_short = NULL;
 	char *aa_seq_short = NULL;
 	
-	seq_short = convert_to_binary(seq_char, 2 * seq_char_size);
-	seq_short2 = convert_to_binary(seq_char2, 2 * seq_char_size2);
+	seq_short = convert_to_binary(seq_char, seq_char_size);
+	seq_short2 = convert_to_binary(seq_char2, seq_char_size2);
 
 	for(int i = 0; i < 2 * seq_char_size; i++)
-		seq_long[i] = (unsigned long)seq_short[i];
+		seq_long[i] = (_Bool)seq_short[i];
   	
   	gene_map_t g;
     g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * 2);
@@ -76,14 +76,14 @@ int main(int argc, char *argv[])
     	m.end_mut[i]=0;   	
     }
 
-    printf("Naive Functions\t\t    | Cycles\n");
+    printf("Boolean function\t\t    | Cycles\n");
     printf("-----------------------------------------\n");
 
 	/*-----convert_to_binary-----*/
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	seq_short = convert_to_binary(seq_char, 2 * seq_char_size);
+    	seq_short = convert_to_binary(seq_char,  seq_char_size);
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		rna_seq_short = generating_mRNA(seq_short, 2 * seq_char_size);
+		rna_seq_short = generating_mRNA(seq_short,  seq_char_size);
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		detecting_genes(seq_long, 2 * seq_char_size, &g);
+		detecting_genes(seq_long,  seq_char_size, &g);
 	}
 	after = rdtsc();
 	elapsed = (double)(after - before);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		aa_seq_short = generating_amino_acid_chain(seq_short, 2 * seq_char_size);
+		aa_seq_short = generating_amino_acid_chain(seq_short,  seq_char_size);
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	detecting_mutations(seq_short, 2 * seq_char_size, m);;
+    	detecting_mutations(seq_short,  seq_char_size, m);;
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     before = rdtsc();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		cms = calculating_matching_score(seq_short, 2 * seq_char_size, seq_short2, 2 * seq_char_size2);
+		cms = calculating_matching_score(seq_short, 2 * seq_char_size, seq_short2,  seq_char_size2);
 	}
     after = rdtsc();
     elapsed = (double)(after - before);
