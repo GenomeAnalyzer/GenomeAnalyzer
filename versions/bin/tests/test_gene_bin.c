@@ -8,20 +8,30 @@
 #include "../headers/gene_bin.h"
 #include "../src/gene_bin.c"
 
-static void test_get_binary_value(void ** state){
-  // Test if the algorithm is OK
-      // 1 = 0000000000000000000000000000001
-  assert_int_equal(1, get_binary_value((long int []){1}, 0));
-      //9350764 = 001101100111010101110001
-  assert_int_equal(0, get_binary_value((long int []){1}, 17));
-  // Pour chaque binaire de 00000 à 11111, vérifier chaque bit.
-  for(int i =0; i<32;i++){
-    assert_int_equal(i%2, get_binary_value((long int  []){i}, 0));
-    assert_int_equal(i/2%2, get_binary_value((long int  []){i}, 1));
-    assert_int_equal(i/4%2, get_binary_value((long int  []){i}, 2));
-    assert_int_equal(i/8%2, get_binary_value((long int  []){i}, 3));
-    assert_int_equal(i/16%2, get_binary_value((long int  []){i}, 4));
+static void test_get_binary_value(void** state) {
+
+  // 1 = 0000000000000000000000000000001
+  assert_int_equal(1, get_binary_value((long int []) { 1 }, 0));
+
+  // Requesting a bit out of the binary range should returns 0
+  assert_int_equal(0, get_binary_value((long int []) { 0b11111 }, 6));
+
+  // For every bit from 0b000000000 to 0b111111111, verify each bit, for each value.
+  // We loop on all the 9bits numbers (2^0 -> 2^8-1)
+  // The value of the bit at position x (from the right) corresponds to i / 2^x % 2
+  for (int value = 0; value < 128;i++) {
+    assert_int_equal(value % 2, get_binary_value((long int []) { value }, 0));
+    assert_int_equal(value / 2 % 2, get_binary_value((long int []) { value }, 1));
+    assert_int_equal(value / 4 % 2, get_binary_value((long int []) { value }, 2));
+    assert_int_equal(value / 8 % 2, get_binary_value((long int []) { value }, 3));
+    assert_int_equal(value / 16 % 2, get_binary_value((long int []) { value }, 4));
+    assert_int_equal(value / 32 % 2, get_binary_value((long int []) { value }, 5));
+    assert_int_equal(value / 64 % 2, get_binary_value((long int []) { value }, 6));
   }
+
+  // Requesting bits outside of the range should returns 0 (31 bits for a long int.)
+  assert_int_equal(1, get_binary_value((long int []) { 0b1111111111111111111111111111111111111111 }, 31));
+  assert_int_equal(0, get_binary_value((long int []) { 0b1111111111111111111111111111111111111111 }, 32));
 }
 
 static void test_change_binary_value(void ** state){
@@ -532,19 +542,19 @@ int main(void) {
   const struct CMUnitTest tests[] = {
     // BINARIES ARRAYS FUNCTIONS
     cmocka_unit_test(test_get_binary_value),
-    cmocka_unit_test(test_change_binary_value),
-    cmocka_unit_test(test_set_binary_array),
-    cmocka_unit_test(test_xor_binary_array),
-    cmocka_unit_test(test_popcount_binary_array),
-    cmocka_unit_test(test_get_piece_binary_array),
-    // DNA & GENES FUNCTIONS
-    cmocka_unit_test(test_convert_to_binary),
-    cmocka_unit_test(test_binary_to_dna),
-    cmocka_unit_test(test_generating_mRNA),
-    cmocka_unit_test(test_detecting_genes),
-    cmocka_unit_test(test_generating_aa_chain),
-    cmocka_unit_test(test_detecting_mutations),
-    cmocka_unit_test(test_calculating_matching_score),
+    // cmocka_unit_test(test_change_binary_value),
+    // cmocka_unit_test(test_set_binary_array),
+    // cmocka_unit_test(test_xor_binary_array),
+    // cmocka_unit_test(test_popcount_binary_array),
+    // cmocka_unit_test(test_get_piece_binary_array),
+    // // DNA & GENES FUNCTIONS
+    // cmocka_unit_test(test_convert_to_binary),
+    // cmocka_unit_test(test_binary_to_dna),
+    // cmocka_unit_test(test_generating_mRNA),
+    // cmocka_unit_test(test_detecting_genes),
+    // cmocka_unit_test(test_generating_aa_chain),
+    // cmocka_unit_test(test_detecting_mutations),
+    // cmocka_unit_test(test_calculating_matching_score),
   };
   result |= cmocka_run_group_tests_name("gene", tests, NULL, NULL);
 
