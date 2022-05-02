@@ -52,11 +52,11 @@ int countfiles()
     int count = 0;
     struct dirent *entry;
 
-    DIR *dir = opendir("fastas/");
+    DIR *dir = opendir("./fastas/");
 
     while ((entry = readdir(dir)) != NULL)
     {
-        if (strcmp(entry->d_name, ".fasta") == 0)
+        if (strstr(entry->d_name, ".fasta"))
             count++;
     }
     return count;
@@ -64,7 +64,9 @@ int countfiles()
 
 int readfiles()
 {
-    char **content = malloc(sizeof(char *) * countfiles());
+
+    int nb = countfiles();
+    char **content = malloc(sizeof(char *) * nb);
 
     DIR *dir;
 
@@ -81,11 +83,13 @@ int readfiles()
     // Iterate if a file exists in this directory
     while ((file = readdir(dir)) != NULL)
     {
-        if ( file->d_type == DT_DIR) 
-        continue ;
+
+        if (file->d_type == DT_DIR)
+            continue;
         // Skip parent directory ( linux)
         if ((!strcmp(file->d_name, ".")) && (!strcmp(file->d_name, "..")))
             continue;
+
         char name[50] = "./fastas/";
 
         strcat(name, file->d_name);
@@ -115,30 +119,21 @@ int readfiles()
         while ((read = getline(&line, &len, input)) != -1)
         {
             // Toggle newline
-            line[strcspn(line, "\n")] = '\0';
+            line[strcspn(line, "\n") - 1] = '\0';
 
             // Copy the line in the content variable
             strcat(content[i], line);
         }
 
-        //   printf("Contenu fichier = \n%s \n", content[i]);
+       // printf("Contenu fichier = \n%s %d \n", content[i], i);
 
-        printf(" finis lecture \n");
+        //printf(" finis lecture \n");
 
         fclose(input);
         i++;
     }
-    if (errno != 0)
-    {
-        if (errno == EBADF)
-            printf("Invalid directory stream descriptor\n");
-        else
-            perror("readdir");
-    }
-    else
-    {
-        printf("End-of-directory reached\n");
-    }
+  
+
     // Free everything
     free(content);
     if (closedir(dir) == -1)
