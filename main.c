@@ -6,6 +6,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 int n = 1000;
 
@@ -70,36 +72,77 @@ int readfiles()
 
     // Open the directory which contain all the fastas files
     if ((dir = opendir("fastas")) == NULL)
-        return printf("Error: Can't open fastas folder"), -1;
+        return printf("Error: Can't open fastas folder\n"), -1;
 
     struct dirent *file;
 
+    int i = 0;
+
     // Iterate if a file exists in this directory
-    while ((file == readdir(dir)))
+    while ((file = readdir(dir)) != NULL)
     {
+        if ( file->d_type == DT_DIR) 
+        continue ;
         // Skip parent directory ( linux)
         if ((!strcmp(file->d_name, ".")) && (!strcmp(file->d_name, "..")))
             continue;
+        char name[50] = "./fastas/";
+
+        strcat(name, file->d_name);
+
+        // Get size of the file to allocate enough memory
+        struct stat st;
+        stat(name, &st);
+        long size = st.st_size;
+
+        content[i] = (char *)malloc(size * sizeof(char));
 
         // Open fasta file
-        if ((input = fopen(file->d_name, "r")) == NULL)
+        if ((input = fopen(name, "r")) == NULL)
         {
-            fclose(input);
-            return printf("Error: Can't open fastas file %s", file->d_name), -1;
+            // fclose(input);
+            return printf("Error: Can't open fastas file %s\n", name), -1;
         }
-
-        // first line , we need to skip it
-        fscanf(input, "%s\n", content[0]);
+        printf("%s\n", file->d_name);
 
         char *line;
+        size_t len = 0;
+        ssize_t read;
 
-        fgets( line, sizeof(line), input);
+        // first line , we need to skip it
+        read = getline(&line, &len, input);
 
-        printf("%s\n", line);
+        while ((read = getline(&line, &len, input)) != -1)
+        {
+            // Toggle newline
+            line[strcspn(line, "\n")] = '\0';
+
+            // Copy the line in the content variable
+            strcat(content[i], line);
+        }
+
+        //   printf("Contenu fichier = \n%s \n", content[i]);
+
+        printf(" finis lecture \n");
 
         fclose(input);
+        i++;
     }
+    if (errno != 0)
+    {
+        if (errno == EBADF)
+            printf("Invalid directory stream descriptor\n");
+        else
+            perror("readdir");
+    }
+    else
+    {
+        printf("End-of-directory reached\n");
+    }
+    // Free everything
     free(content);
+    if (closedir(dir) == -1)
+        return printf("Error close dir\n"), -1;
 }
 int main(int argc, char **argv)
 {
@@ -114,6 +157,9 @@ int main(int argc, char **argv)
     if (rank == RANK_MASTER)
     {
         readfiles();
+    }
+    else
+    {
     }
 
     MPI_Finalize();
