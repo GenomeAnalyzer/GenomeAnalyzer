@@ -186,6 +186,8 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
  * 
  * For each pair of bits in bin_dna_seq, append to dna_seq its corresponding nucleotide in mRNA. (T -> U)
  */
+
+//TODO: faire à partir du string et non depuis à partir du binaire
 char* generating_mRNA(const long int* gene_seq, const long start_pos, const long int seq_size) {
     // Check the input argument
     if (!gene_seq)
@@ -309,17 +311,17 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t*
  * 
  * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
 */
+
 char* generating_amino_acid_chain(const long int *gene_seq, const long int start_pos, const long int seq_size) {
     long int codon_size = 6;
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
-    if(seq_size % 3 != 0)
-        return NULL;
+    // if(seq_size % 3 != 0)
+    //     return NULL;
 
     // Allocate memory and verify it has been allocated
-    char* aa_seq = NULL;
-     aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    char* aa_seq = malloc(sizeof(char) * (seq_size / codon_size) + 1);
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 

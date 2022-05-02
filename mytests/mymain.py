@@ -42,4 +42,7 @@ genes = DNA_bin.detecting_genes(array.array('l',seq_bin))
 for i in genes:
 	i[0] = int(i[0] >> 1)
 	i[1] = int(i[1] >> 1)
-	print(readn[i[0]:i[1]+1])
+	print((i[1]-i[0]+1)%3, readn[i[0]:i[1]+1])
+
+aaread = DNA_bin.generating_amino_acid_chain(array.array('l',seq_bin), 0, len(read.replace('\n','')))
+print(aaread)
