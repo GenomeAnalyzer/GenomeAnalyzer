@@ -62,7 +62,7 @@ int countfiles()
     return count;
 }
 
-int readfiles()
+int readfiles(int size_r)
 {
 
     int nb = countfiles();
@@ -116,6 +116,11 @@ int readfiles()
         // first line , we need to skip it
         read = getline(&line, &len, input);
 
+        content[i] = (char *)malloc((size - read - 1)* sizeof(char));
+        getline(&line, &len, input);
+
+        strcpy(content[i],line);
+
         while ((read = getline(&line, &len, input)) != -1)
         {
             // Toggle newline
@@ -125,20 +130,60 @@ int readfiles()
             strcat(content[i], line);
         }
 
-       // printf("Contenu fichier = \n%s %d \n", content[i], i);
+        // printf("Contenu fichier = \n%s %d \n", content[i], i);
 
-        //printf(" finis lecture \n");
+        // printf(" finis lecture \n");
 
         fclose(input);
+
+        int recv = i % (size_r);
+
+
+        if (recv == 0)
+            recv++;
+
+        MPI_Send(content[i], strlen(content[i]), MPI_CHAR, recv, 0, MPI_COMM_WORLD);
         i++;
     }
-  
+    i = 0;
 
+    for (int j = 1; i < size_r; i++)
+        MPI_Send(&i, 1, MPI_INT, j, 1, MPI_COMM_WORLD);
     // Free everything
     free(content);
     if (closedir(dir) == -1)
         return printf("Error close dir\n"), -1;
 }
+
+void getfile(int rank)
+{
+    MPI_Status sta;
+    MPI_Request req;
+    int flag;
+
+    int cont = 1;
+
+    while (cont)
+    {
+        MPI_Status status;
+        int count;
+        MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        if (sta.MPI_TAG == 1)
+        {
+            MPI_Recv(&count, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+            return;
+        }
+
+        MPI_Get_count(&status, MPI_CHAR, &count);
+
+        char *seq = (char *)malloc(sizeof(char) * count);
+
+        MPI_Recv(seq, count, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
+
+      //  printf("%d) fichier = %s\n", rank, seq);
+    }
+}
+
 int main(int argc, char **argv)
 {
     int RANK_MASTER = 0;
@@ -146,15 +191,18 @@ int main(int argc, char **argv)
     MPI_Init(&argc, &argv);
 
     int rank;
+    int size;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     if (rank == RANK_MASTER)
     {
-        readfiles();
+        readfiles(size);
     }
     else
     {
+        getfile(rank);
     }
 
     MPI_Finalize();
