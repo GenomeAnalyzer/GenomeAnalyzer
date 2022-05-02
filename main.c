@@ -1,4 +1,4 @@
-#include "gene.h"
+#include "gene_bin.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -8,41 +8,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>
-
-int n = 1000;
-
-unsigned int *alea_gen()
-{
-    unsigned int *gene = malloc(n * sizeof(int));
-
-    srand(getpid());
-
-    for (int i = 0; i < n; i++)
-    {
-        gene[i] = rand() % 2;
-        // printf(" %d",gene[i]);
-    }
-    return gene;
-}
-
-int *test_gen()
-{
-    int *gene = calloc(sizeof(int *), MAX_GENES);
-
-    // Example of a gene so the gene map register it
-    gene[0] = 000011011100;
-
-    return gene;
-}
-
-void print_test(gene_map_t *gene_map)
-{
-    printf("Début print de test\n");
-    for (long long i = 0; i < gene_map->genes_counter; i++)
-    {
-        printf("Gene \x1b[31m%lld\x1b[0m: \x1b[32m[%lld:%lld]\x1b[0m\n", i, gene_map->gene_start[i], gene_map->gene_end[i]);
-    }
-}
 
 /* Count files in a directory
  *
@@ -116,10 +81,12 @@ int readfiles(int size_r)
         // first line , we need to skip it
         read = getline(&line, &len, input);
 
-        content[i] = (char *)malloc((size - read - 1)* sizeof(char));
-        getline(&line, &len, input);
+        content[i] = (char *)malloc((size - read - 1) * sizeof(char));
 
-        strcpy(content[i],line);
+        getline(&line, &len, input);
+        line[strcspn(line, "\n") - 1] = '\0';
+
+        strcpy(content[i], line);
 
         while ((read = getline(&line, &len, input)) != -1)
         {
@@ -130,14 +97,12 @@ int readfiles(int size_r)
             strcat(content[i], line);
         }
 
-        // printf("Contenu fichier = \n%s %d \n", content[i], i);
-
-        // printf(" finis lecture \n");
-
+#ifdef DEBUG
+        printf("SEQ:    %s\n", content[i]);
+#endif
         fclose(input);
 
         int recv = i % (size_r);
-
 
         if (recv == 0)
             recv++;
@@ -147,7 +112,7 @@ int readfiles(int size_r)
     }
     i = 0;
 
-    for (int j = 1; i < size_r; i++)
+    for (int j = 1; j < size_r; j++)
         MPI_Send(&i, 1, MPI_INT, j, 1, MPI_COMM_WORLD);
     // Free everything
     free(content);
@@ -168,9 +133,12 @@ void getfile(int rank)
         MPI_Status status;
         int count;
         MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-        if (sta.MPI_TAG == 1)
+
+        if (status.MPI_TAG == 1)
         {
+
             MPI_Recv(&count, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+
             return;
         }
 
@@ -180,7 +148,13 @@ void getfile(int rank)
 
         MPI_Recv(seq, count, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
 
-      //  printf("%d) fichier = %s\n", rank, seq);
+        long int *seq_bin = convert_to_binary(seq, strlen(seq));
+
+        gene_map_t gene_map;
+
+        detecting_genes(seq_bin, strlen(seq) / 2, &gene_map);
+
+        printf(" Gene found : %d\n ", gene_map.genes_counter);
     }
 }
 
