@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <omp.h>
-#include <pthread.h>
-#include <string.h>
-
+#include <mpi.h>
 #include "gene_bin.h"
+#include <sys/types.h>
+#include <dirent.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 /***************************************/
 /********** BINARIES FUNCTION **********/
@@ -47,71 +49,6 @@ long int *change_binary_value(long int *seq_bin, const int pos, const int value)
     return seq_bin;
 }
 
-struct thbin
-{
-    unsigned seq_size;
-    char *seq_char;
-    int pos;
-    long int *seq_bin;
-};
-void *threadSetbinaryarray(void *var)
-{
-    struct thbin *mystruct = (struct thbin *)var;
-   // printf("Rentre dans le thread %s %d %d\n", mystruct->seq_char, mystruct->pos / 2, mystruct->seq_size);
-
-    // Parse the DNA sequence, per nucleotides
-    for (long int i = mystruct->pos / 2; i < mystruct->seq_size; ++i)
-    {
-        //printf("Char = %c\n", mystruct->seq_char[i]);
-        //  Set seq_bin bit values according to the nucleotide read
-        switch (mystruct->seq_char[i])
-        {
-        case 'A': // A = 00
-            break;
-        case 'T': // T = 11
-            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
-            change_binary_value(mystruct->seq_bin, mystruct->pos + 1, 1);
-            break;
-        case 'G': // G = 01
-            change_binary_value(mystruct->seq_bin, mystruct->pos + 1, 1);
-            break;
-        case 'C': // C = 10
-            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
-            break;
-        case 'N': // N = A = 00
-            break;
-        case 'R': // R = A = 00
-            break;
-        case 'Y': // Y = C = 10
-            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
-            break;
-        case 'K': // K = G = 01
-            change_binary_value(mystruct->seq_bin, mystruct->pos + 1, 1);
-            break;
-        case 'M': // M = A = 00
-            break;
-        case 'S': // S = C = 10
-            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
-            break;
-        case 'W': // W = A = 00
-            break;
-        case 'B': // B = C = 10
-            change_binary_value(mystruct->seq_bin, mystruct->pos, 1);
-            break;
-        case 'D': // D = A = 00
-            break;
-        case 'H': // H = G = 01
-            change_binary_value(mystruct->seq_bin, mystruct->pos + 1, 1);
-            break;
-        case 'V': // V = A = 00
-            break;
-        }
-        mystruct->pos += 2;
-    }
-
-    pthread_exit(EXIT_SUCCESS);
-}
-
 /**
  * Convert a char formated DNA sequence to its binary array format.
  *
@@ -126,7 +63,7 @@ long int *set_binary_array(const char *seq_char, const unsigned seq_size)
 {
     // Number of bits needed to transform seq_char into a binary array.
     int seq_bin_size = 2 * seq_size;
-    pthread_t thread_id[2];
+
     // Binary array new size
     int nb = seq_bin_size / int_SIZE;
     if (seq_bin_size % int_SIZE != 0)
@@ -134,44 +71,45 @@ long int *set_binary_array(const char *seq_char, const unsigned seq_size)
 
     // Allocate memory and verify it has been allocated
     long int *seq_bin = NULL;
-    // printf("Nb = %d %d\n",nb,seq_bin_size);
-    seq_bin = calloc(seq_bin_size, sizeof(long int));
-     if (!seq_bin)
-         return printf("ERROR: set_binary_array: cannot allocate memory.\n"), NULL;
+    seq_bin = calloc(nb, sizeof(long int));
+    if (!seq_bin)
+        return printf("ERROR: set_binary_array: cannot allocate memory.\n"), NULL;
 
     int pos = 0;
 
-    struct thbin *thread[2];
+    // Parse the DNA sequence, per nucleotides
+    for (long int i = 0; i < seq_size; ++i)
+    {
 
-    thread[0] = malloc(sizeof(struct thbin *));
-    thread[0]->seq_char = malloc(sizeof(strlen(seq_char)));
-    thread[0]->seq_char = seq_char;
-    thread[0]->seq_size = seq_size;
-    thread[0]->seq_bin = seq_bin;
+        // Default char is put to A to handle the warning : wrong size input
+        // Add '00' bits in this case
+        int c = 0;
+        if (!seq_char[i])
+        {
+            printf("WARNING: set_binary_array: size input is different than the char sequence.\n");
+        }
+        else
+        {
+            c = seq_char[i] - 65;
+        }
+        // get the 2-bits value of char read
+        int bit1, bit2;
+        bit1 = L[c][0];
+        bit2 = L[c][1];
 
-    thread[0]->pos = 0;
-    thread[0]->seq_size = seq_size / 2;
-
-    // printf("Pos = %d\n", thread->pos);
-    pthread_create(&thread_id[0], NULL, threadSetbinaryarray, (void *)thread[0]);
-   
-    thread[1] = malloc(sizeof(struct thbin *));
-    thread[1]->seq_char = malloc(sizeof(strlen(seq_char)));
-    thread[1]->seq_char = seq_char;
-    thread[1]->seq_size = seq_size;
-    thread[1]->seq_bin = seq_bin;
-
-    thread[1]->pos = seq_bin_size / 2;
-    thread[1]->seq_size = seq_size;
-
-    // printf("Pos = %d\n", thread->pos);
-
-    pthread_create(&thread_id[1], NULL, threadSetbinaryarray, (void *)thread[1]);
-
-    for (int i = 0; i < 2; i++)
-        pthread_join(thread_id[i], NULL);
-
-    return thread[1]->seq_bin;
+        if (bit1 != -1)
+        {
+            // Set seq_bin bit values according to the nucleotide read
+            change_binary_value(seq_bin, pos, bit1);
+            change_binary_value(seq_bin, pos + 1, bit2);
+            pos += 2;
+        }
+        else
+        {
+            return printf("ERROR: set_binary_array: %c Unknown letter in sequence.\n", seq_char[i]), NULL;
+        }
+    }
+    return seq_bin;
 }
 
 /**
@@ -281,11 +219,10 @@ int popcount_binary_array(const long int *seq_bin, const long int seq_size)
  *
  * Iterates on seq_bin from pos_start, size times and gets for each iteration its binary value.
  */
-pthread_t thread_id;
-long int *get_piece_binary_array(const long int *seq_bin, const long int pos_start, const long int size)
+long int *get_piece_binary_array(const long int *seq_bin, const uint64_t pos_start, const uint64_t pos_stop)
 {
     // Find the size of the output
-    long int array_size = (size) / int_SIZE + (size % int_SIZE != 0);
+    long int array_size = (pos_stop - pos_start) / int_SIZE + ((pos_stop - pos_start) % int_SIZE != 0);
 
     // Allocate memory and verify it has been allocated
     long int *piece_seq_bin = NULL;
@@ -294,13 +231,12 @@ long int *get_piece_binary_array(const long int *seq_bin, const long int pos_sta
         return printf("ERROR: get_piece_binary_array: cannot allocate memory.\n"), NULL;
 
     // stop position.
-    long int stop_pos = pos_start + size;
 
     long j = 0;
 
     // Parse the binary array,
     // from the bit at 'pos_start' position to 'pos_stop' position
-    for (long i = pos_start; i < stop_pos; i++)
+    for (long i = pos_start; i < pos_stop; i++)
     {
         change_binary_value(piece_seq_bin, j, get_binary_value(seq_bin, i));
         j++;
@@ -352,6 +288,7 @@ char *binary_to_dna(long int *bin_dna_seq, const unsigned size)
         return printf("ERROR: binary_to_dna: cannot allocate memory.\n"), NULL;
 
     int j = 0;
+
     // Parse the binary array, two bits per iteration
     for (unsigned i = 0; i < size; i += 2)
     {
@@ -359,18 +296,9 @@ char *binary_to_dna(long int *bin_dna_seq, const unsigned size)
         int nucl1 = get_binary_value(bin_dna_seq, i);
         int nucl2 = get_binary_value(bin_dna_seq, i + 1);
 
-        if (nucl1 == 0 && nucl2 == 0)
-            // 00 = A/N
-            dna_seq[j] = 'A';
-        else if (nucl1 == 1 && nucl2 == 1)
-            // 11 = T
-            dna_seq[j] = 'T';
-        else if (nucl1 == 1 && nucl2 == 0)
-            // 10 = C
-            dna_seq[j] = 'C';
-        else if (nucl1 == 0 && nucl2 == 1)
-            // 01 = G
-            dna_seq[j] = 'G';
+        // get the ASCII value according to bits value
+        char value = bitstocharDNA[nucl2 + 2 * nucl1];
+        dna_seq[j] = value;
         j++;
     }
     return dna_seq;
@@ -387,7 +315,7 @@ char *binary_to_dna(long int *bin_dna_seq, const unsigned size)
  *
  * For each pair of bits in bin_dna_seq, append to dna_seq its corresponding nucleotide in mRNA. (T -> U)
  */
-char *generating_mRNA(const long int *gene_seq, const long start_pos, const long int seq_size)
+char *generating_mRNA(const long int *gene_seq, const uint64_t start_pos, const uint64_t stop_pos)
 {
     // Check the input argument
     if (!gene_seq)
@@ -395,36 +323,23 @@ char *generating_mRNA(const long int *gene_seq, const long start_pos, const long
 
     // Allocate memory and verify it has been allocated
     char *rna_seq = NULL;
-    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 2);
+    rna_seq = malloc(sizeof(*rna_seq) * (stop_pos - start_pos / 2) + 2);
     if (!rna_seq)
         return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
 
     int j = 0;
 
-    long stop = seq_size + start_pos;
-
     // Parse the binary DNA sequence, two bits per iteration
-    for (long int i = start_pos; i < stop; i += 2)
+    for (long int i = start_pos; i < stop_pos; i += 2)
     {
 
         // nucleotides = A, U, G, C
         int nucl1 = get_binary_value(gene_seq, i);
         int nucl2 = get_binary_value(gene_seq, i + 1);
 
-        if (nucl1 == 0 && nucl2 == 0)
-            // 00 = A
-            rna_seq[j] = 'A';
-        else if (nucl1 == 1 && nucl2 == 1)
-            // 11 = U
-            rna_seq[j] = 'U';
-        else if (nucl1 == 1 && nucl2 == 0)
-            // 10 = C
-            rna_seq[j] = 'C';
-        else if (nucl1 == 0 && nucl2 == 1)
-            // 01 = G
-            rna_seq[j] = 'G';
-        else
-            return printf("ERROR: generating_mRNA: invalid value in DNA sequence\n"), NULL;
+        // get the ASCII value according to bits value
+        char value = bitstocharmRNA[nucl2 + 2 * nucl1];
+        rna_seq[j] = value;
         j++;
     }
     rna_seq[j] = '\0';
@@ -467,63 +382,47 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t 
 
     long int i = 0;
 
-    for (long int i = start_pos; i < gene_size; i += 2)
+    // Parse the binary array, and find all the start and stop codons
+    while ((i + 6) <= gene_size)
     {
-        // The hash functions, takes the 6 bits, and transform the array into an integer.
-        // The integer first char is a 2, for hash generation purposes.
-        int hash = 2;
-        for (long int k = i; k < i + 2; k++)
+        // Each nucleotides can be A, U, G or C
+        int nucl1 = get_binary_value(gene, i);
+        int nucl2 = get_binary_value(gene, i + 1);
+        int nucl3 = get_binary_value(gene, i + 2);
+        int nucl4 = get_binary_value(gene, i + 3);
+        int nucl5 = get_binary_value(gene, i + 4);
+        int nucl6 = get_binary_value(gene, i + 5);
+
+        // If a start pos and a stop pos doesn't exist, search for AUG
+        if (nucl1 == 0 && nucl2 == 0 && nucl3 == 1 && nucl4 == 1 && nucl5 == 0 && nucl6 == 1)
         {
-            hash = 10 * hash + get_binary_value(gene, k);
-        }
-
-        // Parse the binary array, and find all the start and stop codons
-        switch (hash)
-        { // Each nucleotides can be A, U, G or C
-
-        case 2101100:
+            // if AUG, it's the start of a gene
             start_pos = i;
-            i += 4;
-            break;
-        case 2000011:
+            i += 6;
+        }
+        else
+        {
+
             if (start_pos != -1)
             {
-                gene_map->gene_start[gene_map->genes_counter] = start_pos;
-                gene_map->gene_end[gene_map->genes_counter] = i + 5;
+                // if a start pos exists , search for UAA / UAG / UGA
+                if ((nucl1 == 1 && nucl2 == 1 && nucl3 == 0) && ((nucl4 == 0 && nucl5 == 0 && nucl6 == 0) || (nucl4 == 0 && nucl5 == 0 && nucl6 == 1) || (nucl4 == 1 && nucl5 == 0 && nucl6 == 0)))
+                {
+                    // It's the end of a gene
+                    // If a start pos and an stop pos has been found, a gene exists so we save it in the struc
+                    gene_map->gene_start[gene_map->genes_counter] = start_pos;
+                    gene_map->gene_end[gene_map->genes_counter] = i + 5;
 
-                gene_map->genes_counter++;
+                    gene_map->genes_counter++;
 
-                start_pos = -1;
-                i += 4;
+                    start_pos = -1;
+                    i += 6;
+                }
+                else
+                    i += 2;
             }
-            break;
-        case 2100011:
-            if (start_pos != -1)
-            {
-                gene_map->gene_start[gene_map->genes_counter] = start_pos;
-                gene_map->gene_end[gene_map->genes_counter] = i + 5;
-
-                gene_map->genes_counter++;
-
-                start_pos = -1;
-                i += 4;
-            }
-            break;
-        case 2001011:
-            if (start_pos != -1)
-            {
-                gene_map->gene_start[gene_map->genes_counter] = start_pos;
-                gene_map->gene_end[gene_map->genes_counter] = i + 5;
-
-                gene_map->genes_counter++;
-
-                start_pos = -1;
-                i += 4;
-            }
-            break;
-
-        default:
-            break;
+            else
+                i += 2;
         }
     }
 }
@@ -540,235 +439,38 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t 
  *
  * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
  */
-char *generating_amino_acid_chain(const long int *gene_seq, const long int start_pos, const long int seq_size)
+char *generating_amino_acid_chain(const long int *gene_seq, const uint64_t start_pos, const uint64_t stop_pos)
 {
     long int codon_size = 6;
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
-    if (seq_size % 3 != 0)
+    if ((stop_pos - start_pos) % 3 != 0)
         return NULL;
 
     // Allocate memory and verify it has been allocated
-    char *aa_seq = NULL;
-    aa_seq = malloc(sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+    char *aa_seq = calloc(sizeof(char), sizeof(*aa_seq) * ((stop_pos - start_pos) / codon_size) + 1);
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
     unsigned temp = 0;
 
-    long size = start_pos + seq_size;
-
     // Parse the binary array, six bits by six (to parse three nucleotides per three)
-    for (long int i = start_pos; i < size; i += codon_size)
+    for (long int i = start_pos; i < stop_pos; i += codon_size)
     {
-        // The hash functions, takes the 6 bits, and transform the array into an integer.
-        // The integer first char is a 2, for hash generation purposes.
-        int hash = 2;
+
+        // Get the decimal value of the 6 bits
+        int tmp = 0;
+        int pow_bit = 5;
         for (long int k = i; k < i + codon_size; k++)
         {
-            hash = 10 * hash + get_binary_value(gene_seq, k);
+            int get_bin = get_binary_value(gene_seq, k);
+            tmp += get_bin << pow_bit;
+            pow_bit--;
         }
 
-        // Switch over the hash.
-        switch (hash)
-        {
-        case 2000000:
-            aa_seq[temp] = 'K';
-            break;
-        case 2000001:
-            aa_seq[temp] = 'K';
-            break;
-        case 2000010:
-            aa_seq[temp] = 'N';
-            break;
-        case 2000011:
-            aa_seq[temp] = 'N';
-            break;
-        case 2000100:
-            aa_seq[temp] = 'R';
-            break;
-        case 2000101:
-            aa_seq[temp] = 'R';
-            break;
-        case 2000110:
-            aa_seq[temp] = 'S';
-            break;
-        case 2000111:
-            aa_seq[temp] = 'S';
-            break;
-        case 2001000:
-            aa_seq[temp] = 'T';
-            break;
-        case 2001001:
-            aa_seq[temp] = 'T';
-            break;
-        case 2001010:
-            aa_seq[temp] = 'T';
-            break;
-        case 2001011:
-            aa_seq[temp] = 'T';
-            break;
-        case 2001100:
-            aa_seq[temp] = 'I';
-            break;
-        case 2001101:
-            aa_seq[temp] = 'M';
-            break;
-        case 2001110:
-            aa_seq[temp] = 'I';
-            break;
-        case 2001111:
-            aa_seq[temp] = 'I';
-            break;
-        case 2010000:
-            aa_seq[temp] = 'E';
-            break;
-        case 2010001:
-            aa_seq[temp] = 'E';
-            break;
-        case 2010010:
-            aa_seq[temp] = 'D';
-            break;
-        case 2010011:
-            aa_seq[temp] = 'D';
-            break;
-        case 2010100:
-            aa_seq[temp] = 'G';
-            break;
-        case 2010101:
-            aa_seq[temp] = 'G';
-            break;
-        case 2010110:
-            aa_seq[temp] = 'G';
-            break;
-        case 2010111:
-            aa_seq[temp] = 'G';
-            break;
-        case 2011000:
-            aa_seq[temp] = 'A';
-            break;
-        case 2011001:
-            aa_seq[temp] = 'A';
-            break;
-        case 2011010:
-            aa_seq[temp] = 'A';
-            break;
-        case 2011011:
-            aa_seq[temp] = 'A';
-            break;
-        case 2011100:
-            aa_seq[temp] = 'V';
-            break;
-        case 2011101:
-            aa_seq[temp] = 'V';
-            break;
-        case 2011110:
-            aa_seq[temp] = 'V';
-            break;
-        case 2011111:
-            aa_seq[temp] = 'V';
-            break;
-        case 2100000:
-            aa_seq[temp] = 'Q';
-            break;
-        case 2100001:
-            aa_seq[temp] = 'Q';
-            break;
-        case 2100010:
-            aa_seq[temp] = 'H';
-            break;
-        case 2100011:
-            aa_seq[temp] = 'H';
-            break;
-        case 2100100:
-            aa_seq[temp] = 'R';
-            break;
-        case 2100101:
-            aa_seq[temp] = 'R';
-            break;
-        case 2100110:
-            aa_seq[temp] = 'R';
-            break;
-        case 2100111:
-            aa_seq[temp] = 'R';
-            break;
-        case 2101000:
-            aa_seq[temp] = 'P';
-            break;
-        case 2101001:
-            aa_seq[temp] = 'P';
-            break;
-        case 2101010:
-            aa_seq[temp] = 'P';
-            break;
-        case 2101011:
-            aa_seq[temp] = 'P';
-            break;
-        case 2101100:
-            aa_seq[temp] = 'L';
-            break;
-        case 2101101:
-            aa_seq[temp] = 'L';
-            break;
-        case 2101110:
-            aa_seq[temp] = 'L';
-            break;
-        case 2101111:
-            aa_seq[temp] = 'L';
-            break;
-        case 2110000:
-            aa_seq[temp] = 'O';
-            break;
-        case 2110001:
-            aa_seq[temp] = 'O';
-            break;
-        case 2110010:
-            aa_seq[temp] = 'Y';
-            break;
-        case 2110011:
-            aa_seq[temp] = 'Y';
-            break;
-        case 2110100:
-            aa_seq[temp] = 'O';
-            break;
-        case 2110101:
-            aa_seq[temp] = 'W';
-            break;
-        case 2110110:
-            aa_seq[temp] = 'C';
-            break;
-        case 2110111:
-            aa_seq[temp] = 'C';
-            break;
-        case 2111000:
-            aa_seq[temp] = 'S';
-            break;
-        case 2111001:
-            aa_seq[temp] = 'S';
-            break;
-        case 2111010:
-            aa_seq[temp] = 'S';
-            break;
-        case 2111011:
-            aa_seq[temp] = 'S';
-            break;
-        case 2111100:
-            aa_seq[temp] = 'L';
-            break;
-        case 2111101:
-            aa_seq[temp] = 'L';
-            break;
-        case 2111110:
-            aa_seq[temp] = 'F';
-            break;
-        case 2111111:
-            aa_seq[temp] = 'F';
-            break;
-
-        default:
-            return NULL;
-        }
+        // Get the corresponding protein from the lookup table
+        aa_seq[temp] = LUT[tmp];
 
         temp++;
     }
@@ -791,16 +493,16 @@ char *generating_amino_acid_chain(const long int *gene_seq, const long int start
  *
  * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
  */
-void detecting_mutations(const long int *gene_seq, const long int start_pos, const long int size_sequence,
+void detecting_mutations(const long int *gene_seq, const long int start_pos, const uint64_t stop_pos,
                          mutation_map mut_m)
 {
     long int detect_mut = 0;          // Counting size of GC sequence
     unsigned short tmp_start_mut = 0; // stock start mutation
     unsigned cmp = 0;                 // counter of all mutation zones
 
-    long size = start_pos + size_sequence;
+    // long size = start_pos + size_sequence;
     // Parse the binary array, from the 'start_pos' bit to the end
-    for (long int i = start_pos; i < size; i += 2)
+    for (long int i = start_pos; i < stop_pos; i += 2)
     {
 
         // each nucleotides can be  A, U, G or C
@@ -821,7 +523,7 @@ void detecting_mutations(const long int *gene_seq, const long int start_pos, con
         else
         {
             // Check if previous GC sequence is a probable mutation zone
-            if (detect_mut >= (size_sequence / 5))
+            if (detect_mut >= ((stop_pos - start_pos) / 5))
             {
                 mut_m.start_mut[cmp] = tmp_start_mut;
                 mut_m.end_mut[cmp] = (i)-start_pos;
@@ -832,10 +534,10 @@ void detecting_mutations(const long int *gene_seq, const long int start_pos, con
         }
     }
     // Check if ending sequence is a probable mutation zone
-    if (detect_mut >= (size_sequence / 5))
+    if (detect_mut >= ((stop_pos - start_pos) / 5))
     {
         mut_m.start_mut[cmp] = tmp_start_mut;
-        mut_m.end_mut[cmp] = size_sequence;
+        mut_m.end_mut[cmp] = (stop_pos - start_pos);
         mut_m.size[cmp] = detect_mut - 1;
     }
 }
@@ -876,4 +578,208 @@ float calculating_matching_score(const long int *seq1, long int start_pos1, cons
     // Last step: compute the percentage
     float y = ((float)pop * 100.0) / (float)xor_size;
     return 100.0 - y;
+}
+
+/* Count files in a directory
+ *
+ */
+int countfiles()
+{
+    int count = 0;
+    struct dirent *entry;
+
+    DIR *dir = opendir("./fastas/");
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strstr(entry->d_name, ".fasta"))
+            count++;
+    }
+    return count;
+}
+
+int readfiles(int size_r, MPI_Comm comm)
+{
+
+    int nb = countfiles();
+    char **content = malloc(sizeof(char *) * nb);
+
+    DIR *dir;
+
+    FILE *input;
+
+    // Open the directory which contain all the fastas files
+    if ((dir = opendir("fastas")) == NULL)
+        return printf("Error: Can't open fastas folder\n"), -1;
+
+    struct dirent *file;
+
+    int i = 0;
+
+    // Iterate if a file exists in this directory
+    while ((file = readdir(dir)) != NULL)
+    {
+
+        if (file->d_type == DT_DIR)
+            continue;
+        // Skip parent directory ( linux)
+        if ((!strcmp(file->d_name, ".")) && (!strcmp(file->d_name, "..")))
+            continue;
+
+        char name[50] = "./fastas/";
+
+        strcat(name, file->d_name);
+
+        // Get size of the file to allocate enough memory
+        struct stat st;
+        stat(name, &st);
+        long size = st.st_size;
+
+        content[i] = (char *)malloc(size * sizeof(char));
+
+        // Open fasta file
+        if ((input = fopen(name, "r")) == NULL)
+        {
+            // fclose(input);
+            return printf("Error: Can't open fastas file %s\n", name), -1;
+        }
+        printf("%s\n", file->d_name);
+
+        char *line;
+        size_t len = 0;
+        ssize_t read;
+
+        // first line , we need to skip it
+        read = getline(&line, &len, input);
+
+        content[i] = (char *)malloc((size - read - 1) * sizeof(char));
+
+        getline(&line, &len, input);
+        line[strcspn(line, "\n") - 1] = '\0';
+
+        strcpy(content[i], line);
+
+        while ((read = getline(&line, &len, input)) != -1)
+        {
+            // Toggle newline
+            line[strcspn(line, "\n") - 1] = '\0';
+
+            // Copy the line in the content variable
+            strcat(content[i], line);
+        }
+
+#ifdef DEBUG
+        printf("SEQ:    %s\n", content[i]);
+#endif
+        fclose(input);
+
+        int recv = i % (size_r);
+
+        if (recv == 0)
+            recv++;
+
+        MPI_Send(content[i], strlen(content[i]), MPI_CHAR, recv, 0, comm);
+        i++;
+    }
+    i = 0;
+
+    for (int j = 1; j < size_r; j++)
+        MPI_Send(&i, 1, MPI_INT, j, 1, comm);
+    // Free everything
+    free(content);
+    if (closedir(dir) == -1)
+        return printf("Error close dir\n"), -1;
+}
+
+void getfile(int rank, MPI_Comm comm)
+{
+    MPI_Status sta;
+    MPI_Request req;
+    int flag;
+
+    int cont = 1;
+
+
+    while (cont)
+    {
+        MPI_Status status;
+        int count;
+        MPI_Probe(0, MPI_ANY_TAG, comm, &status);
+
+        if (status.MPI_TAG == 1)
+        {
+
+            MPI_Recv(&count, 1, MPI_INT, 0, 1, comm, &status);
+
+            return;
+        }
+
+        MPI_Get_count(&status, MPI_CHAR, &count);
+
+        char *seq = (char *)malloc(sizeof(char) * count);
+
+        MPI_Recv(seq, count, MPI_CHAR, 0, 0, comm, &status);
+
+        long int *seq_bin = convert_to_binary(seq, strlen(seq));
+
+        gene_map_t gene_map;
+        mutation_map mut_m;
+
+        int len_seq = strlen(seq) * 2;
+
+        detecting_genes(seq_bin, len_seq, &gene_map);
+
+        printf(" Gene found : %d a\n ", gene_map.genes_counter);
+
+        long **genes = malloc(sizeof(long*)*gene_map.genes_counter);
+        MPI_Request req[gene_map.genes_counter];
+        MPI_Status sta[gene_map.genes_counter];
+
+
+        for (uint64_t i = 0; i < gene_map.genes_counter; i++)
+        {
+            genes[i] = get_piece_binary_array(seq_bin,gene_map.gene_start[i],gene_map.gene_end[i]);
+            char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i]);
+
+            if (amino != NULL)
+                printf("amino acid chain = %s\n", amino);
+            // printf("MRNA = %s\n", generating_mRNA(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i]));
+            detecting_mutations(seq, gene_map.gene_start[i], gene_map.gene_end[i] - gene_map.gene_start[i], mut_m);
+
+            MPI_Isend(genes[i],gene_map.gene_end[i] - gene_map.gene_start[i],MPI_LONG,0,2,comm,req[i]);
+        }
+
+        MPI_Waitall(gene_map.genes_counter,req,sta);
+
+    }
+}
+
+void launch(MPI_Comm comm)
+{
+    int RANK_MASTER = 0;
+
+    int initialized, finalized;
+
+    MPI_Initialized(&initialized);
+    if (!initialized)
+        MPI_Init(NULL, NULL);
+
+    int rank;
+    int size;
+
+    MPI_Comm_rank(comm, &rank);
+    MPI_Comm_size(comm, &size);
+
+    if (rank == RANK_MASTER)
+    {
+        readfiles(size, comm);
+    }
+    else
+    {
+        getfile(rank, comm);
+    }
+
+    MPI_Finalized(&finalized);
+    if (!finalized)
+        MPI_Finalize();
 }
