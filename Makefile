@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -g -std=c99 -Wall
+CFLAGS = -g -mavx2 -Wall
 
 LDFLAGS = -lcmocka
 
