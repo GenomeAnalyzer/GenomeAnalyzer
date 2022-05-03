@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -g -std=c99 -Wall -Wextra
+CFLAGS = -g -std=c99 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter
 LDFLAGS = -lcmocka
 
 SRC=src
