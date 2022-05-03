@@ -14,6 +14,12 @@
 #define int_SIZE 63
 #define OFFSET_TABLE 65
 
+#ifdef __AVX512__
+#define STEPCHAR 256
+#else
+#define STEPCHAR 128
+#endif
+
 typedef struct gene_map_s {
 
     //
