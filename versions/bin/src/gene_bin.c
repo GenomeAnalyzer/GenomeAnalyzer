@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <omp.h>
 
 #include "../headers/gene_bin.h"
 
@@ -68,89 +69,34 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
         return printf("ERROR: set_binary_array: cannot allocate memory.\n"), NULL;
 
     int pos = 0;
-    
-    //Initialisation of lookup table
-    typedef int lookuptable[2];
-
-    lookuptable L[128];
-    for(int i=0; i<128;++i){
-        L[i][0] = -1;
-        L[i][1] = -1;
-    }
-
-    //Bit values according to ASCII code of nucleotides
-    L[65][0] = 0;
-    L[65][1] = 0;
-
-    L[66][0] = 1;
-    L[66][1] = 0;
-    
-    L[67][0] = 1;
-    L[67][1] = 0;
-    
-    L[68][0] = 0;
-    L[68][1] = 0;
-    
-    L[71][0] = 0;
-    L[71][1] = 1;
-    
-    L[72][0] = 0;
-    L[72][1] = 1;
-    
-    L[75][0] = 0;
-    L[75][1] = 1;
-    
-    L[77][0] = 0;
-    L[77][1] = 0;
-    
-    L[78][0] = 0;
-    L[78][1] = 0;
-    
-    L[82][0] = 0;
-    L[82][1] = 0;
-    
-    L[83][0] = 1;
-    L[83][1] = 0;
-    
-    L[84][0] = 1;
-    L[84][1] = 1;
-    
-    L[86][0] = 0;
-    L[86][1] = 0;
-    
-    L[87][0] = 0;
-    L[87][1] = 0;
-    
-    L[89][0] = 1;
-    L[89][1] = 0;
+    long int i;
 
     // Parse the DNA sequence, per nucleotides
-    for (long int i = 0; i < seq_size; ++i){
+#pragma omp parallel default(shared)
+{
+#pragma omp for schedule(static,64)
+    for (i = 0; i < seq_size; ++i){
 
         //Default char is put to A to handle the warning : wrong size input
         //Add '00' bits in this case
-        int c = 'A';
+        int c = 0;
         if(!seq_char[i]){
             printf("WARNING: set_binary_array: size input is different than the char sequence.\n");
         }
         else{
-            c = seq_char[i];
+            c = seq_char[i] - 65;
         }
         //get the 2-bits value of char read
-        int bit_value[2];
-        bit_value[0] = L[c][0];
-        bit_value[1] = L[c][1];
+        int bit1, bit2;
+        bit1 = L[c][0];
+        bit2 = L[c][1];
 
-        if(bit_value[0] != -1){
-            // Set seq_bin bit values according to the nucleotide read
-            change_binary_value(seq_bin, pos, bit_value[0]);
-            change_binary_value(seq_bin, pos + 1, bit_value[1]);
-            pos += 2;
-        }
-        else{
-            return printf("ERROR: set_binary_array: Unknown letter in sequence.\n"), NULL;
-        }
+        pos = 2*i;
+        // Set seq_bin bit values according to the nucleotide read
+        change_binary_value(seq_bin, pos, bit1);
+        change_binary_value(seq_bin, pos + 1, bit2);
     }
+}
     return seq_bin;
 }
 
@@ -208,17 +154,22 @@ long int* xor_binary_array(long int* const seq_bin1, const unsigned seq_size1,
         return printf("ERROR: xor_binary_array: cannot allocate memory.\n"), NULL;
 
     // Xor the two sequences values since its value is the same length.
+#pragma omp parallel default(shared)
+{
+#pragma omp for schedule(static,(ss2-1) / omp_get_num_threads())
     for (it = 0; it < ss2 - 1; it++)
         xor[it] = s1[it] ^ s2[it];
 
+#pragma omp master
+    {
     // If one sequence is larger than the other, shift the last value of the smaller sequence toxor it with the other value.
-    xor[it] = s1[it] ^ ((s2[it] << ((sbs1 - sbs2) % intsize)));
-    it++;
-
+    xor[ss2-1] = s1[ss2-1] ^ ((s2[ss2-1] << ((sbs1 - sbs2) % intsize)));
+    }
     // Values from the largest binary array are assigned to the xor result. (x^0 = x)
+#pragma omp for schedule(static,(ss1 - ss2) / omp_get_num_threads())
     for (it = ss2; it < ss1; it++)
         xor[it] = s1[it];
-
+}
     return xor;
 }
 
@@ -238,10 +189,15 @@ int popcount_binary_array(const long int *seq_bin, const long int seq_size){
     long int array_size = seq_size / int_SIZE;
     if(seq_size % int_SIZE != 0) array_size++;
 
-    // Parse the binary array
-    for (long int i = 0; i < array_size; ++i)
-        bin_popcount += __builtin_popcount(seq_bin[i]);
+    long int i;
 
+    // Parse the binary array
+#pragma omp parallel default(shared)
+{
+#pragma omp for schedule(static,array_size / omp_get_num_threads()) reduction(+:bin_popcount)
+    for (i = 0; i < array_size; ++i)
+        bin_popcount += __builtin_popcount(seq_bin[i]);
+}
     return bin_popcount;
 }
 
@@ -266,16 +222,17 @@ long int* get_piece_binary_array(const long int* seq_bin, const long int pos_sta
 
     // stop position.
     long int stop_pos = pos_start + size;
-
-    long j = 0;
-
+    long i;
     //Parse the binary array,
     //from the bit at 'pos_start' position to 'pos_stop' position
-    for(long i = pos_start ; i < stop_pos; i++){
-        change_binary_value(piece_seq_bin, j, get_binary_value(seq_bin,i));
-        j++;
+#pragma omp parallel default(shared)
+{
+#pragma omp for schedule(static,(stop_pos - pos_start) / omp_get_num_threads())
+    for(i = pos_start ; i < stop_pos; i++){
+        long tmp = i - pos_start;
+        change_binary_value(piece_seq_bin, tmp, get_binary_value(seq_bin,i));
     }
-
+}
     return piece_seq_bin;
 }
 
@@ -318,23 +275,24 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
     if(!dna_seq)
         return printf("ERROR: binary_to_dna: cannot allocate memory.\n"), NULL;
 
-    int j = 0;
-
-    //Code ASCII de A,G,C,T
-    int bitstochar[4] = {65,71,67,84};
-
-
     //Parse the binary array, two bits per iteration
-    for (unsigned i = 0; i < size; i += 2){
+    unsigned i;
+#pragma omp parallel default(shared)
+{
+#pragma omp for schedule(static,size / omp_get_num_threads())
+    for (i = 0; i < size; i += 2){
         // nucleotides = A, T, G, C
         int nucl1 = get_binary_value(bin_dna_seq, i);
         int nucl2 = get_binary_value(bin_dna_seq, i + 1);
 
         //get the ASCII value according to bits value
-        char value = bitstochar[nucl2 + 2*nucl1];
-        dna_seq[j] = value;
-        j++;
+        char value = bitstocharDNA[nucl2 + 2*nucl1];
+
+        int index = i/2;
+
+        dna_seq[index] = value;
     }
+}
     return dna_seq;
 }
 
@@ -360,26 +318,28 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
     if (!rna_seq)
         return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
 
-    int j = 0;
-
     long stop = seq_size+start_pos;
 
-    //Code ASCII de A,G,C,U
-    int bitstochar[4] = {65,71,67,85};
-
     // Parse the binary DNA sequence, two bits per iteration
-    for (long int i = start_pos; i < stop; i += 2) {
+    long int i;
+
+#pragma omp parallel default(shared)
+{
+#pragma omp for schedule(static,(stop-start_pos) / omp_get_num_threads())
+    for (i = start_pos; i < stop; i += 2) {
 
         // nucleotides = A, U, G, C
         int nucl1 = get_binary_value(gene_seq, i);
         int nucl2 = get_binary_value(gene_seq, i + 1);
 
+        long index = (i+1 - start_pos)/2;
+
         //get the ASCII value according to bits value
-        char value = bitstochar[nucl2 + 2*nucl1];
-        rna_seq[j] = value;
-        j++;
+        char value = bitstocharmRNA[nucl2 + 2*nucl1];
+        rna_seq[index] = value;
     }
-    rna_seq[j] = '\0';
+}
+    rna_seq[stop/2] = '\0';
     return rna_seq;
 }
 
@@ -486,85 +446,22 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
     if (!aa_seq)
         return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
 
-    unsigned temp = 0;
-
     long size = start_pos+seq_size;
 
-    //Lookup Table Initialization
-    char LUT[64];
-
-    LUT[0] = 'K';
-    LUT[1] = 'K';
-    LUT[2] = 'N';
-    LUT[3] = 'N';
-    LUT[4] = 'R';
-    LUT[5] = 'R';
-    LUT[6] = 'S';
-    LUT[7] = 'S';
-    LUT[8] = 'T';
-    LUT[9] = 'T';
-    LUT[10] = 'T';
-    LUT[11] = 'T';
-    LUT[12] = 'I';
-    LUT[13] = 'M';
-    LUT[14] = 'I';
-    LUT[15] = 'I';
-    LUT[16] = 'E';
-    LUT[17] = 'E';
-    LUT[18] = 'D';
-    LUT[19] = 'D';
-    LUT[20] = 'G';
-    LUT[21] = 'G';
-    LUT[22] = 'G';
-    LUT[23] = 'G';
-    LUT[24] = 'A';
-    LUT[25] = 'A';
-    LUT[26] = 'A';
-    LUT[27] = 'A';
-    LUT[28] = 'V';
-    LUT[29] = 'V';
-    LUT[30] = 'V';
-    LUT[31] = 'V';
-    LUT[32] = 'Q';
-    LUT[33] = 'Q';
-    LUT[34] = 'H';
-    LUT[35] = 'H';
-    LUT[36] = 'R';
-    LUT[37] = 'R';
-    LUT[38] = 'R';
-    LUT[39] = 'R';
-    LUT[40] = 'P';
-    LUT[41] = 'P';
-    LUT[42] = 'P';
-    LUT[43] = 'P';
-    LUT[44] = 'L';
-    LUT[45] = 'L';
-    LUT[46] = 'L';
-    LUT[47] = 'L';
-    LUT[48] = 'O';
-    LUT[49] = 'O';
-    LUT[50] = 'Y';
-    LUT[51] = 'Y';
-    LUT[52] = 'O';
-    LUT[53] = 'W';
-    LUT[54] = 'C';
-    LUT[55] = 'C';
-    LUT[56] = 'S';
-    LUT[57] = 'S';
-    LUT[58] = 'S';
-    LUT[59] = 'S';
-    LUT[60] = 'L';
-    LUT[61] = 'L';
-    LUT[62] = 'F';
-    LUT[63] = 'F';
+    long int i,k;
 
     //Parse the binary array, six bits by six (to parse three nucleotides per three)
-    for (long int i = start_pos; i < size; i += codon_size) {
+#pragma omp parallel default(shared) private(k)
+{
+#pragma omp for schedule(static,(size - start_pos ) / omp_get_num_threads())
+    for (i = start_pos; i < size; i += codon_size) {
+
+        unsigned temp = (i - start_pos)/codon_size;
 
         //Get the decimal value of the 6 bits
         int tmp = 0;
         int pow_bit = 5;
-        for(long int k = i; k < i + codon_size; k++){
+        for(k = i; k < i + codon_size; k++){
             int get_bin = get_binary_value(gene_seq, k);
             tmp += get_bin << pow_bit;
             pow_bit--;
@@ -572,11 +469,9 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
         
         //Get the corresponding protein from the lookup table
         aa_seq[temp] = LUT[tmp];
-
-        temp++;
     }
-
-    aa_seq[temp] = '\0';
+}
+    aa_seq[size/codon_size] = '\0';
     return aa_seq;
 }
 
@@ -602,8 +497,10 @@ void detecting_mutations(const long int *gene_seq, const long int start_pos, con
     unsigned cmp = 0;   //counter of all mutation zones
 
     long size = start_pos + size_sequence;
+    long int i;
+
     //Parse the binary array, from the 'start_pos' bit to the end
-    for (long int i = start_pos; i < size; i += 2) {
+    for (i = start_pos; i < size; i += 2) {
 
         // each nucleotides can be  A, U, G or C
         int nucl1 = get_binary_value(gene_seq, i);

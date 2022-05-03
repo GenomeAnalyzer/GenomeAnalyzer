@@ -9,10 +9,17 @@ This projet is a genome analyzer, it allows you to obtain mRNA, mutations, acidi
 
 # Run
 
-In ordre to run you need to have a .fasta file in the subfolder ./fastas/
+In order to run you need to have a .fasta file in the subfolder ./fastas/
 
-`make run <x>` where x is the number of sequences to be analyzed
+All sub command to run the program:
 
+| Long command | Short command | function |
+| :---: | :---: | :---: |
+| --help | -h | display those information |
+| --output | -o | output information in html files |
+| --sequences <n> | -s <n> | sequences to be analyzed (without = max ) |
+
+`make run <sub command>` 
 # Output
 
 This project output the result in an html format into the ./output/ folder.

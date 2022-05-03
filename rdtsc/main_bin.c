@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "rdtsc.h"
-#include "../gene_bin.h"
+#include "../versions/bin/headers/gene_bin.h"
 #include <string.h>
+#include <omp.h>
+#include <mpi.h>
 
 #define MAX 31000
 #define MAX_LINE 150
-#define MAX_LOOP 1000
+#define MAX_LOOP 10
 
 void load_gene(char *filename, char *seq_char)
 {
@@ -32,8 +34,14 @@ void load_gene(char *filename, char *seq_char)
 
 int main(int argc, char *argv[])
 {
-	unsigned long long before = 0;
-	unsigned long long after = 0;
+	MPI_Init(NULL,NULL);
+	int size, rank;
+
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	double before = 0;
+	double after = 0;
 	double elapsed = 0.0;
 
 	char seq_char[MAX] = "";
@@ -76,82 +84,82 @@ int main(int argc, char *argv[])
     printf("-----------------------------------------\n");
 
 	/*-----convert_to_binary-----*/
-    before = rdtsc();
+    before = MPI_Wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
     	seq_long = set_binary_array(seq_char, seq_char_size);
 
 	}
-    after = rdtsc();
+    after = MPI_Wtime();
     elapsed = (double)(after - before);
-	printf("convert_to_binary\t    : %.3lf\n", elapsed / MAX_LOOP);
+	printf("convert_to_binary\t    : %.3lf\n", elapsed );
 	elapsed = 0;
 
 	/*-----binary_to_dna-----*/
-    before = rdtsc();
+    before = MPI_Wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
     	seq_test = binary_to_dna(seq_long, 2 * seq_char_size);
 	}
-    after = rdtsc();
+    after = MPI_Wtime();
     elapsed = (double)(after - before);
-	printf("binary_to_dna\t\t    : %.3lf\n", elapsed / MAX_LOOP);
+	printf("binary_to_dna\t\t    : %.3lf\n", elapsed );
 	elapsed = 0;
 
 	/*-----generating_mRNA-----*/
-    before = rdtsc();
+    before = MPI_Wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
 		rna_seq_long = generating_mRNA(seq_long, 0, 2 * seq_char_size);
 
 	}
-    after = rdtsc();
+    after = MPI_Wtime();
     elapsed = (double)(after - before);
-	printf("generating_mRNA\t\t    : %.3lf\n", elapsed / MAX_LOOP);
+	printf("generating_mRNA\t\t    : %.3lf\n", elapsed );
 	elapsed = 0;
 	
 	/*-----detecting_genes-----*/
-	before = rdtsc();
+	before = MPI_Wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
 		detecting_genes(seq_long, 2 * seq_char_size, &g);
 	}
-	after = rdtsc();
+	after = MPI_Wtime();
 	elapsed = (double)(after - before);
-	printf("detecting_genes\t\t    : %.3lf\n", elapsed / MAX_LOOP);
+	printf("detecting_genes\t\t    : %.3lf\n", elapsed );
 	elapsed = 0;
 	
 	/*-----generating_amino_acid_chain-----*/
-    before = rdtsc();
+    before = MPI_Wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
 		aa_seq_long = generating_amino_acid_chain(seq_long, 0, seq_char_size);
 	}
-    after = rdtsc();
+    after = MPI_Wtime();
     elapsed = (double)(after - before);
-	printf("generating_amino_acid_chain : %.3lf\n", elapsed / MAX_LOOP);
+	printf("generating_amino_acid_chain : %.3lf\n", elapsed );
 	elapsed = 0;
 
 	/*-----detecting_mutations-----*/
-    before = rdtsc();
+    before = MPI_Wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
     	detecting_mutations(seq_long, 0, 2 * seq_char_size, m);
 	}
-    after = rdtsc();
+    after = MPI_Wtime();
     elapsed = (double)(after - before);
-	printf("detecting_mutations\t    : %.3lf\n", elapsed / MAX_LOOP);
+	printf("detecting_mutations\t    : %.3lf\n", elapsed );
 	elapsed = 0;
 
 	/*-----calculating_matching_score-----*/
-    before = rdtsc();
+    before = MPI_Wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
 		cms = calculating_matching_score(seq_long, 0, 2 * seq_char_size, seq_long2, 0, 2 * seq_char_size2);
 	}
-    after = rdtsc();
+    after = MPI_Wtime();
     elapsed = (double)(after - before);
-	printf("calculating_matching_score  : %.3lf\n", elapsed / MAX_LOOP);
+	printf("calculating_matching_score  : %.3lf\n", elapsed );
 	elapsed = 0;
 
 	printf("\n");
@@ -162,6 +170,8 @@ int main(int argc, char *argv[])
 	free(m.size);
 	free(m.start_mut);
 	free(m.end_mut);
+
+	MPI_Finalize();
 
 	return 0;
 }

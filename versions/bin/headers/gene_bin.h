@@ -24,6 +24,58 @@ typedef struct mutation_map {
 }mutation_map;
 
 
+/***************************************/
+
+//Initialisation of lookup table
+    typedef int lookuptable[2];
+
+    //Bit values according to ASCII code of nucleotides - 65
+    static lookuptable L[25] = {
+        {0,0},
+        {1,0},
+        {1,0},
+        {0,0},
+        {-1,-1},
+        {-1,-1},
+        {0,1},
+        {0,1},
+        {-1,-1},
+        {-1,-1},
+        {0,1},
+        {-1,-1},
+        {0,0},
+        {0,0},
+        {-1,-1},
+        {-1,-1},
+        {-1,-1},
+        {0,0},
+        {1,0},
+        {1,1},
+        {-1,-1},
+        {0,0},
+        {0,0},
+        {-1,-1},
+        {1,0}
+    };
+
+//******************************
+//Code ASCII de A,G,C,T
+    static int bitstocharDNA[4] = {65,71,67,84};
+//******************************
+//Code ASCII de A,G,C,U
+    static int bitstocharmRNA[4] = {65,71,67,85};
+//******************************
+    //Lookup Table Initialization
+    static char LUT[64] = { 'K','K','N','N','R','R','S','S','T','T',
+                            'T','T','I','M','I','I','E','E','D','D',
+                            'G','G','G','G','A','A','A','A','V','V',
+                            'V','V','Q','Q','H','H','R','R','R','R',
+                            'P','P','P','P','L','L','L','L','O','O',
+                            'Y','Y','O','W','C','C','S','S','S','S',
+                            'L','L','F','F'
+                        };
+
+
 /********** BINARIES FUNCTION **********/
 
 int get_binary_value(const long int *seq_bin, const int pos);
