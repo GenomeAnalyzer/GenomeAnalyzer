@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -g -std=c99 -Wall
+CFLAGS = -g -std=c99 -Wall -fopenmp
 
 LDFLAGS = -lcmocka
 
@@ -42,13 +42,13 @@ all: DNA check
 install: setup_naive setup_bin setup_bool
 
 setup_naive:
-	sudo python3 $(V0PYTHON)/setup.py install
+	python3 $(V0PYTHON)/setup.py install
 
 setup_bin:
-	sudo python3 $(V1PYTHON)/setup_bin.py install
+	python3 $(V1PYTHON)/setup_bin.py install
 
 setup_bool:
-	sudo python3 $(V2PYTHON)/setup_bool.py install	
+	python3 $(V2PYTHON)/setup_bool.py install	
 
 #For only building and testing interface
 build: DNA DNA_bin DNA_bool
@@ -64,13 +64,13 @@ check: run_test_gene test_DNA run_test_gene_bin test_DNA_bin test_DNA_bool
 
 #For only running the non-binary program
 run:
-	sudo python3 $(V0PYTHON)/setup.py install
+	python3 $(V0PYTHON)/setup.py install
 	python3 $(V0PYTHON)/main.py $(runargs)
 	
 
 #For only running the binary program
 run_bin:
-	sudo python3 $(V1PYTHON)/setup_bin.py install
+	python3 $(V1PYTHON)/setup_bin.py install
 	python3 $(V1PYTHON)/main_bin.py $(runargs)
 
 
