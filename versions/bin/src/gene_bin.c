@@ -156,7 +156,7 @@ long int* xor_binary_array(long int* const seq_bin1, const unsigned seq_size1,
     // Xor the two sequences values since its value is the same length.
 #pragma omp parallel default(shared)
 {
-#pragma omp for schedule(static,(ss2-1) / omp_get_num_threads())
+#pragma omp for schedule(static,64)
     for (it = 0; it < ss2 - 1; it++)
         xor[it] = s1[it] ^ s2[it];
 
@@ -166,7 +166,7 @@ long int* xor_binary_array(long int* const seq_bin1, const unsigned seq_size1,
     xor[ss2-1] = s1[ss2-1] ^ ((s2[ss2-1] << ((sbs1 - sbs2) % intsize)));
     }
     // Values from the largest binary array are assigned to the xor result. (x^0 = x)
-#pragma omp for schedule(static,(ss1 - ss2) / omp_get_num_threads())
+#pragma omp for schedule(static,64)
     for (it = ss2; it < ss1; it++)
         xor[it] = s1[it];
 }
@@ -194,7 +194,7 @@ int popcount_binary_array(const long int *seq_bin, const long int seq_size){
     // Parse the binary array
 #pragma omp parallel default(shared)
 {
-#pragma omp for schedule(static,array_size / omp_get_num_threads()) reduction(+:bin_popcount)
+#pragma omp for schedule(static,64) reduction(+:bin_popcount)
     for (i = 0; i < array_size; ++i)
         bin_popcount += __builtin_popcount(seq_bin[i]);
 }
@@ -227,7 +227,7 @@ long int* get_piece_binary_array(const long int* seq_bin, const long int pos_sta
     //from the bit at 'pos_start' position to 'pos_stop' position
 #pragma omp parallel default(shared)
 {
-#pragma omp for schedule(static,(stop_pos - pos_start) / omp_get_num_threads())
+#pragma omp for schedule(static,64)
     for(i = pos_start ; i < stop_pos; i++){
         long tmp = i - pos_start;
         change_binary_value(piece_seq_bin, tmp, get_binary_value(seq_bin,i));
@@ -279,7 +279,7 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
     unsigned i;
 #pragma omp parallel default(shared)
 {
-#pragma omp for schedule(static,size / omp_get_num_threads())
+#pragma omp for schedule(static,32)
     for (i = 0; i < size; i += 2){
         // nucleotides = A, T, G, C
         int nucl1 = get_binary_value(bin_dna_seq, i);
@@ -325,7 +325,7 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
 
 #pragma omp parallel default(shared)
 {
-#pragma omp for schedule(static,(stop-start_pos) / omp_get_num_threads())
+#pragma omp for schedule(static,32)
     for (i = start_pos; i < stop; i += 2) {
 
         // nucleotides = A, U, G, C
@@ -453,7 +453,7 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
     //Parse the binary array, six bits by six (to parse three nucleotides per three)
 #pragma omp parallel default(shared) private(k)
 {
-#pragma omp for schedule(static,(size - start_pos ) / omp_get_num_threads())
+#pragma omp for schedule(static,64/codon_size)
     for (i = start_pos; i < size; i += codon_size) {
 
         unsigned temp = (i - start_pos)/codon_size;
