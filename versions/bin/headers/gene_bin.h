@@ -1,8 +1,18 @@
 #pragma once 
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
+#include <ctype.h>
+#include <stdint.h>
+#include <x86intrin.h>
+#include <immintrin.h>
+
 #define MAX_GENES 1024
 // Number of bits in an integer
 #define int_SIZE 63
+#define OFFSET_TABLE 65
 
 typedef struct gene_map_s {
 
@@ -23,6 +33,47 @@ typedef struct mutation_map {
     unsigned long *end_mut;
 }mutation_map;
 
+typedef struct mm_array_s
+{
+#ifdef __AVX512__
+    __m512i reg;
+#else
+    __m256i reg;
+#endif
+} mm_array_t;
+
+//Initialisation of lookup table
+    typedef int lookuptable[2];
+
+    //Bit values according to ASCII code of nucleotides - 65
+    static lookuptable L[25] = {
+        {0,0},
+        {1,0},
+        {1,0},
+        {0,0},
+        {-1,-1},
+        {-1,-1},
+        {0,1},
+        {0,1},
+        {-1,-1},
+        {-1,-1},
+        {0,1},
+        {-1,-1},
+        {0,0},
+        {0,0},
+        {-1,-1},
+        {-1,-1},
+        {-1,-1},
+        {0,0},
+        {1,0},
+        {1,1},
+        {-1,-1},
+        {0,0},
+        {0,0},
+        {-1,-1},
+        {1,0}
+    };
+
 
 /********** BINARIES FUNCTION **********/
 
@@ -31,7 +82,7 @@ int get_binary_value(const long int *seq_bin, const int pos);
 
 /******** DNA & GENES FUNCTION *********/
 
-void convert_to_binary(long int *seq_bin, const char* seq_char, const unsigned seq_char_size);
+void my_convert_to_binary(mm_array_t *seq_bin, const uint64_t seq_bin_size, const char* seq_char, const uint64_t seq_char_size);
 char* binary_to_dna(long int* bin_dna_seq, const unsigned size);
 char* generating_mRNA(const long int* gene_seq, const long start_pos,const long int seq_size);
 void detecting_genes(const long int *gene, const long int gene_size, gene_map_t* gene_map);

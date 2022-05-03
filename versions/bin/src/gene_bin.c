@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <math.h>
-#include <ctype.h>
-#include <x86intrin.h>
-
 #include "../headers/gene_bin.h"
 
 
@@ -43,91 +36,105 @@ int get_binary_value(const long int *seq_bin, const int pos){
  * Set each int64 element of seq_bin from bit values according to the nucleotide read.
  * The non-ACGT nucleotides corresponding to several possible nucleotides are arbitrarily defined.
  */
-void convert_to_binary(long int *seq_bin, const char* seq_char, const unsigned seq_char_size)
-{     
-    int i_bin = 0;
+void convert_to_binary(mm_array_t *seq_bin, const uint64_t seq_bin_size, const char* seq_char, const uint64_t seq_char_size)
+{
+    uint64_t k = 0;
 
-    //Initialisation of lookup table
-    typedef int lookuptable[2];
-
-    lookuptable L[90];
-    for(int i = 0; i < 90; ++i)
+    for(uint64_t j = 0; j < seq_bin_size - 1; ++j)
     {
-        L[i][0] = -1;
-        L[i][1] = -1;
-    }
-
-    //Bit values according to ASCII code of nucleotides
-    L[65][0] = 0;
-    L[65][1] = 0;
-
-    L[66][0] = 1;
-    L[66][1] = 0;
-    
-    L[67][0] = 1;
-    L[67][1] = 0;
-    
-    L[68][0] = 0;
-    L[68][1] = 0;
-    
-    L[71][0] = 0;
-    L[71][1] = 1;
-    
-    L[72][0] = 0;
-    L[72][1] = 1;
-    
-    L[75][0] = 0;
-    L[75][1] = 1;
-    
-    L[77][0] = 0;
-    L[77][1] = 0;
-    
-    L[78][0] = 0;
-    L[78][1] = 0;
-    
-    L[82][0] = 0;
-    L[82][1] = 0;
-    
-    L[83][0] = 1;
-    L[83][1] = 0;
-    
-    L[84][0] = 1;
-    L[84][1] = 1;
-    
-    L[86][0] = 0;
-    L[86][1] = 0;
-    
-    L[87][0] = 0;
-    L[87][1] = 0;
-    
-    L[89][0] = 1;
-    L[89][1] = 0;
-
-    // Parse the DNA sequence, per nucleotides
-    for (unsigned i = 0; i < seq_char_size; ++i)
-    {
-        int c = seq_char[i];
-
-        //get the 2-bits value of char read
-        int bit_value[2];
-        bit_value[0] = L[c][0];
-        bit_value[1] = L[c][1];
-
-        if(bit_value[0]+1) //shift then add the first bit then shift then add the second bit
+        uint64_t p1 = 0, p2 = 0, p3 = 0, p4 = 0;
+#ifdef __AVX512__
+        uint64_t p5 = 0, p6 = 0, p7 = 0, p8 = 0;
+#endif
+        int i = 0;
+        for(i = i; i < 32; ++i)
         {   
-            seq_bin[i_bin] <<= 1;
-            seq_bin[i_bin] = ((long int)(seq_bin[i_bin] + bit_value[0]) << 1) + (long int)bit_value[1];
+            p1 <<= 1;
+            p1 = ((p1 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
         }
-        else if(!(c-10) && seq_char_size-i != 1) //if '\n', set next element of seq_bin 
-            ++i_bin;
-        else if(isalpha(seq_char[i]))
-        {
-            printf("ERROR: convert_to_binary: Unknown letter in sequence.\n");
-            seq_bin[0] = -1;
-            return;
+
+        for(i = i; i < 64; ++i)
+        {   
+            p2 <<= 1;
+            p2 = ((p2 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
         }
+
+        for(i = i; i < 96; ++i)
+        {   
+            p3 <<= 1;
+            p3 = ((p3 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
+        }
+
+        for(i = i; i < 128; ++i)
+        {   
+            p4 <<= 1;
+            p4 = ((p4 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
+        }
+
+#ifdef __AVX512__
+        for(i = i; i < 160; ++i)
+        {   
+            p5 <<= 1;
+            p5 = ((p5 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
+        }
+
+        for(i = i; i < 192; ++i)
+        {   
+            p6 <<= 1;
+            p6 = ((p6 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
+        }
+
+        for(i = i; i < 224; ++i)
+        {   
+            p7 <<= 1;
+            p7 = ((p7 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
+        }
+
+        for(i = i; i < 256; ++i)
+        {   
+            p8 <<= 1;
+            p8 = ((p8 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
+        }
+
+        seq_bin[j].reg = _mm512_setr_epi64x(p8, p7, p6, p5, p4, p3, p2, p1);
+        k += 256;
+#else
+        seq_bin[j].reg = _mm256_setr_epi64x(p4, p3, p2, p1);
+        k += 128;
+#endif
     }
-    seq_bin[i_bin] <<= ((i_bin+1)*64 - (seq_char_size-i_bin-1)*2);
+
+    uint64_t rest = seq_char_size - k;
+#ifdef __AVX512__
+    uint64_t p[8] = {0,0,0,0,0,0,0,0};
+#else
+    uint64_t p[4] = {0,0,0,0};
+#endif
+    int i;
+    int r = rest >> 5;
+    int m = rest & 31;
+    for(i = 0; i < r; ++i)
+    {   
+        for(int j = 0; j < 32; ++j)
+        {
+            p[i] <<= 1;
+            p[i] = ((p[i] + L[seq_char[j+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[j+k]-OFFSET_TABLE][1];
+        }
+        k += 32;
+    }
+
+    for(int j = 0; j < m; ++j)
+    {
+        p[i] <<= 1;
+        p[i] = ((p[i] + L[seq_char[j+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[j+k]-OFFSET_TABLE][1];
+    }
+    p[i] <<= 64 - 2*m;
+
+#ifdef __AVX512__
+    seq_bin[seq_bin_size - 1].reg = _mm512_setr_epi64x(p[7], p[6], p[5], p[4], p[3], p[2], p[1], p[0]);
+#else
+    seq_bin[seq_bin_size - 1].reg = _mm256_setr_epi64x(p[3], p[2], p[1], p[0]);
+#endif
 }
 
 //////////////// Convert binary aa to codon
