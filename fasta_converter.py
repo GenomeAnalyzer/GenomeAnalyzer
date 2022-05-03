@@ -11,10 +11,10 @@ def read_file(name):
     return gene
 
 def write_file(namefile, gene):
-    l = ceil(len(gene)/32)
+    # l = ceil(len(gene)/32)
     with open(namefile, "w") as file:
-        for i in range(0,l):
-            file.write(gene[i*32:(i+1)*32]+'\n')
+        # for i in range(0,l):
+        file.write(gene)# [i*32:(i+1)*32]+'\n')
 
 # if not os.path.exists('fasta_text'):
 #     os.makedirs('fasta_text')
