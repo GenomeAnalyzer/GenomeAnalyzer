@@ -1,4 +1,5 @@
 #include <nmmintrin.h>
+#include <immintrin.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -48,7 +49,6 @@ unsigned long long load_from_file(char *filename, char *seq_char)
 	return i-1;
 }
 
-#pragma GCC target("avx2")
 void detecting_genes_2(const long int *gene, const long int gene_size, gene_map_t* gene_map) {
         gene_map->genes_counter = 0;
 
@@ -87,7 +87,7 @@ void detecting_genes_2(const long int *gene, const long int gene_size, gene_map_
 
         const __m128i cmp_AUG = _mm_xor_si128(codon_to_test, AUG);
 
-	    const __m128i cmp_UAA = _mm_xor_si128(codon_to_test, UAA);
+	const __m128i cmp_UAA = _mm_xor_si128(codon_to_test, UAA);
         const __m128i cmp_UAG = _mm_xor_si128(codon_to_test, UAG);
         const __m128i cmp_UGA = _mm_xor_si128(codon_to_test, UGA);
 
@@ -116,9 +116,6 @@ void detecting_genes_2(const long int *gene, const long int gene_size, gene_map_
     }
 }
 
-
-
-#pragma GCC target("avx2")
 void test_m128i()
 {
     int test = 0;
@@ -142,7 +139,7 @@ unsigned long long test1_genes(unsigned long long seq_char_size, long int *seq_l
 {
     gene_map_t g;
     g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * int_SIZE);
-    g.gene_end = malloc(sizeof(*g.gene_end) * seq_char_size * int_SIZE);
+    g.gene_end   = malloc(sizeof(*g.gene_end) * seq_char_size * int_SIZE);
 
     detecting_genes(seq_long, 2 * seq_char_size, &g);
     //printf("%llu genes\n\n", g.genes_counter);
@@ -156,7 +153,7 @@ unsigned long long test2_genes(unsigned long long seq_char_size, long int *seq_l
 {
     gene_map_t g;
     g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * int_SIZE);
-    g.gene_end = malloc(sizeof(*g.gene_end) * seq_char_size * int_SIZE);
+    g.gene_end   = malloc(sizeof(*g.gene_end) * seq_char_size * int_SIZE);
 
     detecting_genes_2(seq_long, 2 * seq_char_size, &g);
     //printf("%llu genes\n\n", g.genes_counter);
@@ -166,7 +163,6 @@ unsigned long long test2_genes(unsigned long long seq_char_size, long int *seq_l
     return g.genes_counter;
 }
 
-#pragma GCC target("avx2")
 void detecting_mutations_2(const long int *gene_seq, const long int start_pos,
                            const long int size_sequence, mutation_map mut_m) {
     long int detect_mut = 0;  //Counting size of GC sequence
@@ -224,9 +220,9 @@ void detecting_mutations_2(const long int *gene_seq, const long int start_pos,
 unsigned long long test1_mutations(unsigned long long seq_char_size, long int *seq_long)
 {
     mutation_map mut_m;
-    mut_m.size = malloc(sizeof(*mut_m.size) * (seq_char_size/5) * int_SIZE);
+    mut_m.size =      malloc(sizeof(*mut_m.size) * (seq_char_size/5) * int_SIZE);
     mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * (seq_char_size/5) * int_SIZE);
-    mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * (seq_char_size/5) * int_SIZE);
+    mut_m.end_mut =   malloc(sizeof(*mut_m.end_mut) * (seq_char_size/5) * int_SIZE);
 
     detecting_mutations(seq_long, 0, 2 * seq_char_size, mut_m);
     //printf("%llu genes\n\n", g.genes_counter);
@@ -239,9 +235,9 @@ unsigned long long test1_mutations(unsigned long long seq_char_size, long int *s
 unsigned long long test2_mutations(unsigned long long seq_char_size, long int *seq_long)
 {
     mutation_map mut_m;
-    mut_m.size = malloc(sizeof(*mut_m.size) * (seq_char_size/5) * int_SIZE);
+    mut_m.size =      malloc(sizeof(*mut_m.size) * (seq_char_size/5) * int_SIZE);
     mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * (seq_char_size/5 + 1) * int_SIZE);
-    mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * (seq_char_size/5 + 1) * int_SIZE);
+    mut_m.end_mut =   malloc(sizeof(*mut_m.end_mut) * (seq_char_size/5 + 1) * int_SIZE);
 
     detecting_mutations_2(seq_long, 0, 2 * seq_char_size, mut_m);
     //printf("%llu genes\n\n", g.genes_counter);
@@ -250,6 +246,36 @@ unsigned long long test2_mutations(unsigned long long seq_char_size, long int *s
     free(mut_m.end_mut);
     return 0;
 }
+
+/* ORIGINEL (seulement ajouté un printf au milieu) */
+float calculating_matching_score_0(const long int *seq1, long int start_pos1,const int seq_size1,
+                                 const long int *seq2, long int start_pos2,const int seq_size2) {
+    // Check the input argument
+    if (!seq1 || !seq2)
+        return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
+
+    // First step: apply the xor operation between both arrays
+    long int *seq1tmp;
+    seq1tmp = get_piece_binary_array(seq1, start_pos1, seq_size1);
+
+    long int *seq2tmp;
+    seq2tmp = get_piece_binary_array(seq2, start_pos2, seq_size2);
+
+    long int *xor = NULL;
+    xor = xor_binary_array(seq1tmp, seq_size1, seq2tmp, seq_size2);
+    // xor_size = max size between 'seq_size1' and 'seq_size2'
+    int xor_size = seq_size1 >= seq_size2 ? seq_size1 : seq_size2;
+
+    //Second step: count the number of bits whose value is 1 on the result
+    int pop = popcount_binary_array(xor, xor_size);
+
+    printf("pop = %d\n", pop);
+
+    //Last step: compute the percentage
+    float y = ((float)pop * 100.0) / (float)xor_size;
+    return 100.0 - y;
+}
+
 
 /**
  * Calculates the matching score of two binary array sequences.
@@ -262,6 +288,7 @@ unsigned long long test2_mutations(unsigned long long seq_char_size, long int *s
  * 
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score percentage
 */
+__attribute__((target("avx512vpopcntdq", "avx512f")))
 float calculating_matching_score_2(long int *seq1,const int seq_size1,
                                    long int *seq2,const int seq_size2) {
     // Check the input argument
@@ -307,14 +334,37 @@ float calculating_matching_score_2(long int *seq1,const int seq_size1,
 
     int pop = 0;
     int j = len_small;
-    for (int i = len_big; i > 0; --i)
+    for (int i = len_big; i > 0; i-= 8)
     {
-        const long x = j ? small_seq[j - 1] : (long)0;
-        pop += __builtin_popcountl(big_seq[i - 1] ^ x);
+        const long x0 = j   >=0 ? (long)small_seq[j - 1] : (long)0;
+        const long x1 = j-1 >=0 ? (long)small_seq[j - 2] : (long)0;
+        const long x2 = j-2 >=0 ? (long)small_seq[j - 3] : (long)0;
+        const long x3 = j-3 >=0 ? (long)small_seq[j - 4] : (long)0;
+        const long x4 = j-4 >=0 ? (long)small_seq[j - 5] : (long)0;
+        const long x5 = j-5 >=0 ? (long)small_seq[j - 6] : (long)0;
+        const long x6 = j-6 >=0 ? (long)small_seq[j - 7] : (long)0;
+        const long x7 = j-7 >=0 ? (long)small_seq[j - 8] : (long)0;
 
-        j--;
+        const long y0 = j   >=0 ? (long)big_seq[i - 1] : (long)0;
+        const long y1 = j-1 >=0 ? (long)big_seq[i - 2] : (long)0;
+        const long y2 = j-2 >=0 ? (long)big_seq[i - 3] : (long)0;
+        const long y3 = j-3 >=0 ? (long)big_seq[i - 4] : (long)0;
+        const long y4 = j-4 >=0 ? (long)big_seq[i - 5] : (long)0;
+        const long y5 = j-5 >=0 ? (long)big_seq[i - 6] : (long)0;
+        const long y6 = j-6 >=0 ? (long)big_seq[i - 7] : (long)0;
+        const long y7 = j-7 >=0 ? (long)big_seq[i - 8] : (long)0;
+
+        const __m512i xor = _mm512_xor_epi64(_mm512_set_epi64(y0, y1, y2, y3, y4, y5, y6, y7),
+                                             _mm512_set_epi64(x0, x1, x2, x3, x4, x5, x6, x7));
+
+        const __m512i popcnt = _mm512_popcnt_epi64(xor);
+
+        pop += _mm512_reduce_add_epi64(popcnt);
+        j -= 8;
     }
 
+    printf("pop = %d\n", pop);
+ 
     const float denom = 1.0 / (float)(len_big * int_SIZE);
     const float F = pop ? (float)pop * 100.0 * denom : 0.0;
 
@@ -340,16 +390,15 @@ int main(int argc, char *argv[])
     seq_char = malloc(sizeof(*seq_char) * MAX_ADN);
     if(!seq_char)
 	    return printf("error malloc\n"), 1;
-    seq_char_size = load_from_file("seq_test_intrinsic.txt", seq_char);
+    seq_char_size = load_from_file("seq_test_intrinsic_2.txt", seq_char);
     seq_long = convert_to_binary(seq_char, seq_char_size);
 
     seq_char2 = malloc(sizeof(*seq_char2) * MAX_ADN);
     if(!seq_char2)
         return printf("error malloc\n"), 1;
-    seq_char_size2 = load_from_file("seq_test_intrinsic_2.txt", seq_char2);
+    seq_char_size2 = load_from_file("seq_test_intrinsic.txt", seq_char2);
     seq_long2 = convert_to_binary(seq_char2, seq_char_size2);
-
-
+ 
     double cycles = 0.0;
     double boucles = 0.0;
     unsigned long long cnt = 0;
@@ -418,11 +467,6 @@ int main(int argc, char *argv[])
     }
     printf("intrinsic detecting mutations : %lf cycles, %0.1lf boucles, mutations cnt = %llu\n\n", cycles / boucles, boucles, cnt);
 
-
-
-
-
-
     // ------------------------------------ //
     // ------- TESTS MATCHING SCORE ------- //
     // ------------------------------------ //
@@ -435,7 +479,7 @@ int main(int argc, char *argv[])
     while(cycles <= 500)
     {
         double before = (double)rdtsc();
-        MS = calculating_matching_score(seq_long, 0, 2*seq_char_size, seq_long2, 0, 2*seq_char_size2);
+        MS = calculating_matching_score_0(seq_long, 0, 2*seq_char_size, seq_long2, 0, 2*seq_char_size2);
         double after = (double)rdtsc();
 
         cycles += (after - before);
