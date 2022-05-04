@@ -8,8 +8,12 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <nmmintrin.h>
+#include <immintrin.h>
 
 int output = 1;
+
+int rank;
 
 /***************************************/
 /********** BINARIES FUNCTION **********/
@@ -405,6 +409,15 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t 
         }
     }
 
+    // Start codon
+    const __m128i AUG = _mm_set_epi16(0, 0, 1, 1, 0, 1, 0, 0);
+    // Stop codons
+    const __m128i UAA = _mm_set_epi16(1, 1, 0, 0, 0, 0, 0, 0);
+    const __m128i UGA = _mm_set_epi16(1, 1, 0, 1, 0, 0, 0, 0);
+    const __m128i UAG = _mm_set_epi16(1, 1, 0, 0, 0, 1, 0, 0);
+
+    __m128i codon_to_test = _mm_setzero_si128();
+
     int start_pos = -1;
 
     long int i = 0;
@@ -413,44 +426,41 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t 
     while ((i + 6) <= gene_size)
     {
         // Each nucleotides can be A, U, G or C
-        int nucl1 = get_binary_value(gene, i);
-        int nucl2 = get_binary_value(gene, i + 1);
-        int nucl3 = get_binary_value(gene, i + 2);
-        int nucl4 = get_binary_value(gene, i + 3);
-        int nucl5 = get_binary_value(gene, i + 4);
-        int nucl6 = get_binary_value(gene, i + 5);
+        codon_to_test = _mm_set_epi16(get_binary_value(gene, i),
+                                      get_binary_value(gene, i + 1),
+                                      get_binary_value(gene, i + 2),
+                                      get_binary_value(gene, i + 3),
+                                      get_binary_value(gene, i + 4),
+                                      get_binary_value(gene, i + 5),
+                                      0, 0);
+
+        const __m128i cmp_AUG = _mm_xor_si128(codon_to_test, AUG);
+
+        const __m128i cmp_UAA = _mm_xor_si128(codon_to_test, UAA);
+        const __m128i cmp_UAG = _mm_xor_si128(codon_to_test, UAG);
+        const __m128i cmp_UGA = _mm_xor_si128(codon_to_test, UGA);
 
         // If a start pos and a stop pos doesn't exist, search for AUG
-        if (nucl1 == 0 && nucl2 == 0 && nucl3 == 1 && nucl4 == 1 && nucl5 == 0 && nucl6 == 1)
+        if (_mm_testz_si128(cmp_AUG, cmp_AUG))
         {
             // if AUG, it's the start of a gene
             start_pos = i;
             i += 6;
         }
-        else
+        else if ((start_pos != -1) && (_mm_testz_si128(cmp_UAA, cmp_UAA) || _mm_testz_si128(cmp_UAG, cmp_UAG) || _mm_testz_si128(cmp_UGA, cmp_UGA)))
         {
+            // It's the end of a gene
+            // If a start pos and an stop pos has been found, a gene exists so we save it in the struc
+            gene_map->gene_start[gene_map->genes_counter] = start_pos;
+            gene_map->gene_end[gene_map->genes_counter] = i + 5;
 
-            if (start_pos != -1)
-            {
-                // if a start pos exists , search for UAA / UAG / UGA
-                if ((nucl1 == 1 && nucl2 == 1 && nucl3 == 0) && ((nucl4 == 0 && nucl5 == 0 && nucl6 == 0) || (nucl4 == 0 && nucl5 == 0 && nucl6 == 1) || (nucl4 == 1 && nucl5 == 0 && nucl6 == 0)))
-                {
-                    // It's the end of a gene
-                    // If a start pos and an stop pos has been found, a gene exists so we save it in the struc
-                    gene_map->gene_start[gene_map->genes_counter] = start_pos;
-                    gene_map->gene_end[gene_map->genes_counter] = i + 5;
+            gene_map->genes_counter++;
 
-                    gene_map->genes_counter++;
-
-                    start_pos = -1;
-                    i += 6;
-                }
-                else
-                    i += 2;
-            }
-            else
-                i += 2;
+            start_pos = -1;
+            i += 6;
         }
+        else
+            i += 2;
     }
 }
 
@@ -482,33 +492,35 @@ char *generating_amino_acid_chain(const long int *gene_seq, const uint64_t start
 
     unsigned temp = 0;
 
- long int k;
-    int tmp,pow_bit,get_bin;
+    long int k;
+    int tmp, pow_bit, get_bin;
 
-        long int i, size = stop_pos-start_pos;
+    long int i, size = stop_pos - start_pos;
 
 #pragma omp parallel shared(gene_seq, start_pos, codon_size, size, aa_seq, i) private(k, temp, tmp, pow_bit, get_bin)
-{
-    //Parse the binary array, six bits by six (to parse three nucleotides per three)
-#pragma omp for schedule(static,64/codon_size)
-    for (i = start_pos; i < stop_pos; i += codon_size) {
+    {
+        // Parse the binary array, six bits by six (to parse three nucleotides per three)
+#pragma omp for schedule(static, 64 / codon_size)
+        for (i = start_pos; i < stop_pos; i += codon_size)
+        {
 
-        temp = (i - start_pos)/codon_size;
+            temp = (i - start_pos) / codon_size;
 
-        //Get the decimal value of the 6 bits
-        tmp = 0;
-        pow_bit = 5;
-        for(k = i; k < i + codon_size; k++){
-            get_bin = get_binary_value(gene_seq, k);
-            tmp += get_bin << pow_bit;
-            pow_bit--;
+            // Get the decimal value of the 6 bits
+            tmp = 0;
+            pow_bit = 5;
+            for (k = i; k < i + codon_size; k++)
+            {
+                get_bin = get_binary_value(gene_seq, k);
+                tmp += get_bin << pow_bit;
+                pow_bit--;
+            }
+
+            // Get the corresponding protein from the lookup table
+            aa_seq[temp] = LUT[tmp];
         }
-        
-        //Get the corresponding protein from the lookup table
-        aa_seq[temp] = LUT[tmp];
     }
-}
-    aa_seq[size/codon_size] = '\0';
+    aa_seq[size / codon_size] = '\0';
     return aa_seq;
 }
 
@@ -526,53 +538,77 @@ char *generating_amino_acid_chain(const long int *gene_seq, const uint64_t start
  *
  * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
  */
-void detecting_mutations(const long int *gene_seq, const long int start_pos, const uint64_t stop_pos,
+void detecting_mutations(const long int *gene_seq, const uint64_t start_pos, const uint64_t stop_pos,
                          mutation_map mut_m)
 {
-    long int detect_mut = 0;          // Counting size of GC sequence
-    unsigned short tmp_start_mut = 0; // stock start mutation
-    unsigned cmp = 0;                 // counter of all mutation zones
+    uint64_t detect_mut = 0;
+    uint64_t size_sequence = stop_pos - start_pos; // Counting size of GC sequence
+    unsigned short tmp_start_mut = 0;              // stock start mutation
+    unsigned cmp = 0;                              // counter of all mutation zones
+    const __m128i G = _mm_set_epi64x((long)0, (long)1);
+    const __m128i C = _mm_set_epi64x((long)1, (long)0);
+
+    // printf("%d) avant for\n", rank);
 
     // long size = start_pos + size_sequence;
     // Parse the binary array, from the 'start_pos' bit to the end
-    for (long int i = start_pos; i < stop_pos; i += 2)
+    for (uint64_t i = start_pos; i < stop_pos; i += 2)
     {
+        //  printf("%d) debut for\n", rank);
 
         // each nucleotides can be  A, U, G or C
-        int nucl1 = get_binary_value(gene_seq, i);
-        int nucl2 = get_binary_value(gene_seq, i + 1);
+        const long bit1 = (long)get_binary_value(gene_seq, i);
+        const long bit2 = (long)get_binary_value(gene_seq, i + 1);
+        //    printf("%d) 562\n", rank);
+
+        const __m128i nucl = _mm_set_epi64x(bit1, bit2);
+        const __m128i cmp_G = _mm_xor_si128(nucl, G);
+        const __m128i cmp_C = _mm_xor_si128(nucl, C);
+        //     printf("%d) 567\n", rank);
 
         // Increment detect_mut if find a C or G nucl
-        if (((nucl1 == 0) && (nucl2 == 1)) ||
-            ((nucl1 == 1) && (nucl2 == 0)))
+        if (_mm_testz_si128(cmp_G, cmp_G) || _mm_testz_si128(cmp_C, cmp_C))
         {
+            // printf("%d) 575\n", rank);
             if (detect_mut == 0)
-            {
                 tmp_start_mut = i - start_pos;
-            }
             detect_mut += 2;
         }
         // Put detect_mut to 0 if find a A or T nucl
         else
         {
             // Check if previous GC sequence is a probable mutation zone
-            if (detect_mut >= ((stop_pos - start_pos) / 5))
+            if (detect_mut >= (size_sequence / 5))
             {
+                //   printf("%d) 588\n", rank);
                 mut_m.start_mut[cmp] = tmp_start_mut;
+                // printf("%d) bim\n", rank);
+
                 mut_m.end_mut[cmp] = (i)-start_pos;
+                // printf("%d) bam\n", rank);
+
                 mut_m.size[cmp] = detect_mut - 1;
+                //  printf("%d) boum\n", rank);
+
                 cmp++;
             }
             detect_mut = 0;
+            //  printf("%d) 592\n", rank);
         }
     }
     // Check if ending sequence is a probable mutation zone
-    if (detect_mut >= ((stop_pos - start_pos) / 5))
+    if (detect_mut >= (size_sequence / 5))
     {
         mut_m.start_mut[cmp] = tmp_start_mut;
-        mut_m.end_mut[cmp] = (stop_pos - start_pos);
+        mut_m.end_mut[cmp] = size_sequence;
         mut_m.size[cmp] = detect_mut - 1;
+        // printf("%d) 602\n", rank);
+
+        // TMP//TMP//TMP
+        cmp++;
+        // TMP//TMP//TMP
     }
+    //   printf("%d) 608\n", rank);
 }
 
 /**
@@ -893,14 +929,19 @@ void getfile(int rank)
         mutation_map mut_m;
         long *seq_bin;
         long len_seq;
+                        printf("%d) 932\n",rank);
 
         seq_bin = convert_to_binary(seq, strlen(seq));
 
-        len_seq = strlen(seq);
+        len_seq = strlen(seq) * 2;
 
+        gene_map.gene_start = malloc(sizeof(*gene_map.gene_start) * strlen(seq) * int_SIZE);
+        gene_map.gene_end = malloc(sizeof(*gene_map.gene_end) * strlen(seq) * int_SIZE);
+
+        printf("%d) DETECTING GENE\n", rank);
         detecting_genes(seq_bin, len_seq, &gene_map);
 
-        printf(" Gene found : %ld a\n ", gene_map.genes_counter);
+      //  printf(" Gene found : %ld a\n ", gene_map.genes_counter);
         genes = malloc(sizeof(long *) * gene_map.genes_counter);
 
         count_gene = gene_map.genes_counter;
@@ -910,15 +951,29 @@ void getfile(int rank)
 
         for (uint64_t i = 0; i < gene_map.genes_counter; i++)
         {
+
             genes[i] = get_piece_binary_array(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i]);
+                                      //          printf("%d) 957\n",rank);
+
             char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i]);
+            mut_m.size = malloc(sizeof(*mut_m.size) * (strlen(seq) / 5) * int_SIZE);
+            mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * (strlen(seq) / 5) * int_SIZE);
+            mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * (strlen(seq) / 5) * int_SIZE);
 
             // if (amino != NULL)
             //  printf("amino acid chain = %s\n", amino);
             // printf("MRNA = %s\n", generating_mRNA(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i]));
-            detecting_mutations(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i] - gene_map.gene_start[i], mut_m);
+                              //      printf("%d) 966\n",rank);
 
-            MPI_Isend(genes[i], gene_map.gene_end[i] - gene_map.gene_start[i], MPI_LONG, 0, 2, MPI_COMM_WORLD, &req[i]);
+            detecting_mutations(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i], mut_m);
+
+                                //    printf("%d) 970\n",rank);
+
+            if(genes[i] != NULL)
+                MPI_Isend(genes[i], gene_map.gene_end[i] - gene_map.gene_start[i], MPI_LONG, 0, 2, MPI_COMM_WORLD, &req[i]);
+
+                     //   printf("%d) 974\n",rank);
+
         }
 
         MPI_Iprobe(0, 1, MPI_COMM_WORLD, &flag, &status);
@@ -948,7 +1003,7 @@ void launch()
     if (!initialized)
         MPI_Init(NULL, NULL);
 
-    int rank;
+    //   int rank;
     int size;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);

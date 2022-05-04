@@ -103,7 +103,7 @@ char *generating_mRNA(const long int *gene_seq, const uint64_t  start_pos, const
 void detecting_genes(const long int *gene, const long int gene_size,
                      gene_map_t *gene_map);
 char *generating_amino_acid_chain(const long int *gene_seq, const uint64_t  start_pos, const uint64_t  stop_pos);
-void detecting_mutations(const long int *gene_seq, const long int start_pos, const uint64_t  stop_pos,
+void detecting_mutations(const long int *gene_seq, const uint64_t start_pos, const uint64_t  stop_pos,
                          mutation_map mut_m);
 float calculating_matching_score(const long int *seq1, const int seq_size1,
                                  const long int *seq2, const int seq_size2);
