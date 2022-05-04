@@ -89,15 +89,15 @@ static char LUT[64] = {'K', 'K', 'N', 'N', 'R', 'R', 'S', 'S', 'T', 'T',
 
 int get_binary_value(const long int *seq_bin, const int pos);
 long int *change_binary_value(long int *seq_bin, const int pos, const int value);
-long int *set_binary_array(const char *array, const unsigned size);
-long int *xor_binary_array(long int *const seq1, const unsigned array_size1,
-                           long int *const seq2, const unsigned array_size2);
+long int *set_binary_array(const char *array, const size_t size);
+long int *xor_binary_array(const long int *seq1, const int array_size1,
+                           const long int *seq2, const int array_size2);
 int popcount_binary_array(const long int *seq, const long int size);
 long int *get_piece_binary_array(const long int *seq_bin, const uint64_t pos_start, const uint64_t pos_stop);
 
 /******** DNA & GENES FUNCTION *********/
 
-long int *convert_to_binary(const char *dna_seq, const unsigned size);
+long int *convert_to_binary(const char *dna_seq, const size_t size);
 char *binary_to_dna(long int *bin_dna_seq, const unsigned size);
 char *generating_mRNA(const long int *gene_seq, const uint64_t  start_pos, const uint64_t  stop_pos);
 void detecting_genes(const long int *gene, const long int gene_size,
