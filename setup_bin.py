@@ -1,56 +1,103 @@
+### From a setup.py on a github repo, we don't own the code
+
+import os
+import sys
 from distutils.core import setup
 from distutils.extension import Extension
-from Cython.Build import cythonize
 from Cython.Distutils import build_ext
-import os
-import sysconfig
 
-_DEBUG = False
-_DEBUG_LEVEL = 0
+extra_flags_c = ["-fopenmp"]
+extra_link_args_c = ["-fopenmp"]
+mpi_compile_args = []
+mpi_link_args = []
 
+# If true, do not check for parallel
+avoid_parallel_test = False
 
-mpi_compile_args = os.popen("mpicc --showme:compile").read().strip().split(' ')
-mpi_link_args = os.popen("mpicc --showme:link").read().strip().split(' ')
-# mpi_compile_args += ["-L /usr/lib/"]
+# Get the MPI from environmental variables
+parallel = False
+if "MPICC" in os.environ:
+    mpicc = os.environ["MPICC"]
+    parallel = True
+    print()
+    print("Parallel compiler setted to:", mpicc)
+    print()
 
-#mpi_link_args = ["-L/usr/lib/ -pthread -lmpi -fopenmp"]
-
-# Common flags for both release and debug builds.
-extra_compile_args = sysconfig.get_config_var('CFLAGS').split()
-extra_compile_args += ["-Wall", "-Wextra"]
-extra_compile_args += mpi_compile_args
-
-if _DEBUG:
-    extra_compile_args += ["-g3", "-O0", "-DDEBUG=%s" %
-                           _DEBUG_LEVEL, "-UNDEBUG"]
-else:
-    extra_compile_args += ["-DNDEBUG", "-O3"]
-
-here = os.path.abspath(os.path.dirname(__file__))
-include_dirs = [here]
+# Check for the python parallel libraries
+python_parallel = True
 try:
-    import mpi4py
-except ImportError:
-    MPI4PY = False
-else:
-    MPI4PY = True
-    INCLUDE_MPI = '/usr/lib/openmpi/include'
-    include_dirs.extend([
-        INCLUDE_MPI,
-        mpi4py.get_include()])
+    import pypar
+except:
+    try:
+        import mpi4py
+    except:
+        #parallel = False
+        python_parallel = False
 
-# TODO add ,"-fopenmp"
-DNAb_module = Extension("DNA_bin", language='c', sources=["DNA_bin.pyx",
-                        "gene_bin.c"],
-                         extra_compile_args=extra_compile_args, extra_link_args=mpi_link_args)
+# Setup the parallel environemnt
+if parallel:
+    # If we are here we can compile using MPI support
+    mpi_compile_args = os.popen("%s -show" %
+                                mpicc).read().strip().split(' ')[1:]
+    mpi_link_args = os.popen("%s -show" % mpicc).read().strip().split(' ')[1:]
+    extra_flags_c += ["-D_MPI"]
 
-setup(name="DNA_bin",
-      version="2.0",
-           cmdclass={"build_ext": build_ext},
-      description="Genome analyser",
-      ext_modules=[DNAb_module])
-#cythonize(DNAb_module,compile_time_env={'MPI4PY': MPI4PY}))
-if not MPI4PY:
-    print('Warning: since importing mpi4py raises an ImportError,\n'
-          '         the extensions are compiled without mpi and \n'
-          '         will work only in sequencial.')
+print(mpi_compile_args)
+# Check if it is python2 or 3
+if sys.version_info[0] < 3:
+    print("Running on python 2, added the flag -D_PYTHON2")
+    extra_flags_c += ["-D_PYTHON2"]
+
+
+ext_modules = [
+    Extension("DNA_mod",
+              sources=["DNA_mod.pyx"],
+              language='c',
+              extra_compile_args=extra_flags_c + mpi_compile_args,
+              extra_link_args=mpi_link_args + extra_link_args_c
+              )
+]
+
+setup(
+    name="DNA_mod",
+    cmdclass={"build_ext": build_ext},
+    ext_modules=ext_modules
+)
+
+if not python_parallel and not parallel and not avoid_parallel_test:
+    print()
+    print("======= WARNING =======")
+    print("Nor python parallel neither MPI compiler found.")
+    print("If you whish to activate MPI acceleration,")
+    print("Consider installing either pypar or mpi4py")
+    print("For example, try to run: ")
+    print(" >>> MPICC=mpicc python3 " + " ".join(sys.argv))
+    print("Note: clean the build directory if you whish to recompile the code.")
+    print("=======================")
+    print()
+elif not parallel and not avoid_parallel_test:
+    print()
+    print("======= WARNING =======")
+    print("No MPI compiler found, please specify MPICC environmental variable")
+    print("For example, try to run: ")
+    print(" >>> MPICC=mpicc python3 " + " ".join(sys.argv))
+    print("Note: clean the build directory if you whish to recompile the code.")
+    print("=======================")
+    print()
+elif not python_parallel and not avoid_parallel_test:
+    print()
+    print("======= WARNING =======")
+    print("No Python MPI library found")
+    print("Supported libraries:")
+    print(" - pypar ")
+    print(" - mpi4py ")
+    print()
+    print("Note: Fast MPI implemetation will crash if used")
+    print("      consider to install one of these libraries.")
+    print("      (No need to reinstall python-sscha)")
+    print("=======================")
+    print()
+elif not avoid_parallel_test:
+    print()
+    print(" PARALLEL ENVIRONMENT DETECTED CORRECTLY ")
+    print()
