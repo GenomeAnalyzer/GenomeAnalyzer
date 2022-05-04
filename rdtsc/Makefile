@@ -27,15 +27,18 @@ endif
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 ifeq ($(IFICC),icc)
-all: gcc_nobin gcc_bin clang_nobin clang_bin icc_nobin icc_bin
+all: gcc_nobin gcc_bin gcc_omp clang_nobin clang_bin icc_nobin icc_bin
 else
-all: gcc_nobin gcc_bin llvm_nobin llvm_bin
+all: gcc_nobin gcc_bin gcc_omp llvm_nobin llvm_bin
 endif
 
 gcc_nobin: main.c ../versions/naive/src/gene.c
 	$(GCC) $(GCCFLAGS) -o $@ $^
 	
 gcc_bin: main_bin.c ../versions/bin/src/gene_bin.c
+	mpicc $(GCCFLAGS) -o $@ $^ -fopenmp
+
+gcc_omp: main_bin_omp.c ../versions/bin/src/gene_bin_omp.c
 	mpicc $(GCCFLAGS) -o $@ $^ -fopenmp
 
 llvm_nobin: main.c ../versions/naive/src/gene.c
@@ -57,4 +60,4 @@ icc_bin: main_bin.c ../versions/bin/src/gene_bin.c
 	$(ICC) $(ICCFLAGS) -o $@ $^
 
 clean :
-	@rm -f *.o gcc_nobin gcc_bin clang_nobin clang_bin llvm_nobin llvm_bin icc_nobin icc_bin
+	@rm -f *.o gcc_nobin gcc_bin clang_nobin clang_bin llvm_nobin llvm_bin icc_nobin icc_bin gcc_omp

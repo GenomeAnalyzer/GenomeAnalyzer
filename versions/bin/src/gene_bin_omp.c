@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <omp.h>
 
-#include "../headers/gene_bin.h"
+#include "../headers/gene_bin_omp.h"
 
 /***************************************/
 /********** BINARIES FUNCTION **********/
@@ -54,32 +54,35 @@ long int* change_binary_value(long int *seq_bin, const int pos, const int value)
  * The non-ACGT nucleotides corresponding to several possible nucleotides are arbitrarily defined.
  */
 long int* set_binary_array(const char *seq_char, const unsigned seq_size){
+    int seq_bin_size, nb, c;
+    long int* seq_bin;
+    long int i;
+    int pos, bit1, bit2;
+
+    //Initialization
+// #pragma omp single
+// {
     // Number of bits needed to transform seq_char into a binary array.
-    int seq_bin_size = 2 * seq_size;
+    seq_bin_size = 2 * seq_size;
 
     // Binary array new size
-    int nb = seq_bin_size / int_SIZE;
+    nb = seq_bin_size / int_SIZE;
     if(seq_bin_size % int_SIZE != 0)
         nb++;
 
     // Allocate memory and verify it has been allocated
-    long int* seq_bin = NULL;
     seq_bin = calloc(nb, sizeof(long int));
+// }
     if(!seq_bin)
         return printf("ERROR: set_binary_array: cannot allocate memory.\n"), NULL;
 
-    int pos = 0;
-    long int i;
-
     // Parse the DNA sequence, per nucleotides
-#pragma omp parallel default(shared)
-{
 #pragma omp for schedule(static,64)
     for (i = 0; i < seq_size; ++i){
 
         //Default char is put to A to handle the warning : wrong size input
         //Add '00' bits in this case
-        int c = 0;
+        c = 0;
         if(!seq_char[i]){
             printf("WARNING: set_binary_array: size input is different than the char sequence.\n");
         }
@@ -87,7 +90,6 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
             c = seq_char[i] - 65;
         }
         //get the 2-bits value of char read
-        int bit1, bit2;
         bit1 = L[c][0];
         bit2 = L[c][1];
 
@@ -96,7 +98,6 @@ long int* set_binary_array(const char *seq_char, const unsigned seq_size){
         change_binary_value(seq_bin, pos, bit1);
         change_binary_value(seq_bin, pos + 1, bit2);
     }
-}
     return seq_bin;
 }
 
@@ -265,25 +266,30 @@ long int* convert_to_binary(const char* dna_seq, const unsigned size){
  * For each pair of bits in bin_dna_seq, append to dna_seq its corresponding nucleotide.
  */
 char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
-    if (size % 2 != 0) {
-        printf("Error: binary_to_aa : wrong binary size (%d). Must be odd.\nExit.\n",size);
-        return NULL;
-    }
+    //Verify Input
+    if (size % 2 != 0)
+        return printf("Error: binary_to_aa : wrong binary size (%d). Must be odd.\nExit.\n",size), NULL;
+    
+    //Shared variables
+    char* dna_seq;
+    unsigned i;
+
+    //Local variables
+    int nucl1,nucl2,index;
+    char value;
+
+    //Initialization
+// #pragma omp single
+// {
+    i = 0;
 
     //Allocate memory and verify it has been allocated
-    char* dna_seq = calloc((size / 2) + 1, sizeof(*dna_seq));
+    dna_seq = calloc((size / 2) + 1, sizeof(*dna_seq));
+// }
     if(!dna_seq)
         return printf("ERROR: binary_to_dna: cannot allocate memory.\n"), NULL;
 
     //Parse the binary array, two bits per iteration
-    unsigned i;
-
-    int nucl1,nucl2,index;
-    char value;
-
-#pragma omp parallel shared(bin_dna_seq, size, dna_seq, i) private(nucl1,nucl2,index,value)
-{
-    double b = omp_get_wtime();
 #pragma omp for schedule(static,32)
     for (i = 0; i < size; i += 2){
         // nucleotides = A, T, G, C
@@ -297,12 +303,6 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
 
         dna_seq[index] = value;
     }
-    double a = omp_get_wtime();
-#pragma omp master
-    {
-    printf("Elapsed bin_top_dna : %lf\n", a - b);
-    }
-}
     return dna_seq;
 }
 
@@ -318,27 +318,27 @@ char* binary_to_dna(long int* bin_dna_seq, const unsigned size){
  * For each pair of bits in bin_dna_seq, append to dna_seq its corresponding nucleotide in mRNA. (T -> U)
  */
 char* generating_mRNA(const long int* gene_seq, const long start_pos, const long int seq_size) {
-    // Check the input argument
-    if (!gene_seq)
-        return printf("ERROR: generating_mRNA: undefined sequence\n"), NULL;
 
-    // Allocate memory and verify it has been allocated
-    char* rna_seq = NULL;
-    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 2);
-    if (!rna_seq)
-        return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
+    //Shared variables
+    char* rna_seq;
+    long stop,i;
 
-    long stop = seq_size+start_pos;
-
-    long int i;
-
+    //Local variables
     int nucl1,nucl2;
     char value;
     long index;
 
-#pragma omp parallel shared(gene_seq, start_pos, seq_size, stop, i) private(nucl1, nucl2, value, index)
-{
-    double b = omp_get_wtime();
+    //Initialization
+// #pragma omp single
+// {
+    stop = seq_size+start_pos;
+
+    // Allocate memory and verify it has been allocated
+    rna_seq = malloc(sizeof(*rna_seq) * (seq_size / 2) + 2);
+// }
+    if (!rna_seq)
+        return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
+
     // Parse the binary DNA sequence, two bits per iteration
 #pragma omp for schedule(static,32)
     for (i = start_pos; i < stop; i += 2) {
@@ -353,13 +353,10 @@ char* generating_mRNA(const long int* gene_seq, const long start_pos, const long
         value = bitstocharmRNA[nucl2 + 2*nucl1];
         rna_seq[index] = value;
     }
-    double a = omp_get_wtime();
-    #pragma omp master
-    {
-    printf("Elapsed gen_mrna : %lf\n", a - b);
-    }
-}
+// #pragma omp single
+// {
     rna_seq[stop/2] = '\0';
+// }
     return rna_seq;
 }
 
@@ -457,24 +454,31 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
     // Check the input argument
     if (!gene_seq)
         return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
-    if(seq_size % 3 != 0)
-        return printf("ERROR: generating_amino_acid_chain: wrong_size\n"), NULL;
+    // if(seq_size % 3 != 0)
+        // return printf("ERROR: generating_amino_acid_chain: wrong_size\n"), NULL;
 
-    long int codon_size = 6;
-    // Allocate memory and verify it has been allocated
-    char* aa_seq = calloc(sizeof(char), sizeof(*aa_seq) * (seq_size / codon_size) + 1);
-    if (!aa_seq)
-        return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
+    //Shared variables
+    long int i, size, stop;
+    int codon_size;
+    char* aa_seq;
 
-    long int i, size = start_pos+seq_size;
-
+    //Local variables
     long int k;
     unsigned temp;
     int tmp,pow_bit,get_bin;
 
-#pragma omp parallel shared(gene_seq, start_pos, codon_size, size, aa_seq, i) private(k, temp, tmp, pow_bit, get_bin)
-{
-    double b = omp_get_wtime();
+    //initilization
+// #pragma omp single
+// {
+    codon_size = 6;
+    stop = start_pos+seq_size;
+
+    // Allocate memory and verify it has been allocated
+    aa_seq = calloc(sizeof(char), sizeof(*aa_seq) * (seq_size / codon_size) + 1);
+// }
+    if (!aa_seq)
+        return printf("ERROR: generating_amino_acid_chain: cannot allocate memory\n"), NULL;
+
     //Parse the binary array, six bits by six (to parse three nucleotides per three)
 #pragma omp for schedule(static,64/codon_size)
     for (i = start_pos; i < size; i += codon_size) {
@@ -493,13 +497,10 @@ char* generating_amino_acid_chain(const long int *gene_seq, const long int start
         //Get the corresponding protein from the lookup table
         aa_seq[temp] = LUT[tmp];
     }
-    double a = omp_get_wtime();
-    #pragma omp master
-    {
-    printf("Elapsed gen_aa_chain : %lf\n", a - b);
-    }
-}
+// #pragma omp single
+// {
     aa_seq[size/codon_size] = '\0';
+// }
     return aa_seq;
 }
 
@@ -595,4 +596,124 @@ float calculating_matching_score(const long int *seq1, long int start_pos1,const
     //Last step: compute the percentage
     float y = ((float)pop * 100.0) / (float)xor_size;
     return 100.0 - y;
+}
+
+
+
+
+
+//**********************************************
+
+void set_binary_arr(const char *seq_char, const unsigned seq_size, long int* seq_bin){
+    int seq_bin_size, nb, c;
+    long int i;
+    int pos, bit1, bit2;
+
+    // Parse the DNA sequence, per nucleotides
+#pragma omp for schedule(static,64)
+    for (i = 0; i < seq_size; ++i){
+
+        //Default char is put to A to handle the warning : wrong size input
+        //Add '00' bits in this case
+        c = 0;
+        if(!seq_char[i]){
+            printf("WARNING: set_binary_array: size input is different than the char sequence.\n");
+        }
+        else{
+            c = seq_char[i] - 65;
+        }
+        //get the 2-bits value of char read
+        bit1 = L[c][0];
+        bit2 = L[c][1];
+
+        pos = 2*i;
+        // Set seq_bin bit values according to the nucleotide read
+        change_binary_value(seq_bin, pos, bit1);
+        change_binary_value(seq_bin, pos + 1, bit2);
+    }
+}
+
+void convert_to_bin(const char* dna_seq, const unsigned size, long int* seq_bin){
+    set_binary_arr(dna_seq, size, seq_bin);
+}
+
+void bin_to_dna(long int* bin_dna_seq, const unsigned size, char* dna_seq){
+    //Verify Input
+    // if (size % 2 != 0)
+    //     return printf("Error: binary_to_aa : wrong binary size (%d). Must be odd.\nExit.\n",size), NULL;
+    
+    unsigned i;
+    int nucl1,nucl2,index;
+    char value;
+
+    //Parse the binary array, two bits per iteration
+#pragma omp for schedule(static,32)
+    for (i = 0; i < size; i += 2){
+        // nucleotides = A, T, G, C
+        nucl1 = get_binary_value(bin_dna_seq, i);
+        nucl2 = get_binary_value(bin_dna_seq, i + 1);
+
+        //get the ASCII value according to bits value
+        value = bitstocharDNA[nucl2 + 2*nucl1];
+
+        index = i/2;
+        dna_seq[index] = value;
+    }
+}
+
+void gen_mRNA(const long int* gene_seq, const long start_pos,const long int seq_size, char* rna_seq){
+    long stop,i;
+    int nucl1,nucl2;
+    char value;
+    long index;
+    stop = seq_size+start_pos;
+
+    // Parse the binary DNA sequence, two bits per iteration
+#pragma omp for schedule(static,32)
+    for (i = start_pos; i < stop; i += 2) {
+
+        // nucleotides = A, U, G, C
+        nucl1 = get_binary_value(gene_seq, i);
+        nucl2 = get_binary_value(gene_seq, i + 1);
+
+        index = (i+1 - start_pos)/2;
+
+        //get the ASCII value according to bits value
+        value = bitstocharmRNA[nucl2 + 2*nucl1];
+        rna_seq[index] = value;
+    }
+    rna_seq[stop/2] = '\0';
+}
+
+void gen_aa_chain(const long int *gene_seq, const long int start_pos, const long int seq_size, char* aa_seq) {
+    // Check the input argument
+    if (!gene_seq)
+        return printf("ERROR: generating_amino_acid_chain: undefined sequence\n"), NULL;
+    // if(seq_size % 3 != 0)
+        // return printf("ERROR: generating_amino_acid_chain: wrong_size\n"), NULL;
+    long int i, size, stop, k;
+    int codon_size = 6;
+    unsigned temp;
+    int tmp,pow_bit,get_bin;
+    stop = start_pos+seq_size;
+
+    //Parse the binary array, six bits by six (to parse three nucleotides per three)
+#pragma omp for schedule(static,64/codon_size)
+    for (i = start_pos; i < size; i += codon_size) {
+
+        temp = (i - start_pos)/codon_size;
+
+        //Get the decimal value of the 6 bits
+        tmp = 0;
+        pow_bit = 5;
+        for(k = i; k < i + codon_size; k++){
+            get_bin = get_binary_value(gene_seq, k);
+            tmp += get_bin << pow_bit;
+            pow_bit--;
+        }
+        
+        //Get the corresponding protein from the lookup table
+        aa_seq[temp] = LUT[tmp];
+    }
+    aa_seq[size/codon_size] = '\0';
 }

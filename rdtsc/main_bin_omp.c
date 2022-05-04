@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "rdtsc.h"
-#include "../versions/bin/headers/gene_bin.h"
+#include "../versions/bin/headers/gene_bin_omp.h"
 #include <string.h>
 #include <omp.h>
 #include <mpi.h>
 
 #define MAX 31000
 #define MAX_LINE 150
-#define MAX_LOOP 10000
+#define MAX_LOOP 1
 
 void load_gene(char *filename, char *seq_char)
 {
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	char *aa_seq_long = NULL;
 	char *seq_test = calloc(seq_char_size, sizeof(char));
 	
-	seq_long2 = convert_to_binary(seq_char2, seq_char_size2);
+	
   	
   	gene_map_t g;
     g.gene_start = malloc(sizeof(*g.gene_start) * seq_char_size * int_SIZE);
@@ -80,97 +80,146 @@ int main(int argc, char *argv[])
     	m.end_mut[i]=0;   	
     }
 
+    long int* seq_bin;
+        // Number of bits needed to transform seq_char into a binary array.
+    int seq_bin_size = 2 * seq_char_size;
+
+    // Binary array new size
+    int nb = seq_bin_size / int_SIZE;
+    if(seq_bin_size % int_SIZE != 0)
+        nb++;
+
+    // Allocate memory and verify it has been allocated
+    seq_bin = calloc(nb, sizeof(long int));
+
+    //Allocate memory and verify it has been allocated
+    char* dna_seq = calloc(seq_char_size + 1, sizeof(char));
+
+    // Allocate memory and verify it has been allocated
+    char* rna_seq = malloc(sizeof(char) * seq_char_size + 2);
+
+    // Allocate memory and verify it has been allocated
+    char* aa_seq = calloc(sizeof(char), sizeof(char) * (seq_char_size / 3) + 1);
+
+    seq_long2 = convert_to_binary(seq_char2, seq_char_size2);
+
     printf("Binaries Functions\t    | Cycles\n");
     printf("-----------------------------------------\n");
 
+#pragma omp parallel default(shared) private(seq_long2, seq_long, seq_test, rna_seq_long, aa_seq_long, cms)
+{
+	// seq_long2 = convert_to_binary(seq_char2, seq_char_size2);
+
 	/*-----convert_to_binary-----*/
-    before = MPI_Wtime();
+	before = omp_get_wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
     	seq_long = set_binary_array(seq_char, seq_char_size);
-
+    	// set_binary_arr(seq_char, seq_char_size, seq_long);
 	}
-    after = MPI_Wtime();
+	after = omp_get_wtime();
+#pragma omp single
+{
     elapsed = (double)(after - before);
-	printf("convert_to_binary\t    : %.10lf\n", elapsed/MAX_LOOP );
+	printf("convert_to_binary\t\t : %.10lf\n", elapsed/MAX_LOOP );
+}
 	elapsed = 0;
 
 	/*-----binary_to_dna-----*/
-    before = MPI_Wtime();
+	before = omp_get_wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-    	seq_test = binary_to_dna(seq_long, 2 * seq_char_size);
+    	// seq_test = binary_to_dna(seq_long, 2 * seq_char_size);
+    	bin_to_dna(seq_long, 2 * seq_char_size, dna_seq);
 	}
-    after = MPI_Wtime();
+    after = omp_get_wtime();
+#pragma omp single
+{
     elapsed = (double)(after - before);
-	printf("binary_to_dna\t\t    : %.10lf\n", elapsed/MAX_LOOP );
+	printf("binary_to_dna\t\t\t : %.10lf\n", elapsed/MAX_LOOP );
+}
 	elapsed = 0;
 
 	/*-----generating_mRNA-----*/
-    before = MPI_Wtime();
+	before = omp_get_wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		rna_seq_long = generating_mRNA(seq_long, 0, 2 * seq_char_size);
+		// rna_seq_long = generating_mRNA(seq_long, 0, 2 * seq_char_size);
+		gen_mRNA(seq_long, 0, 2 * seq_char_size, rna_seq);
 
 	}
-    after = MPI_Wtime();
+    after = omp_get_wtime();
+#pragma omp single
+{
     elapsed = (double)(after - before);
-	printf("generating_mRNA\t\t    : %.10lf\n", elapsed/MAX_LOOP );
+	printf("generating_mRNA\t\t\t : %.10lf\n", elapsed/MAX_LOOP );
+}
 	elapsed = 0;
 	
 	/*-----detecting_genes-----*/
-	before = MPI_Wtime();
+#pragma omp single
+{
+	before = omp_get_wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
 		detecting_genes(seq_long, 2 * seq_char_size, &g);
 	}
-	after = MPI_Wtime();
-	elapsed = (double)(after - before);
-	printf("detecting_genes\t\t    : %.10lf\n", elapsed/MAX_LOOP );
+	after = omp_get_wtime();
+    elapsed = (double)(after - before);
+	printf("detecting_genes\t\t\t : %.10lf\n", elapsed/MAX_LOOP );
+}
 	elapsed = 0;
 	
 	/*-----generating_amino_acid_chain-----*/
-    before = MPI_Wtime();
+	before = omp_get_wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
-		aa_seq_long = generating_amino_acid_chain(seq_long, 0, 2 * seq_char_size);
+		// aa_seq_long = generating_amino_acid_chain(seq_long, 0, 2 * seq_char_size);
+		gen_aa_chain(seq_long, 0, 2 * seq_char_size, aa_seq);
 	}
-    after = MPI_Wtime();
+    after = omp_get_wtime();
+#pragma omp single
+{
     elapsed = (double)(after - before);
-	printf("generating_amino_acid_chain : %.10lf\n", elapsed/MAX_LOOP );
+	printf("generating_amino_acid_chain\t : %.10lf\n", elapsed/MAX_LOOP );
+}
 	elapsed = 0;
 
 	/*-----detecting_mutations-----*/
-    before = MPI_Wtime();
+#pragma omp single
+{
+	before = omp_get_wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
     	detecting_mutations(seq_long, 0, 2 * seq_char_size, m);
 	}
-    after = MPI_Wtime();
+    after = omp_get_wtime();
     elapsed = (double)(after - before);
-	printf("detecting_mutations\t    : %.10lf\n", elapsed/MAX_LOOP );
+	printf("detecting_mutations\t\t : %.10lf\n", elapsed/MAX_LOOP );
+}
 	elapsed = 0;
 
 	/*-----calculating_matching_score-----*/
-    before = MPI_Wtime();
+#pragma omp single
+{
+	before = omp_get_wtime();
 	for(int i = 0; i < MAX_LOOP; i++)
 	{
 		cms = calculating_matching_score(seq_long, 0, 2 * seq_char_size, seq_long2, 0, 2 * seq_char_size2);
 	}
-    after = MPI_Wtime();
+    after = omp_get_wtime();
     elapsed = (double)(after - before);
-	printf("calculating_matching_score  : %.10lf\n", elapsed/MAX_LOOP );
-	elapsed = 0;
-
+	printf("calculating_matching_score\t : %.10lf\n", elapsed/MAX_LOOP );
+}
 	printf("\n");
 
+}
 	// free
 	free(g.gene_start);
 	free(g.gene_end);
 	free(m.size);
 	free(m.start_mut);
 	free(m.end_mut);
-
 	MPI_Finalize();
 
 	return 0;
