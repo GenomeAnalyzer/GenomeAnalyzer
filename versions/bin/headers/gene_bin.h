@@ -15,28 +15,30 @@
 #define OFFSET_TABLE 65
 
 #ifdef __AVX512__
+#define REGSIZE 512
 #define STEPCHAR 256
 #else
+#define REGSIZE 256
 #define STEPCHAR 128
 #endif
 
 typedef struct gene_map_s {
 
     //
-    unsigned long long genes_counter;
+    uint64_t genes_counter;
 
     //Gene start position (AUG)
-    unsigned long long* gene_start;
+    uint64_t *gene_start;
 
     //Gene stop position (UAA, UAG, UGA)
-    unsigned long long* gene_end;
+    uint64_t *gene_end;
 
 }gene_map_t;
 
 typedef struct mutation_map {
-    unsigned long* size;
-    unsigned long *start_mut;
-    unsigned long *end_mut;
+    uint64_t *size;
+    uint64_t *start_mut;
+    uint64_t *end_mut;
 }mutation_map;
 
 typedef struct mm_array_s
@@ -88,7 +90,7 @@ int get_binary_value(const long int *seq_bin, const int pos);
 
 /******** DNA & GENES FUNCTION *********/
 
-void my_convert_to_binary(mm_array_t *seq_bin, const uint64_t seq_bin_size, const char* seq_char, const uint64_t seq_char_size);
+void convert_to_binary(mm_array_t *seq_bin, const uint64_t seq_bin_size, const char* seq_char, const uint64_t seq_char_size);
 char* binary_to_dna(long int* bin_dna_seq, const unsigned size);
 char* generating_mRNA(const long int* gene_seq, const long start_pos,const long int seq_size);
 void detecting_genes(const long int *gene, const long int gene_size, gene_map_t* gene_map);

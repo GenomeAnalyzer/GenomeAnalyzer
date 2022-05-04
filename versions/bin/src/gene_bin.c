@@ -38,100 +38,73 @@ int get_binary_value(const long int *seq_bin, const int pos){
  */
 void convert_to_binary(mm_array_t *seq_bin, const uint64_t seq_bin_size, const char* seq_char, const uint64_t seq_char_size)
 {
-    uint64_t k = 0;
-
     for(uint64_t j = 0; j < seq_bin_size - 1; ++j)
     {
-        uint64_t p1 = 0, p2 = 0, p3 = 0, p4 = 0;
-#ifdef __AVX512__
-        uint64_t p5 = 0, p6 = 0, p7 = 0, p8 = 0;
-#endif
-        int i = 0;
-        for(i = i; i < 32; ++i)
-        {   
-            p1 <<= 1;
-            p1 = ((p1 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
+        uint64_t k = STEPCHAR * j;
+#ifdef __AVX512F__
+        __m512i pack = _mm512_setzero_si512();
+        for(uint64_t i = k; i < k + 32; ++i)    //For each iteration, 8 letters are stored in each packed 64 bits (one letter each)
+        {                                       // << 1, + 0 or 1, << 1, + 0 or 1, for the 8 packed 64 bits. 
+            pack = _mm512_slli_epi64(pack, 1);
+            pack = _mm512_add_epi64(pack, (__m512i){L[seq_char[i+224]-OFFSET_TABLE][0], L[seq_char[i+192]-OFFSET_TABLE][0],
+                                                    L[seq_char[i+160]-OFFSET_TABLE][0], L[seq_char[i+128]-OFFSET_TABLE][0],
+                                                    L[seq_char[i+96]-OFFSET_TABLE][0],  L[seq_char[i+64]-OFFSET_TABLE][0],
+                                                    L[seq_char[i+32]-OFFSET_TABLE][0],  L[seq_char[i]-OFFSET_TABLE][0]});
+            pack = _mm512_slli_epi64(pack, 1);
+            pack = _mm512_add_epi64(pack, (__m512i){L[seq_char[i+224]-OFFSET_TABLE][1], L[seq_char[i+192]-OFFSET_TABLE][1],
+                                                    L[seq_char[i+160]-OFFSET_TABLE][1], L[seq_char[i+128]-OFFSET_TABLE][1],
+                                                    L[seq_char[i+96]-OFFSET_TABLE][1],  L[seq_char[i+64]-OFFSET_TABLE][1],
+                                                    L[seq_char[i+32]-OFFSET_TABLE][1],  L[seq_char[i]-OFFSET_TABLE][1]});
         }
-
-        for(i = i; i < 64; ++i)
-        {   
-            p2 <<= 1;
-            p2 = ((p2 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
-        }
-
-        for(i = i; i < 96; ++i)
-        {   
-            p3 <<= 1;
-            p3 = ((p3 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
-        }
-
-        for(i = i; i < 128; ++i)
-        {   
-            p4 <<= 1;
-            p4 = ((p4 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
-        }
-
-#ifdef __AVX512__
-        for(i = i; i < 160; ++i)
-        {   
-            p5 <<= 1;
-            p5 = ((p5 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
-        }
-
-        for(i = i; i < 192; ++i)
-        {   
-            p6 <<= 1;
-            p6 = ((p6 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
-        }
-
-        for(i = i; i < 224; ++i)
-        {   
-            p7 <<= 1;
-            p7 = ((p7 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
-        }
-
-        for(i = i; i < 256; ++i)
-        {   
-            p8 <<= 1;
-            p8 = ((p8 + L[seq_char[i+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[i+k]-OFFSET_TABLE][1];
-        }
-
-        seq_bin[j].reg = _mm512_setr_epi64x(p8, p7, p6, p5, p4, p3, p2, p1);
-        k += 256;
 #else
-        seq_bin[j].reg = _mm256_setr_epi64x(p4, p3, p2, p1);
-        k += 128;
+        __m256i pack = _mm256_setzero_si256();
+        for(uint64_t i = k; i < k + 32; ++i)    //For each iteration, 4 letters are stored in each packed 64 bits (one letter each)
+        {                                       // << 1, + 0 or 1, << 1, + 0 or 1, for the 4 packed 64 bits. 
+            pack = _mm256_slli_epi64(pack, 1);
+            pack = _mm256_add_epi64(pack, (__m256i){L[seq_char[i+96]-OFFSET_TABLE][0],
+                                                    L[seq_char[i+64]-OFFSET_TABLE][0],
+                                                    L[seq_char[i+32]-OFFSET_TABLE][0],
+                                                    L[seq_char[i]-OFFSET_TABLE][0]});
+            pack = _mm256_slli_epi64(pack, 1);
+            pack = _mm256_add_epi64(pack, (__m256i){L[seq_char[i+96]-OFFSET_TABLE][1],
+                                                    L[seq_char[i+64]-OFFSET_TABLE][1],
+                                                    L[seq_char[i+32]-OFFSET_TABLE][1],
+                                                    L[seq_char[i]-OFFSET_TABLE][1]});
+        }
 #endif
+        seq_bin[j].reg = pack;
     }
 
-    uint64_t rest = seq_char_size - k;
-#ifdef __AVX512__
+    // Last piece
+    uint64_t rest = seq_char_size - (seq_bin_size - 1) * STEPCHAR;  // Number of remained character
+#ifdef __AVX512F__
     uint64_t p[8] = {0,0,0,0,0,0,0,0};
 #else
     uint64_t p[4] = {0,0,0,0};
 #endif
     int i;
-    int r = rest >> 5;
-    int m = rest & 31;
+    int r = rest >> 5;  // Number of full packed 64bits
+    int m = rest & 31;  // Number of used bits in the last used packed 64 bits
     for(i = 0; i < r; ++i)
     {   
-        for(int j = 0; j < 32; ++j)
+        int k = (seq_bin_size-1) * STEPCHAR + 32 * i;
+        for(int j = k; j < k + 32; ++j)
         {
             p[i] <<= 1;
-            p[i] = ((p[i] + L[seq_char[j+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[j+k]-OFFSET_TABLE][1];
+            p[i] = ((p[i] + L[seq_char[j]-OFFSET_TABLE][0]) << 1) + L[seq_char[j]-OFFSET_TABLE][1];
         }
-        k += 32;
     }
 
-    for(int j = 0; j < m; ++j)
+    int k = (seq_bin_size-1) * STEPCHAR + 32 * r;
+    for(int j = k; j < k + m; ++j)
     {
         p[i] <<= 1;
-        p[i] = ((p[i] + L[seq_char[j+k]-OFFSET_TABLE][0]) << 1) + L[seq_char[j+k]-OFFSET_TABLE][1];
+        p[i] = ((p[i] + L[seq_char[j]-OFFSET_TABLE][0]) << 1) + L[seq_char[j]-OFFSET_TABLE][1];
     }
-    p[i] <<= 64 - 2*m;
+    p[i] <<= 64 - 2*m;  //Left shift to put in high bits
 
-#ifdef __AVX512__
-    seq_bin[seq_bin_size - 1].reg = _mm512_setr_epi64x(p[7], p[6], p[5], p[4], p[3], p[2], p[1], p[0]);
+#ifdef __AVX512F__
+    seq_bin[seq_bin_size - 1].reg = _mm512_setr_epi64(p[7], p[6], p[5], p[4], p[3], p[2], p[1], p[0]);
 #else
     seq_bin[seq_bin_size - 1].reg = _mm256_setr_epi64x(p[3], p[2], p[1], p[0]);
 #endif
