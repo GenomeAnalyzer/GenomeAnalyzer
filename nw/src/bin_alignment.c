@@ -17,9 +17,9 @@ void print_mat(int* F, char A [], char B [], int m, int n, int k, int l) {
         printf("%3c  ", i == 0 ? '-' : B[i - 1]);
         for (int j = 0; j < m; j++) {
             if (i == k && j == l)
-                printf("\033[101m% 3d  \033[0m", F[i * n + j]);
+                printf("\033[101m% 3d  \033[0m", F[i * m + j]);
             else
-                printf("% 3d  ", F[i * n + j]);
+                printf("% 3d  ", F[i * m + j]);
         }
         printf("\n");
     }
@@ -72,17 +72,17 @@ int* bin_calculate_scoring_matrix(long int* bin_A, long int* bin_B, int m, int n
 void string_insert(char** dest, char* source) {
     if (*dest == NULL) {
         *dest = calloc(sizeof(char), 2);
-        strncpy(*dest, source, 1);
+        memcpy(*dest, source, 1);
         return;
     }
     char* temp = calloc(sizeof(char), strlen(*dest) + 2);
-    strncpy(temp, source, 1);
+    memcpy(temp, source, 1);
     strcat(temp, *dest);
     free(*dest);
     *dest = temp;
 }
 
-void align(int* F, char A [], char B [], int match, int mismatch, int gap) {
+int align(int* F, char A [], char B [], int match, int mismatch, int gap) {
     int m = strlen(A) + 1;
     int n = strlen(B) + 1;
 
@@ -93,7 +93,7 @@ void align(int* F, char A [], char B [], int match, int mismatch, int gap) {
     char* AlignmentB = NULL;
 
     while (i > 0 || j > 0) {
-        if (i > 0 && j > 0 && F[i * n + j] == F[(i - 1) * m + j - 1] + (A[i - 1] == B[j - 1] ? match : mismatch)) {
+        if (i > 0 && j > 0 && F[i * m + j] == F[(i - 1) * m + j - 1] + (A[i - 1] == B[j - 1] ? match : mismatch)) {
             string_insert(&AlignmentA, A + (i - 1));
             string_insert(&AlignmentB, B + (j - 1));
             i--;
@@ -113,6 +113,7 @@ void align(int* F, char A [], char B [], int match, int mismatch, int gap) {
     }
     printf("%s\n", AlignmentA);
     printf("%s\n", AlignmentB);
+    return F[m * n - 1];
 }
 
 
@@ -122,13 +123,13 @@ int main() {
     // 0b10011011000110
     char A [] = "GCATGCG";
     // 0b00010011110010
-    char B [] = "GATTACA";
+    char B [] = "GATTACAAA";
 
     long int* bin_A = set_binary_array(A, strlen(A));
     long int* bin_B = set_binary_array(B, strlen(B));
 
-    // int m = strlen(A) + 1;
-    // int n = strlen(B) + 1;
+    int m = strlen(A) + 1;
+    int n = strlen(B) + 1;
 
     int match = 1;
     int mismatch = -1;
@@ -136,9 +137,10 @@ int main() {
 
     // int* F = calculate_scoring_matrix(A, B, match, mismatch, gap);
     int* F = bin_calculate_scoring_matrix(bin_A, bin_B, strlen(A), strlen(B), match, mismatch, gap);
-    // print_mat(F, A, B, m, n, n - 1, m - 1);
+    print_mat(F, A, B, m, n, n - 1, m - 1);
 
-    align(F, A, B, match, mismatch, gap);
+    int score = align(F, A, B, match, mismatch, gap);
+    printf("Max score : %d\n", score);
 
     free(F);
 }
