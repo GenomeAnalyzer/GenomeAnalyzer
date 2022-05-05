@@ -244,13 +244,13 @@ long int *get_piece_binary_array(const long int *seq_bin, const unsigned long lo
 
     long j = 0;
 
-    // printf("%d) hm\n",rank);
+// printf("%d) hm\n",rank);
 
-    // Parse the binary array,
-    // from the bit at 'pos_start' position to 'pos_stop' position
-    //#pragma omp parallel default(shared)
+// Parse the binary array,
+// from the bit at 'pos_start' position to 'pos_stop' position
+#pragma omp parallel default(shared)
     {
-        //#pragma omp for schedule(static, 64)
+#pragma omp for schedule(static, 64)
         for (int i = (int)pos_start; i < (int)pos_stop; i++)
         {
             int tmp = i - pos_start;
@@ -615,6 +615,95 @@ void detecting_mutations(const long int *gene_seq, const unsigned long long star
     //   printf("%d) 608\n", rank);
 }
 
+#ifdef __AVX512VPOPCNTDQ__
+__attribute__((target("avx512vpopcntdq", "avx512f"))) float calculating_matching_score(long int *seq1, const int seq_size1,
+                                                                                         long int *seq2, const int seq_size2)
+{
+    // Check the input argument
+    if (!seq1 || !seq2)
+        return printf("ERROR: calculating_matching_score: undefined sequence\n"), -1.0;
+
+    long int *big_seq = NULL, *small_seq = NULL;
+    int len_big = 0, len_small = 0, diff_len = 0;
+
+    // Find and rename the biggest/smallest sequences
+    // !! size = number of bits, length = size of the array (= size/int_SIZE)
+    if (seq_size1 >= seq_size2)
+    {
+        big_seq = seq1;
+        small_seq = seq2;
+
+        len_big = seq_size1 / int_SIZE;
+        if (seq_size1 % int_SIZE != 0)
+            len_big++;
+
+        len_small = seq_size2 / int_SIZE;
+        if (seq_size2 % int_SIZE != 0)
+            len_small++;
+    }
+    else
+    {
+        big_seq = seq2;
+        small_seq = seq1;
+
+        len_big = seq_size2 / int_SIZE;
+        if (seq_size2 % int_SIZE != 0)
+            len_big++;
+
+        len_small = seq_size1 / int_SIZE;
+        if (seq_size1 % int_SIZE != 0)
+            len_small++;
+    }
+
+    // Parse both seqences from the end
+    /**
+     * (Need to add some "0" at the beginning, if too small)
+     *
+     * big =   l1    l2    l3     l4     l5
+     * small =  0     0    l3'    l4'    l5'
+     * ---------------------------------------------
+     * xor =   l1    l2   l3^l3' l4^l4' l5^l5'
+     */
+
+    int pop = 0;
+    int j = len_small;
+    for (int i = len_big; i > 0; i -= 8)
+    {
+        const long x0 = j >= 0 ? (long)small_seq[j - 1] : (long)0;
+        const long x1 = j - 1 >= 0 ? (long)small_seq[j - 2] : (long)0;
+        const long x2 = j - 2 >= 0 ? (long)small_seq[j - 3] : (long)0;
+        const long x3 = j - 3 >= 0 ? (long)small_seq[j - 4] : (long)0;
+        const long x4 = j - 4 >= 0 ? (long)small_seq[j - 5] : (long)0;
+        const long x5 = j - 5 >= 0 ? (long)small_seq[j - 6] : (long)0;
+        const long x6 = j - 6 >= 0 ? (long)small_seq[j - 7] : (long)0;
+        const long x7 = j - 7 >= 0 ? (long)small_seq[j - 8] : (long)0;
+
+        const long y0 = j >= 0 ? (long)big_seq[i - 1] : (long)0;
+        const long y1 = j - 1 >= 0 ? (long)big_seq[i - 2] : (long)0;
+        const long y2 = j - 2 >= 0 ? (long)big_seq[i - 3] : (long)0;
+        const long y3 = j - 3 >= 0 ? (long)big_seq[i - 4] : (long)0;
+        const long y4 = j - 4 >= 0 ? (long)big_seq[i - 5] : (long)0;
+        const long y5 = j - 5 >= 0 ? (long)big_seq[i - 6] : (long)0;
+        const long y6 = j - 6 >= 0 ? (long)big_seq[i - 7] : (long)0;
+        const long y7 = j - 7 >= 0 ? (long)big_seq[i - 8] : (long)0;
+
+        const __m512i xor = _mm512_xor_epi64(_mm512_set_epi64(y0, y1, y2, y3, y4, y5, y6, y7),
+                                             _mm512_set_epi64(x0, x1, x2, x3, x4, x5, x6, x7));
+
+        const __m512i popcnt = _mm512_popcnt_epi64(xor);
+
+        pop += _mm512_reduce_add_epi64(popcnt);
+        j -= 8;
+    }
+
+    printf("pop = %d\n", pop);
+
+    const float denom = 1.0 / (float)(len_big * int_SIZE);
+    const float F = pop ? (float)pop * 100.0 * denom : 0.0;
+
+    return 100.0 - F;
+}
+#else
 /**
  * Calculates the matching score of two binary array sequences.
  *
@@ -626,8 +715,8 @@ void detecting_mutations(const long int *gene_seq, const unsigned long long star
  *
  * The algorithms runs the hamming distance between two binary sequences, and return their matching score percentage
  */
-float calculating_matching_score(const long int *seq1, const int seq_size1,
-                                 const long int *seq2, const int seq_size2)
+float calculating_matching_score(long int *seq1, const int seq_size1,
+                                 long int *seq2, const int seq_size2)
 {
     // Check the input argument
     if (!seq1 || !seq2)
@@ -646,6 +735,7 @@ float calculating_matching_score(const long int *seq1, const int seq_size1,
     float y = ((float)pop * 100.0) / (float)xor_size;
     return 100.0 - y;
 }
+#endif
 
 /* Count files in a directory
  *
@@ -968,15 +1058,15 @@ void getfile(int rank)
 
             // printf("%d) 970\n", rank);
 
-       //     printf("%d)  %lld %lld %ld piece req \n", rank, k, gene_map.genes_counter, genes[0]);
+            //     printf("%d)  %lld %lld %ld piece req \n", rank, k, gene_map.genes_counter, genes[0]);
 
-            MPI_Send(genes, (gene_map.gene_end[k] - gene_map.gene_start[k])/int_SIZE, MPI_LONG, 0, 2, MPI_COMM_WORLD);
+            MPI_Send(genes, (gene_map.gene_end[k] - gene_map.gene_start[k]) / int_SIZE, MPI_LONG, 0, 2, MPI_COMM_WORLD);
 
-       //     printf("%d) finis send \n", rank);
+            //     printf("%d) finis send \n", rank);
 
             //   printf("%d) 974\n", rank);
         }
-      //  printf(" %d) ici ? \n", rank);
+        //  printf(" %d) ici ? \n", rank);
         //  printf("%d) on attend ici\n ",rank);
     }
 

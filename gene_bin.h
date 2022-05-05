@@ -1,8 +1,27 @@
 #pragma once
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
+#include <ctype.h>
+#include <stdint.h>
+#include <x86intrin.h>
+#include <immintrin.h>
+
 #define MAX_GENES 1024
 // Number of bits in an integer
 #define int_SIZE 63
+
+#define OFFSET_TABLE 65
+
+#ifdef __AVX512__
+#define REGSIZE 512
+#define STEPCHAR 256
+#else
+#define REGSIZE 256
+#define STEPCHAR 128
+#endif
 
 #include <mpi.h>
 #include <sys/types.h>
@@ -11,13 +30,13 @@ typedef struct gene_map_s
 {
 
     //
-    unsigned long long  genes_counter;
+    unsigned long long genes_counter;
 
     // Gene start position (AUG)
-    unsigned long long  *gene_start;
+    unsigned long long *gene_start;
 
     // Gene stop position (UAA, UAG, UGA)
-    unsigned long long  *gene_end;
+    unsigned long long *gene_end;
 
 } gene_map_t;
 
@@ -27,6 +46,7 @@ typedef struct mutation_map
     unsigned long *start_mut;
     unsigned long *end_mut;
 } mutation_map;
+
 
 typedef struct node
 {
@@ -98,15 +118,15 @@ long int *get_piece_binary_array(const long int *seq_bin, const unsigned long lo
 
 /******** DNA & GENES FUNCTION *********/
 
-long int *convert_to_binary(const char *dna_seq, const size_t size);
+long* convert_to_binary(const char *dna_seq, size_t size);
 char *binary_to_dna(long int *bin_dna_seq, const unsigned size);
-char *generating_mRNA(const long int *gene_seq, const unsigned long long  start_pos, const unsigned long long  stop_pos);
+char *generating_mRNA(const long int *gene_seq, const unsigned long long start_pos, const unsigned long long stop_pos);
 void detecting_genes(const long int *gene, const long int gene_size,
                      gene_map_t *gene_map);
-char *generating_amino_acid_chain(const long int *gene_seq, const unsigned long long  start_pos, const unsigned long long  stop_pos);
-void detecting_mutations(const long int *gene_seq, const unsigned long long start_pos, const unsigned long long  stop_pos,
+char *generating_amino_acid_chain(const long int *gene_seq, const unsigned long long start_pos, const unsigned long long stop_pos);
+void detecting_mutations(const long int *gene_seq, const unsigned long long start_pos, const unsigned long long stop_pos,
                          mutation_map mut_m);
-float calculating_matching_score(const long int *seq1, const int seq_size1,
-                                 const long int *seq2, const int seq_size2);
+float calculating_matching_score(long int *seq1, const int seq_size1,
+                                 long int *seq2, const int seq_size2);
 
 void launch();
