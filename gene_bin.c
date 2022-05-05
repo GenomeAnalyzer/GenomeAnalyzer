@@ -617,7 +617,7 @@ void detecting_mutations(const long int *gene_seq, const unsigned long long star
 
 #ifdef __AVX512VPOPCNTDQ__
 __attribute__((target("avx512vpopcntdq", "avx512f"))) float calculating_matching_score(long int *seq1, const int seq_size1,
-                                                                                         long int *seq2, const int seq_size2)
+                                                                                       long int *seq2, const int seq_size2)
 {
     // Check the input argument
     if (!seq1 || !seq2)
@@ -949,7 +949,7 @@ int readfiles(int size_r)
         while (seq2 != NULL)
         {
             // printf("%ld\n", seq2->seq[0]);
-            // printf("%f\n", calculating_matching_score(seq1->seq, seq1->size, seq2->seq, seq2->size));
+            calculating_matching_score(seq1->seq, seq1->size, seq2->seq, seq2->size);
             seq2 = seq2->next;
         }
 
@@ -1018,7 +1018,6 @@ void getfile(int rank)
     for (int j = 0; j < i; j++)
     {
         gene_map_t gene_map;
-        mutation_map mut_m;
         long *seq_bin;
         long len_seq;
         //   printf("%d) 932\n", rank);
@@ -1038,32 +1037,41 @@ void getfile(int rank)
 
         for (unsigned long long k = 0; k < gene_map.genes_counter; k++)
         {
-            // printf("%d) début req\n",rank);
+            mutation_map mut_m;
+
+         //   printf("%d) début req\n", rank);
 
             //  genes[i][gene_map.gene_end[i] - gene_map.gene_start[i]];
             long *genes = get_piece_binary_array(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
-            //   printf("%d) 957\n", rank);
+     //       printf("%d) 957\n", rank);
 
-            /* char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
-             mut_m.size = malloc(sizeof(*mut_m.size) * (strlen(seq) / 5) * int_SIZE);
-             mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * (strlen(seq) / 5) * int_SIZE);
-             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * (strlen(seq) / 5) * int_SIZE);*/
+            char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
 
-            // if (amino != NULL)
-            //  printf("amino acid chain = %s\n", amino);
-            // printf("MRNA = %s\n", generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
-            //      printf("%d) 966\n",rank);
+      //      printf("%d) 1048\n", rank);
 
-            // detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
+            mut_m.size = malloc(sizeof(*mut_m.size) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
+            mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
+            mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
+          //  printf("%d) 1054\n", rank);
 
-            // printf("%d) 970\n", rank);
+          /*  if (amino != NULL)
+                printf("amino acid chain = %s\n", amino);*/
+       //     printf("%d) MRNA = %s\n", rank, generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
+            //printf("%d) 966\n", rank);
 
-            //     printf("%d)  %lld %lld %ld piece req \n", rank, k, gene_map.genes_counter, genes[0]);
+            detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
+
+   //        printf("%d) 970\n", rank);
+
+           // printf("%d)  %lld %lld %ld piece req \n", rank, k, gene_map.genes_counter, genes[0]);
 
             MPI_Send(genes, (gene_map.gene_end[k] - gene_map.gene_start[k]) / int_SIZE, MPI_LONG, 0, 2, MPI_COMM_WORLD);
 
-            //     printf("%d) finis send \n", rank);
+      //      printf("%d) finis send \n", rank);
 
+            free(mut_m.end_mut);
+            free(mut_m.size);
+            free(mut_m.start_mut);
             //   printf("%d) 974\n", rank);
         }
         //  printf(" %d) ici ? \n", rank);
