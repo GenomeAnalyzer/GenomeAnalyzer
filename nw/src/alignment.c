@@ -26,7 +26,6 @@ int* calculate_scoring_matrix(char A [], char B [], int match, int mismatch, int
 
     int m = strlen(A) + 1;
     int n = strlen(B) + 1;
-    // printf("m:%d _ n:%d\n", m, n);
 
     int* F = NULL;
     F = (int*)calloc(m * n, sizeof(int));
@@ -34,11 +33,6 @@ int* calculate_scoring_matrix(char A [], char B [], int match, int mismatch, int
     int diag = 0;
     int left = 0;
     int up = 0;
-
-    // Initialize F (calloc already did that job)
-    // for (int i = 0; i < m; i++)
-    //     for (int j = 0; j < n; j++)
-    //         F[i * n + j] = 0;
 
     // Setting F borders
     for (int i = 0; i < n; i++)
@@ -75,25 +69,13 @@ void align(int* F, char A [], char B [], int match, int mismatch, int gap) {
     int m = strlen(A) + 1;
     int n = strlen(B) + 1;
 
-    printf("%s (%d) \n", A, strlen(A));
-    printf("%s (%d) \n", B, strlen(B));
-
     int i = m-1;
     int j = n-1;
-
-    printf("i : %d\nj : %d\n", i, j);
 
     char* AlignmentA = NULL;
     char* AlignmentB = NULL;
 
-
-    // diag = F[(i - 1) * m + j - 1] + (A[j - 1] == B[i - 1] ? match : mismatch);
-    // up = F[(i - 1) * m + j] + gap;
-    // left = F[i * m + j - 1] + gap;
-
     while (i > 0 || j > 0) {
-        printf("i : %d\nj : %d\n", i, j);
-        print_mat(F, A, B, m, n, i, j);
         if (i > 0 && j > 0 && F[i * n + j] == F[(i - 1) * m + j - 1] + (A[i-1] == B[j-1] ? match : mismatch)) {
             string_insert(&AlignmentA, A + (i-1));
             string_insert(&AlignmentB, B + (j-1));
@@ -111,10 +93,6 @@ void align(int* F, char A [], char B [], int match, int mismatch, int gap) {
             string_insert(&AlignmentB, B + (j-1));
             j--;
         }
-        // else {
-        //     i--;
-        //     j--;
-        // }
     }
     printf("%s\n", AlignmentA);
     printf("%s\n", AlignmentB);
