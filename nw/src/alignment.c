@@ -72,16 +72,16 @@ void string_insert(char** dest, char* source) {
 }
 
 void align(int* F, char A [], char B [], int match, int mismatch, int gap) {
-    int m = strlen(A);
-    int n = strlen(B);
+    int m = strlen(A) + 1;
+    int n = strlen(B) + 1;
 
-    printf("%s\n", A);
-    printf("%s\n", B);
+    printf("%s (%d) \n", A, strlen(A));
+    printf("%s (%d) \n", B, strlen(B));
 
-    int i = m;
-    int j = n;
+    int i = m-1;
+    int j = n-1;
 
-    // printf("\n%d_%d_%d_%d\n", m, n, i, j);
+    printf("i : %d\nj : %d\n", i, j);
 
     char* AlignmentA = NULL;
     char* AlignmentB = NULL;
@@ -92,28 +92,29 @@ void align(int* F, char A [], char B [], int match, int mismatch, int gap) {
     // left = F[i * m + j - 1] + gap;
 
     while (i > 0 || j > 0) {
-        if (i > 0 && j > 0 && F[i * n + j] == F[(i - 1) * m + j - 1] + (A[i] == B[j] ? match : mismatch)) {
-            string_insert(&AlignmentA, A + i);
-            string_insert(&AlignmentB, B + j);
+        printf("i : %d\nj : %d\n", i, j);
+        print_mat(F, A, B, m, n, i, j);
+        if (i > 0 && j > 0 && F[i * n + j] == F[(i - 1) * m + j - 1] + (A[i-1] == B[j-1] ? match : mismatch)) {
+            string_insert(&AlignmentA, A + (i-1));
+            string_insert(&AlignmentB, B + (j-1));
             i--;
             j--;
         }
         else if (i > 0 && F[i * m + j] == F[(i - 1) * m + j] + gap) {
-            string_insert(&AlignmentA, A + i);
+            string_insert(&AlignmentA, A + (i-1));
             string_insert(&AlignmentB, "-");
             i--;
         }
-        // else {
-        else if (j > 0 && F[i * m + j] == F[i * m + j - 1] + gap) {
-            string_insert(&AlignmentA, "-");
-            string_insert(&AlignmentB, B + j);
-            j--;
-        }
         else {
-            printf("NO\n");
-            i--;
+        // else if (j > 0 && F[i * m + j] == F[i * m + j - 1] + gap) {
+            string_insert(&AlignmentA, "-");
+            string_insert(&AlignmentB, B + (j-1));
             j--;
         }
+        // else {
+        //     i--;
+        //     j--;
+        // }
     }
     printf("%s\n", AlignmentA);
     printf("%s\n", AlignmentB);
@@ -136,7 +137,6 @@ int main(int argc, char** argv) {
     print_mat(F, A, B, m, n, n - 1, m - 1);
 
     align(F, A, B, match, mismatch, gap);
-    // print_mat(F, A, B, m, n, 0, 0);
 
     free(F);
 }
