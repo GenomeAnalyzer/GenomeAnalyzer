@@ -4,19 +4,20 @@
 // Number of bits in an integer
 #define int_SIZE 63
 
-#include "mpi.h"
+#include <mpi.h>
+#include <sys/types.h>
 
 typedef struct gene_map_s
 {
 
     //
-    uint64_t  genes_counter;
+    unsigned long long  genes_counter;
 
     // Gene start position (AUG)
-    uint64_t  *gene_start;
+    unsigned long long  *gene_start;
 
     // Gene stop position (UAA, UAG, UGA)
-    uint64_t  *gene_end;
+    unsigned long long  *gene_end;
 
 } gene_map_t;
 
@@ -93,17 +94,17 @@ long int *set_binary_array(const char *array, const size_t size);
 long int *xor_binary_array(const long int *seq1, const int array_size1,
                            const long int *seq2, const int array_size2);
 int popcount_binary_array(const long int *seq, const long int size);
-long int *get_piece_binary_array(const long int *seq_bin, const uint64_t pos_start, const uint64_t pos_stop);
+long int *get_piece_binary_array(const long int *seq_bin, const unsigned long long pos_start, const unsigned long long pos_stop);
 
 /******** DNA & GENES FUNCTION *********/
 
 long int *convert_to_binary(const char *dna_seq, const size_t size);
 char *binary_to_dna(long int *bin_dna_seq, const unsigned size);
-char *generating_mRNA(const long int *gene_seq, const uint64_t  start_pos, const uint64_t  stop_pos);
+char *generating_mRNA(const long int *gene_seq, const unsigned long long  start_pos, const unsigned long long  stop_pos);
 void detecting_genes(const long int *gene, const long int gene_size,
                      gene_map_t *gene_map);
-char *generating_amino_acid_chain(const long int *gene_seq, const uint64_t  start_pos, const uint64_t  stop_pos);
-void detecting_mutations(const long int *gene_seq, const uint64_t start_pos, const uint64_t  stop_pos,
+char *generating_amino_acid_chain(const long int *gene_seq, const unsigned long long  start_pos, const unsigned long long  stop_pos);
+void detecting_mutations(const long int *gene_seq, const unsigned long long start_pos, const unsigned long long  stop_pos,
                          mutation_map mut_m);
 float calculating_matching_score(const long int *seq1, const int seq_size1,
                                  const long int *seq2, const int seq_size2);

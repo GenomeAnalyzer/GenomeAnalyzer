@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "mpi.h"
+#include <mpi.h>
 #include "gene_bin.h"
 #include <sys/types.h>
 #include <dirent.h>
@@ -88,7 +88,7 @@ long int *set_binary_array(const char *seq_char, const size_t seq_size)
 #pragma omp parallel default(shared)
     {
 #pragma omp for schedule(static, 64)
-        for (int i = 0; i < seq_size; ++i)
+        for (size_t i = 0; i < seq_size; ++i)
         {
 
             // Default char is put to A to handle the warning : wrong size input
@@ -229,7 +229,7 @@ int popcount_binary_array(const long int *seq_bin, const long int seq_size)
  *
  * Iterates on seq_bin from pos_start, size times and gets for each iteration its binary value.
  */
-long int *get_piece_binary_array(const long int *seq_bin, const uint64_t pos_start, const uint64_t pos_stop)
+long int *get_piece_binary_array(const long int *seq_bin, const unsigned long long pos_start, const unsigned long long pos_stop)
 {
     // Find the size of the output
     long int array_size = (pos_stop - pos_start) / int_SIZE + ((pos_stop - pos_start) % int_SIZE != 0);
@@ -244,17 +244,21 @@ long int *get_piece_binary_array(const long int *seq_bin, const uint64_t pos_sta
 
     long j = 0;
 
+    // printf("%d) hm\n",rank);
+
     // Parse the binary array,
     // from the bit at 'pos_start' position to 'pos_stop' position
-#pragma omp parallel default(shared)
+    //#pragma omp parallel default(shared)
     {
-#pragma omp for schedule(static, 64)
-        for (long i = pos_start; i < pos_stop; i++)
+        //#pragma omp for schedule(static, 64)
+        for (int i = (int)pos_start; i < (int)pos_stop; i++)
         {
-            long tmp = i - pos_start;
-            change_binary_value(piece_seq_bin, tmp, get_binary_value(seq_bin, i));
+            int tmp = i - pos_start;
+            // printf("%d) ok\n",rank);
+            change_binary_value(piece_seq_bin, (int)tmp, get_binary_value(seq_bin, (int)i));
         }
     }
+    //    printf("%d) Finis\n",rank);
 
     return piece_seq_bin;
 }
@@ -337,7 +341,7 @@ char *binary_to_dna(long int *bin_dna_seq, const unsigned size)
  *
  * For each pair of bits in bin_dna_seq, append to dna_seq its corresponding nucleotide in mRNA. (T -> U)
  */
-char *generating_mRNA(const long int *gene_seq, const uint64_t start_pos, const uint64_t stop_pos)
+char *generating_mRNA(const long int *gene_seq, const unsigned long long start_pos, const unsigned long long stop_pos)
 {
     // Check the input argument
     if (!gene_seq)
@@ -476,7 +480,7 @@ void detecting_genes(const long int *gene, const long int gene_size, gene_map_t 
  *
  * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
  */
-char *generating_amino_acid_chain(const long int *gene_seq, const uint64_t start_pos, const uint64_t stop_pos)
+char *generating_amino_acid_chain(const long int *gene_seq, const unsigned long long start_pos, const unsigned long long stop_pos)
 {
     long int codon_size = 6;
     // Check the input argument
@@ -538,13 +542,13 @@ char *generating_amino_acid_chain(const long int *gene_seq, const uint64_t start
  *
  * NB : The gene in binary array form can correspond to an mRNA or DNA sequence, since it is stored in the same way.
  */
-void detecting_mutations(const long int *gene_seq, const uint64_t start_pos, const uint64_t stop_pos,
+void detecting_mutations(const long int *gene_seq, const unsigned long long start_pos, const unsigned long long stop_pos,
                          mutation_map mut_m)
 {
-    uint64_t detect_mut = 0;
-    uint64_t size_sequence = stop_pos - start_pos; // Counting size of GC sequence
-    unsigned short tmp_start_mut = 0;              // stock start mutation
-    unsigned cmp = 0;                              // counter of all mutation zones
+    unsigned long long detect_mut = 0;
+    unsigned long long size_sequence = stop_pos - start_pos; // Counting size of GC sequence
+    unsigned short tmp_start_mut = 0;                        // stock start mutation
+    unsigned cmp = 0;                                        // counter of all mutation zones
     const __m128i G = _mm_set_epi64x((long)0, (long)1);
     const __m128i C = _mm_set_epi64x((long)1, (long)0);
 
@@ -552,7 +556,7 @@ void detecting_mutations(const long int *gene_seq, const uint64_t start_pos, con
 
     // long size = start_pos + size_sequence;
     // Parse the binary array, from the 'start_pos' bit to the end
-    for (uint64_t i = start_pos; i < stop_pos; i += 2)
+    for (unsigned long long i = start_pos; i < stop_pos; i += 2)
     {
         //  printf("%d) debut for\n", rank);
 
@@ -709,16 +713,14 @@ int readfiles(int size_r)
 
     FILE *fp;
 
-    printf("Salut \n");
-
-    fp = fopen("./ouput/rapport_bin.html", "w");
-    if (fp == NULL)
-    {
-        printf("Cannot open file \n");
-        exit(0);
-    }
-    fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
-
+    /*  fp = fopen("./ouput/rapport_bin.html", "w");
+      if (fp == NULL)
+      {
+          printf("Cannot open file \n");
+          exit(0);
+      }
+      fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
+  */
     //#endif
 
     DIR *dir;
@@ -797,45 +799,26 @@ int readfiles(int size_r)
             recv++;
         //#if output == 1
 
-        fprintf(fp, "<details><summary> %s </summary>\n<a href=\"sequences/rank_%d_%d_bin.html\"> %s </a></details>\n", file->d_name, recv, i / size_r, file->d_name);
+        //  fprintf(fp, "<details><summary> %s </summary>\n<a href=\"sequences/rank_%d_%d_bin.html\"> %s </a></details>\n", file->d_name, recv, i / size_r, file->d_name);
 
         //#endif
+
+        printf("%d) sending to %d\n", rank, recv);
         MPI_Send(content[i], strlen(content[i]), MPI_CHAR, recv, 0, MPI_COMM_WORLD);
         i++;
-
-        MPI_Status status;
-
-        int count;
-
-        int flag = 0;
-
-        MPI_Iprobe(MPI_ANY_SOURCE, 2, MPI_COMM_WORLD, &flag, &status);
-
-        if (flag)
-        {
-
-            MPI_Status sta;
-
-            MPI_Get_count(&status, MPI_LONG, &count);
-            long int *tmp = (long *)malloc(sizeof(long) * count);
-
-            MPI_Recv(tmp, count, MPI_LONG, status.MPI_SOURCE, 2, MPI_COMM_WORLD, &sta);
-            printf("Data = %ld\n", tmp[0]);
-
-            insert_list(&head, tmp, count);
-
-            free(tmp);
-        }
     }
-    for (int j = 1; j < size_r; j++)
-        MPI_Send(&i, 1, MPI_INT, j, 1, MPI_COMM_WORLD);
     i = 0;
+    for (int j = 1; j < size_r; j++)
+    {
+        printf("Stop sent to %d\n", j);
+        MPI_Send(&i, 1, MPI_INT, j, 1, MPI_COMM_WORLD);
+    }
 
     int cont = 1;
 
     MPI_Status status;
 
-    printf("size = %d", size_r);
+    printf("%d) size = %d", rank, size_r);
 
     while (cont < size_r)
     {
@@ -843,13 +826,14 @@ int readfiles(int size_r)
 
         if (status.MPI_TAG == 3)
         {
-            printf("ça rentre \n");
             MPI_Recv(&i, 1, MPI_INT, status.MPI_SOURCE, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             cont++;
             printf("cont = %d size_r = %d \n", cont, size_r);
         }
         else
         {
+
+            //  printf("%d) reçoit de %d %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
 
             int count;
 
@@ -887,7 +871,7 @@ int readfiles(int size_r)
 
     if (closedir(dir) == -1)
         return printf("Error close dir\n"), -1;
-    fclose(fp);
+    // fclose(fp);
     printf("0 FINIS\n");
 
     return 0;
@@ -900,97 +884,105 @@ void getfile(int rank)
 
     int cont = 1;
 
+    int nb = countfiles();
+
+    char *seq[nb];
+
+    int i = 0;
+    int count = 0;
+
     while (cont)
     {
         MPI_Status status;
-        int count;
-        MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        //    printf("%d) waiting from 0\n", rank);
 
-        if (status.MPI_TAG == 1)
+        MPI_Iprobe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+
+        if (flag)
         {
+            if (status.MPI_TAG == 1)
+            {
 
-            MPI_Recv(&count, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+                MPI_Status sta;
 
-            cont = 0;
+                MPI_Recv(&count, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &sta);
 
-            break;
+                cont = 0;
+
+                printf("%d) exit\n", rank);
+            }
+            else
+            {
+                //      printf("%d) receiving from 0\n", rank);
+
+                MPI_Get_count(&status, MPI_CHAR, &count);
+
+                seq[i] = (char *)malloc(sizeof(char) * count);
+
+                MPI_Recv(seq[i], count, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
+                i++;
+            }
         }
+    }
 
-        MPI_Get_count(&status, MPI_CHAR, &count);
-
-        char *seq = (char *)malloc(sizeof(char) * count);
-
-        MPI_Recv(seq, count, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
-
-        int count_gene;
-        long **genes;
-
+    for (int j = 0; j < i; j++)
+    {
         gene_map_t gene_map;
         mutation_map mut_m;
         long *seq_bin;
         long len_seq;
-                        printf("%d) 932\n",rank);
+        //   printf("%d) 932\n", rank);
 
-        seq_bin = convert_to_binary(seq, strlen(seq));
+        seq_bin = convert_to_binary(seq[j], strlen(seq[j]));
 
-        len_seq = strlen(seq) * 2;
+        len_seq = strlen(seq[j]) * 2;
 
-        gene_map.gene_start = malloc(sizeof(*gene_map.gene_start) * strlen(seq) * int_SIZE);
-        gene_map.gene_end = malloc(sizeof(*gene_map.gene_end) * strlen(seq) * int_SIZE);
+        gene_map.gene_start = malloc(sizeof(*gene_map.gene_start) * strlen(seq[j]) * int_SIZE);
+        gene_map.gene_end = malloc(sizeof(*gene_map.gene_end) * strlen(seq[j]) * int_SIZE);
 
-        printf("%d) DETECTING GENE\n", rank);
+        //  printf("%d) DETECTING GENE\n", rank);
         detecting_genes(seq_bin, len_seq, &gene_map);
+        //  printf("%d) avant req\n",rank);
 
-      //  printf(" Gene found : %ld a\n ", gene_map.genes_counter);
-        genes = malloc(sizeof(long *) * gene_map.genes_counter);
+        // printf("%d) après req\n",rank);
 
-        count_gene = gene_map.genes_counter;
-
-        MPI_Request req[gene_map.genes_counter];
-        MPI_Status sta[count_gene];
-
-        for (uint64_t i = 0; i < gene_map.genes_counter; i++)
+        for (unsigned long long k = 0; k < gene_map.genes_counter; k++)
         {
+            // printf("%d) début req\n",rank);
 
-            genes[i] = get_piece_binary_array(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i]);
-                                      //          printf("%d) 957\n",rank);
+            //  genes[i][gene_map.gene_end[i] - gene_map.gene_start[i]];
+            long *genes = get_piece_binary_array(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
+            //   printf("%d) 957\n", rank);
 
-            char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i]);
-            mut_m.size = malloc(sizeof(*mut_m.size) * (strlen(seq) / 5) * int_SIZE);
-            mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * (strlen(seq) / 5) * int_SIZE);
-            mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * (strlen(seq) / 5) * int_SIZE);
+            /* char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
+             mut_m.size = malloc(sizeof(*mut_m.size) * (strlen(seq) / 5) * int_SIZE);
+             mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * (strlen(seq) / 5) * int_SIZE);
+             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * (strlen(seq) / 5) * int_SIZE);*/
 
             // if (amino != NULL)
             //  printf("amino acid chain = %s\n", amino);
-            // printf("MRNA = %s\n", generating_mRNA(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i]));
-                              //      printf("%d) 966\n",rank);
+            // printf("MRNA = %s\n", generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
+            //      printf("%d) 966\n",rank);
 
-            detecting_mutations(seq_bin, gene_map.gene_start[i], gene_map.gene_end[i], mut_m);
+            // detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
 
-                                //    printf("%d) 970\n",rank);
+            // printf("%d) 970\n", rank);
 
-            if(genes[i] != NULL)
-                MPI_Isend(genes[i], gene_map.gene_end[i] - gene_map.gene_start[i], MPI_LONG, 0, 2, MPI_COMM_WORLD, &req[i]);
+       //     printf("%d)  %lld %lld %ld piece req \n", rank, k, gene_map.genes_counter, genes[0]);
 
-                     //   printf("%d) 974\n",rank);
+            MPI_Send(genes, (gene_map.gene_end[k] - gene_map.gene_start[k])/int_SIZE, MPI_LONG, 0, 2, MPI_COMM_WORLD);
 
+       //     printf("%d) finis send \n", rank);
+
+            //   printf("%d) 974\n", rank);
         }
-
-        MPI_Iprobe(0, 1, MPI_COMM_WORLD, &flag, &status);
-
-        if (flag == 1)
-        {
-
-            MPI_Recv(&count, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
-
-            cont = 0;
-        }
-        MPI_Waitall(count_gene, req, sta);
+      //  printf(" %d) ici ? \n", rank);
+        //  printf("%d) on attend ici\n ",rank);
     }
 
     MPI_Send(&cont, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
 
-    printf("%d FINIS\n", rank);
+    //   printf("%d FINIS\n", rank);
 }
 
 void launch()
