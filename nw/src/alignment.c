@@ -6,12 +6,12 @@
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
 void print_mat(int* F, char A [], char B [], int m, int n, int k, int l) {
-    printf("% 3s  % 3s  ", "*", "-");
+    printf("%3s  %3s  ", "*", "-");
     for (int j = 0; j < m; j++)
-        printf("% 3c  ", A[j]);
+        printf("%3c  ", A[j]);
     printf("\n");
     for (int i = 0; i < n; i++) {
-        printf("% 3c  ", i == 0 ? '-' : B[i - 1]);
+        printf("%3c  ", i == 0 ? '-' : B[i - 1]);
         for (int j = 0; j < m; j++) {
             if (i == k && j == l)
                 printf("\033[101m% 3d  \033[0m", F[i * n + j]);
@@ -101,7 +101,7 @@ void align(int* F, char A [], char B [], int match, int mismatch, int gap) {
 
 
 
-int main(int argc, char** argv) {
+int main() {
     char A [] = "GCATGCG";
     char B [] = "GATTACA";
     int m = strlen(A) + 1;
