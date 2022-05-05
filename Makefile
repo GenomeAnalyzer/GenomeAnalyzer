@@ -7,21 +7,32 @@ LDFLAGS = -lcmocka
 V0 = ./versions/naive
 V1 = ./versions/bin
 V2 = ./versions/bool
+V3 = ./versions/bin_S2
+
+# mpich or openmpi
+MPI=.openmpi
+NP=4
 
 V0SRC=$(V0)/src
 V1SRC=$(V1)/src
 V2SRC=$(V2)/src
+V3SRC=$(V3)/src
+
 
 V0TESTS=$(V0)/tests
 V1TESTS=$(V1)/tests
 V2TESTS=$(V2)/tests
+V3TESTS=$(V3)/tests
 
 
 V0PYTHON=$(V0)/python
 V1PYTHON=$(V1)/python
 V2PYTHON=$(V2)/python
+V3PYTHON=$(V3)/python
+
 
 BIN = ./bin
+BINS2 = ./bin
 OUTPUT = ./output
 BUILD = ./build
 
@@ -73,6 +84,10 @@ run_bin:
 	python3 $(V1PYTHON)/setup_bin.py install
 	python3 $(V1PYTHON)/main_bin.py $(runargs)
 
+run_bin_par:
+	sudo MPICC=mpicc$(MPI) python3 $(V3PYTHON)/setup_bin.py build_ext --inplace
+	mv *.so  $(V3PYTHON)
+	mpirun$(MPI) -np $(NP) python3 $(V3PYTHON)/main.py $(runargs)
 
 %.o:
 	$(CC) $(CFLAGS) -c -o $(BUILD)/$(*F).o $(*D)/$(*F).c
