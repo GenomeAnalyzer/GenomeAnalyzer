@@ -943,7 +943,7 @@ int needleman_wunsch(char A[], char B[]){
     int* F = calculate_scoring_matrix(A, B, match, mismatch, gap);
     // print_mat(F, A, B, m, n, n - 1, m - 1);
 
-    int score = align(F, A, B, match, mismatch, gap, 1);
+    int score = align(F, A, B, match, mismatch, gap, 0);
     // printf("Max score : %d\n", score);
     return score;
 }
@@ -973,7 +973,7 @@ int needleman_wunsch_bin(long int* bin_A, long int* bin_B, int m, int n){
     // int score = align(F, A, B, match, mismatch, gap, 1);
     // printf("Max score : %d\n", score);
     // return score;
-    return F[(m+1)*(n+1)-1];
+    return F[(m + 1) * (n + 1) - 1];
 }
 
 
@@ -994,12 +994,10 @@ int countfiles() {
 }
 
 void insert_list(node_t** head, long int* data, int size) {
-
     if (data == NULL)
         printf("Error data \n");
 
     node_t* tmp_node = (node_t*)malloc(sizeof(node_t));
-
     node_t* last = *head;
 
     tmp_node->seq = malloc(sizeof(long) * (size));
@@ -1009,7 +1007,6 @@ void insert_list(node_t** head, long int* data, int size) {
     }
 
     tmp_node->size = size;
-
     tmp_node->next = NULL;
 
     if (*head == NULL) {
@@ -1021,12 +1018,14 @@ void insert_list(node_t** head, long int* data, int size) {
             last = last->next;
 
         last->next = tmp_node;
-
         tmp_node->prev = last;
     }
 }
 
 int readfiles(int comm_size, int nbseq) {
+
+    int align_rank = comm_size - 1;
+
     int nb = countfiles();
     char** content = malloc(sizeof(char*) * nb);
     FILE* fp;
@@ -1101,26 +1100,26 @@ int readfiles(int comm_size, int nbseq) {
         }
         fclose(input);
 
-        int recv = i % (comm_size-1)+1;
-
-
-        // int recv = i % (comm_size);
-        // if (recv == 0)
-        //     recv++;
+        int recv = i % (comm_size - 2) + 1;
 
         if (output)
             fprintf(fp, "<details><summary> %s </summary>\n<a href=\"sequences/rank_%d_%d_bin.html\"> %s </a></details>\n", file->d_name, recv, i / comm_size, file->d_name);
 
         printf("%d) sending to %d\n", rank, recv);
         MPI_Send(content[i], strlen(content[i]), MPI_CHAR, recv, 0, MPI_COMM_WORLD);
+
+        // Sends seq for alignment purposes.
+        MPI_Send(content[i], strlen(content[i]), MPI_CHAR, align_rank, 4, MPI_COMM_WORLD);
         i++;
         printf("Count i : %d\n", i);
     }
 
+    MPI_Send(&i, 1, MPI_INT, align_rank, 5, MPI_COMM_WORLD);
+
     i = 0;
 
     // Sends the sequence count to receiver. Ends communication from MASTER to receiver
-    for (int j = 1; j < comm_size; j++)
+    for (int j = 1; j < comm_size - 1; j++)
         MPI_Send(&i, 1, MPI_INT, j, 1, MPI_COMM_WORLD);
 
     int cont = 1;
@@ -1151,7 +1150,7 @@ int readfiles(int comm_size, int nbseq) {
             insert_list(&head, tmp, count);
             free(tmp);
         }
-    } while (cont < comm_size);
+    } while (cont < comm_size - 1);
 
     printf("Rank 0 ended receiving data\n");
 
@@ -1187,6 +1186,65 @@ int readfiles(int comm_size, int nbseq) {
     return 0;
 }
 
+void alignment_work(int rank){
+    int real_nb_seqs = NULL;
+    MPI_Status sta;
+
+    char** seq = malloc(sizeof(char*) * 200);
+
+    int cont = 1;
+    int i = 0;
+    int flag;
+    while (cont) {
+        MPI_Status status;
+
+        MPI_Iprobe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+
+        if (flag) {
+            // printf("ALIGN IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
+            if (status.MPI_TAG == 5) {
+                MPI_Status sta;
+                MPI_Recv(&real_nb_seqs, 1, MPI_INT, 0, 5, MPI_COMM_WORLD, &sta);
+                if (i == real_nb_seqs) cont = 0;
+            }
+            else if (status.MPI_TAG == 4) {
+                int count = 0;
+                MPI_Get_count(&status, MPI_CHAR, &count);
+                seq[i] = (char*)malloc(sizeof(char) * count);
+                MPI_Recv(seq[i], count, MPI_CHAR, 0, 4, MPI_COMM_WORLD, &sta);
+                i++;
+
+                if(real_nb_seqs && i == real_nb_seqs) cont = 0;
+            }
+        }
+    }
+
+    for(int i = 1; i < real_nb_seqs ; i++){
+        // int score = needleman_wunsch(seq[i], seq[i+1]);
+        long* previous_seq_bin;
+        long* seq_bin;
+        long previous_len_seq;
+        long len_seq;
+
+        if (i != 0){
+            previous_seq_bin = seq_bin;
+            previous_len_seq = len_seq;
+        }
+        else{
+            previous_seq_bin = convert_to_binary(seq[i-1], strlen(seq[i-1]));
+            previous_len_seq = strlen(seq[i-1]) * 2;
+        }
+        seq_bin = convert_to_binary(seq[i], strlen(seq[i]));
+        len_seq = strlen(seq[i]) * 2;
+
+        int score = needleman_wunsch_bin(previous_seq_bin, seq_bin, previous_len_seq/2, len_seq/2);
+        free(seq[i-1]);
+        printf("*%d\tAlignment score (%d:%d) : %d\033[0m\n", rank, i-1, i, score);
+    }
+    free(seq[i]);
+    free(seq);
+}
+
 void process_work(int rank) {
     int flag;
     int cont = 1;
@@ -1197,13 +1255,15 @@ void process_work(int rank) {
     int i = 0;
     int count = 0;
 
+    printf("PROCESS WORK : %d\n", rank);
+
     while (cont) {
         MPI_Status status;
 
         MPI_Iprobe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-        // printf("IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
 
         if (flag) {
+            printf("IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
             if (status.MPI_TAG == 1) {
                 MPI_Status sta;
                 MPI_Recv(&count, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &sta);
@@ -1222,10 +1282,8 @@ void process_work(int rank) {
         printf("*\033[33mRank %3d - Iterating %d/%d\033[0m\n", rank, j, i);
         gene_map_t gene_map;
         long* seq_bin;
-        long* previous_seq_bin;
         long len_seq;
 
-        if (j != 0) previous_seq_bin = seq_bin;
         seq_bin = convert_to_binary(seq[j], strlen(seq[j]));
 
         len_seq = strlen(seq[j]) * 2;
@@ -1258,7 +1316,6 @@ void process_work(int rank) {
             if (!size_m)
                 size_m = 1;
 
-            // MPI_Send(genes, (gene_map.gene_end[k] - gene_map.gene_start[k]) / int_SIZE, MPI_LONG, 0, 2, MPI_COMM_WORLD);
             printf("*%d\tSending genes (%d) to 0\n", rank, size_m);
             MPI_Send(genes, size_m, MPI_LONG, 0, 2, MPI_COMM_WORLD);
 
@@ -1290,6 +1347,8 @@ void launch(int affichage, int sequences) {
     if (rank == RANK_MASTER) {
         readfiles(comm_size, sequences);
     }
+    else if (rank == comm_size - 1)
+        alignment_work(rank);
     else {
         process_work(rank);
     }
