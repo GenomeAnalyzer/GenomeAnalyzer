@@ -1092,7 +1092,7 @@ int readfiles(int comm_size, int nbseq)
         if ((!strcmp(file->d_name, ".")) && (!strcmp(file->d_name, "..")))
             continue;
 
-         printf("Reading file : %s\n", file->d_name);
+        printf("Reading file : %s\n", file->d_name);
 
         // Get filepath
         char *filepath = NULL;
@@ -1137,13 +1137,13 @@ int readfiles(int comm_size, int nbseq)
         if (output)
             fprintf(fp, "<details><summary> %s </summary>\n<a href=\"sequences/rank_%d_%d_bin.html\"> %s </a></details>\n", file->d_name, recv, i / comm_size, file->d_name);
 
-         printf("%d) sending to %d\n", rank, recv);
+        printf("%d) sending to %d\n", rank, recv);
         MPI_Send(content[i], strlen(content[i]), MPI_CHAR, recv, 0, MPI_COMM_WORLD);
 
         // Sends seq for alignment purposes.
-           MPI_Send(content[i], strlen(content[i]), MPI_CHAR, align_rank, 4, MPI_COMM_WORLD);
+        MPI_Send(content[i], strlen(content[i]), MPI_CHAR, align_rank, 4, MPI_COMM_WORLD);
         i++;
-         printf("Count i : %d\n", i);
+        printf("Count i : %d\n", i);
     }
 
     MPI_Send(&i, 1, MPI_INT, align_rank, 5, MPI_COMM_WORLD);
@@ -1173,7 +1173,7 @@ int readfiles(int comm_size, int nbseq)
         }
         else
         {
-             printf("%d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
+            printf("%d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
 
             int count;
 
@@ -1187,7 +1187,7 @@ int readfiles(int comm_size, int nbseq)
         }
     } while (cont < comm_size - 1);
 
-     printf("Rank 0 ended receiving data\n");
+    printf("Rank 0 ended receiving data\n");
 
     node_t *seq1;
     node_t *seq2;
@@ -1226,9 +1226,9 @@ int readfiles(int comm_size, int nbseq)
         while (seq2 != NULL)
         {
             // printf("%ld\n", seq2->seq[0]);
-            float calc = calculating_matching_score(seq1->seq, seq1->size, seq2->seq, seq2->size);
+            float calc = calculating_matching_score(seq1->seq, seq1->size * 32, seq2->seq, seq2->size * 32);
             if (output)
-                fprintf(comp, "<tr><td>SEQ 1</td><td>SEQ 2</td><td>%f</td></tr>", calc);
+                fprintf(comp, "<tr><td>%s</td><td>%s</td><td>%f</td></tr>", binary_to_dna(seq1->seq, seq1->size * 32), binary_to_dna(seq2->seq, seq2->size * 32), calc);
             printf("Matching score : %f\n", calc);
             seq2 = seq2->next;
         }
@@ -1250,7 +1250,7 @@ int readfiles(int comm_size, int nbseq)
         fprintf(fp, "</html>");
         fclose(fp);
     }
-     printf("Rank 0 terminated\n");
+    printf("Rank 0 terminated\n");
     return 0;
 }
 
@@ -1272,7 +1272,7 @@ void alignment_work(int rank)
 
         if (flag)
         {
-             printf("ALIGN IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
+            printf("ALIGN IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
             if (status.MPI_TAG == 5)
             {
                 MPI_Status sta;
@@ -1317,7 +1317,7 @@ void alignment_work(int rank)
 
         int score = needleman_wunsch_bin(previous_seq_bin, seq_bin, previous_len_seq / 2, len_seq / 2);
         free(seq[i - 1]);
-         printf("*%d\tAlignment score (%d:%d) : %d\033[0m\n", rank, i - 1, i, score);
+        printf("*%d\tAlignment score (%d:%d) : %d\033[0m\n", rank, i - 1, i, score);
     }
     free(seq[i]);
     free(seq);
@@ -1334,7 +1334,7 @@ void process_work(int rank)
     int i = 0;
     int count = 0;
 
-     printf("PROCESS WORK : %d\n", rank);
+    printf("PROCESS WORK : %d\n", rank);
 
     while (cont)
     {
@@ -1363,7 +1363,7 @@ void process_work(int rank)
 
     for (int j = 0; j < i; j++)
     {
-         printf("*\033[33mRank %3d - Iterating %d/%d\033[0m\n", rank, j, i);
+        printf("*\033[33mRank %3d - Iterating %d/%d\033[0m\n", rank, j, i);
         gene_map_t gene_map;
         long *seq_bin;
         long len_seq;
@@ -1419,15 +1419,15 @@ void process_work(int rank)
             long *genes = get_piece_binary_array(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
 
             char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
-             if (amino != NULL)
-              printf("*%d\tamino acid chain = %s\n", rank, amino);
+            if (amino != NULL)
+                printf("*%d\tamino acid chain = %s\n", rank, amino);
 
             mut_m.size = malloc(sizeof(*mut_m.size) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
 
             char *mrna = generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
-             printf("*%d\t MRNA = %s\n", rank, mrna);
+            printf("*%d\t MRNA = %s\n", rank, mrna);
 
             detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
 
