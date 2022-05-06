@@ -5,7 +5,7 @@ RM=rm -f
 #flags
 CFLAGS=-Wall -g3 -I include/ -Wall -Wextra
 OFLAGS=-O2 -march=native -mtune=native
-OFLAGS=-Ofast -march=native -mtune=native -funroll-loops -finline-functions -ftree-loop-vectorize -ftree-vectorize
+# OFLAGS=-Ofast -march=native -mtune=native -funroll-loops -finline-functions -ftree-loop-vectorize -ftree-vectorize
 LDFLAGS=
 # LDFLAGS=-lm
 

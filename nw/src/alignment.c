@@ -65,37 +65,40 @@ void string_insert(char** dest, char* source) {
     *dest = temp;
 }
 
-void align(int* F, char A [], char B [], int match, int mismatch, int gap) {
+int align(int* F, char A [], char B [], int match, int mismatch, int gap, int print) {
     int m = strlen(A) + 1;
     int n = strlen(B) + 1;
 
-    int i = m-1;
-    int j = n-1;
+    if (print) {
+        int i = m - 1;
+        int j = n - 1;
 
-    char* AlignmentA = NULL;
-    char* AlignmentB = NULL;
+        char* A_aligned = NULL;
+        char* B_aligned = NULL;
 
-    while (i > 0 || j > 0) {
-        if (i > 0 && j > 0 && F[i * n + j] == F[(i - 1) * m + j - 1] + (A[i-1] == B[j-1] ? match : mismatch)) {
-            string_insert(&AlignmentA, A + (i-1));
-            string_insert(&AlignmentB, B + (j-1));
-            i--;
-            j--;
+        while (i > 0 || j > 0) {
+            if (i > 0 && j > 0 && F[i * m + j] == F[(i - 1) * m + j - 1] + (A[i - 1] == B[j - 1] ? match : mismatch)) {
+                string_insert(&A_aligned, A + (i - 1));
+                string_insert(&B_aligned, B + (j - 1));
+                i--;
+                j--;
+            }
+            else if (i > 0 && F[i * m + j] == F[(i - 1) * m + j] + gap) {
+                string_insert(&A_aligned, A + (i - 1));
+                string_insert(&B_aligned, "-");
+                i--;
+            }
+            else {
+                // else if (j > 0 && F[i * m + j] == F[i * m + j - 1] + gap) {
+                string_insert(&A_aligned, "-");
+                string_insert(&B_aligned, B + (j - 1));
+                j--;
+            }
         }
-        else if (i > 0 && F[i * m + j] == F[(i - 1) * m + j] + gap) {
-            string_insert(&AlignmentA, A + (i-1));
-            string_insert(&AlignmentB, "-");
-            i--;
-        }
-        else {
-        // else if (j > 0 && F[i * m + j] == F[i * m + j - 1] + gap) {
-            string_insert(&AlignmentA, "-");
-            string_insert(&AlignmentB, B + (j-1));
-            j--;
-        }
+        printf("%s\n", A_aligned);
+        printf("%s\n", B_aligned);
     }
-    printf("%s\n", AlignmentA);
-    printf("%s\n", AlignmentB);
+    return F[m * n - 1];
 }
 
 
@@ -114,7 +117,8 @@ int main() {
     int* F = calculate_scoring_matrix(A, B, match, mismatch, gap);
     print_mat(F, A, B, m, n, n - 1, m - 1);
 
-    align(F, A, B, match, mismatch, gap);
+    int score = align(F, A, B, match, mismatch, gap, 1);
+    printf("Max score : %d\n", score);
 
     free(F);
 }
