@@ -1,13 +1,14 @@
 CC = gcc
 
-CFLAGS = -g -std=c99 -Wall -fopenmp
-
+CFLAGS = -g -std=c99 -Wall -Wextra -fopenmp
+CTESTSFLAGS=-Wno-unused-function -Wno-unused-parameter
 LDFLAGS = -lcmocka
+MPIFLAGS=--mca opal_warn_on_missing_libcuda 0
 
 V0 = ./versions/naive
 V1 = ./versions/bin
 V2 = ./versions/bool
-V3 = ./versions/bin_S2
+V3 = ./versions/parallel_bin
 
 # mpich or openmpi
 MPI=.openmpi
@@ -67,8 +68,10 @@ build: DNA DNA_bin DNA_bool
 #Clean compilation files & output result
 clean :
 	find . -type d  -name "__pycache__" -exec rm -rv {} +
-	rm -rf  build .pytest_cache *.so
-	rm -rf $(BUILD) $(BIN)/*
+	find . -type f  -name "*.so" -exec rm -rv {} +
+	rm -rf $(BUILD) $(BIN)
+	rm -rf $(V3)/build
+	rm -rf $(V3PYTHON)/DNA_mod.c
 
 #For only executing tests
 check: run_test_gene test_DNA run_test_gene_bin test_DNA_bin test_DNA_bool
@@ -84,10 +87,20 @@ run_bin:
 	python3 $(V1PYTHON)/setup_bin.py install
 	python3 $(V1PYTHON)/main_bin.py $(runargs)
 
+<<<<<<< HEAD
 run_bin_par:
 	sudo MPICC=mpicc$(MPI) python3 $(V3PYTHON)/setup_bin.py build_ext --inplace
 	mv *.so  $(V3PYTHON)
 	mpirun$(MPI) -np $(NP) python3 $(V3PYTHON)/main.py $(runargs)
+=======
+setup_bin_par:
+	sed "s|sources.*|sources=[\"$(V3PYTHON)/DNA_mod.pyx\"],|g" -i $(V3PYTHON)/setup_bin.py
+	MPICC=mpicc python3 $(V3PYTHON)/setup_bin.py build_ext --inplace
+	mv *.so $(V3PYTHON)
+
+run_bin_par: setup_bin_par
+	mpirun $(MPIFLAGS) -np $(NP) python3 $(V3PYTHON)/main.py $(runargs)
+>>>>>>> master
 
 %.o:
 	$(CC) $(CFLAGS) -c -o $(BUILD)/$(*F).o $(*D)/$(*F).c
@@ -118,7 +131,7 @@ test_DNA :
 gene_bin: $(V1SRC)/gene_bin.o
 
 test_gene_bin: gene_bin $(V1TESTS)/test_gene_bin.o
-	$(CC) $(CFLAGS) -o $(BIN)/$@ $(BUILD)/$@.o $(LDFLAGS)
+	$(CC) $(CFLAGS) $(CTESTSFLAGS) -o $(BIN)/$@ $(BUILD)/$@.o $(LDFLAGS)
 
 run_test_gene_bin: test_gene_bin
 	$(BIN)/test_gene_bin &
