@@ -243,9 +243,9 @@ long int *get_piece_binary_array(const long int *seq_bin, const unsigned long lo
     if (!piece_seq_bin)
         return printf("ERROR: get_piece_binary_array: cannot allocate memory.\n"), NULL;
 
-    // stop position.
+        // stop position.
 
-    // long j = 0;
+        // long j = 0;
 
 // Parse the binary array,
 // from the bit at 'pos_start' position to 'pos_stop' position
@@ -720,7 +720,6 @@ float calculating_matching_score(long int *seq1, const int seq_size1,
 }
 #endif
 
-
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
 //////////////// Print Similarity Matrix
@@ -735,14 +734,17 @@ float calculating_matching_score(long int *seq1, const int seq_size1,
  * in : k : Colors background of selected case in `F`, which position is `k` and `l`. Defaults it to 0 if not intended to use.
  * in : l : Colors background of selected case in `F`, which position is `k` and `l`. Defaults it to 0 if not intended to use.
  */
-void print_sim_mat(int* F, char A [], char B [], int m, int n, int k, int l) {
+void print_sim_mat(int *F, char A[], char B[], int m, int n, int k, int l)
+{
     printf("%3s  %3s  ", "*", "-");
     for (int j = 0; j < m; j++)
         printf("%3c  ", A[j]);
     printf("\n");
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         printf("%3c  ", i == 0 ? '-' : B[i - 1]);
-        for (int j = 0; j < m; j++) {
+        for (int j = 0; j < m; j++)
+        {
             if (i == k && j == l)
                 printf("\033[101m% 3d  \033[0m", F[i * m + j]);
             else
@@ -767,12 +769,13 @@ void print_sim_mat(int* F, char A [], char B [], int m, int n, int k, int l) {
  * in  : gap : Score for a gap.
  * out : F : The similarity matrix in COL MAJOR. <!> Its dimensions are `(m+1)*(n+1)`.
  */
-int* bin_calculate_scoring_matrix(long int* bin_A, long int* bin_B, int m, int n, int match, int mismatch, int gap) {
+int *bin_calculate_scoring_matrix(long int *bin_A, long int *bin_B, int m, int n, int match, int mismatch, int gap)
+{
     m++;
     n++;
 
-    int* F = NULL;
-    F = (int*)calloc(m * n, sizeof(int));
+    int *F = NULL;
+    F = (int *)calloc(m * n, sizeof(int));
 
     int diag = 0;
     int left = 0;
@@ -790,15 +793,17 @@ int* bin_calculate_scoring_matrix(long int* bin_A, long int* bin_B, int m, int n
     // Two right bits
     unsigned short int aa, bb;
 
-    //    G C A T G C G 
-    //<=> G C G T A C G 
+    //    G C A T G C G
+    //<=> G C G T A C G
     //  0b10011011000110
 
     // Calculate scoring matrix
-    for (int i = 1; i < n; i++) {
+    for (int i = 1; i < n; i++)
+    {
         i_bin_A = i / int_SIZE + (i % int_SIZE != 0) - 1;
         aa = (bin_A[i_bin_A] >> ((i - 1) * 2) % int_SIZE) & 0b11;
-        for (int j = 1; j < m; j++) {
+        for (int j = 1; j < m; j++)
+        {
             j_bin_B = j / int_SIZE + (j % int_SIZE != 0) - 1;
             bb = (bin_B[j_bin_B] >> ((j - 1) * 2) % int_SIZE) & 0b11;
             diag = F[(i - 1) * m + j - 1] + (aa == bb ? match : mismatch);
@@ -824,12 +829,13 @@ int* bin_calculate_scoring_matrix(long int* bin_A, long int* bin_B, int m, int n
  * in  : gap : Score for a gap.
  * out : F : The similarity matrix in COL MAJOR. <!> Its dimensions are (`A` length+1)*(`B` length+1).
  */
-int* calculate_scoring_matrix(char A [], char B [], int match, int mismatch, int gap) {
+int *calculate_scoring_matrix(char A[], char B[], int match, int mismatch, int gap)
+{
     int m = strlen(A) + 1;
     int n = strlen(B) + 1;
 
-    int* F = NULL;
-    F = (int*)calloc(m * n, sizeof(int));
+    int *F = NULL;
+    F = (int *)calloc(m * n, sizeof(int));
 
     int diag = 0;
     int left = 0;
@@ -843,7 +849,8 @@ int* calculate_scoring_matrix(char A [], char B [], int match, int mismatch, int
 
     // Calculate scoring matrix
     for (int i = 1; i < n; i++)
-        for (int j = 1; j < m; j++) {
+        for (int j = 1; j < m; j++)
+        {
             diag = F[(i - 1) * m + j - 1] + (A[j - 1] == B[i - 1] ? match : mismatch);
             up = F[(i - 1) * m + j] + gap;
             left = F[i * m + j - 1] + gap;
@@ -860,13 +867,15 @@ int* calculate_scoring_matrix(char A [], char B [], int match, int mismatch, int
  * in/out : dest   : Destination string, to which we insert the `source` char
  * in     : source : Char to be inerted at beginning of `dest`.
  */
-void string_insert(char** dest, char* source) {
-    if (*dest == NULL) {
+void string_insert(char **dest, char *source)
+{
+    if (*dest == NULL)
+    {
         *dest = calloc(sizeof(char), 2);
         memcpy(*dest, source, 1);
         return;
     }
-    char* temp = calloc(sizeof(char), strlen(*dest) + 2);
+    char *temp = calloc(sizeof(char), strlen(*dest) + 2);
     memcpy(temp, source, 1);
     strcat(temp, *dest);
     free(*dest);
@@ -887,30 +896,36 @@ void string_insert(char** dest, char* source) {
  * in  : print : Enables (1) or Disables (0) alignment output. Returns max similarity score either ways.
  * out : Max similarity score of the `A` and `B` sequences.
  */
-int align(int* F, char A [], char B [], int match, int mismatch, int gap, int print) {
+int align(int *F, char A[], char B[], int match, int mismatch, int gap, int print)
+{
     int m = strlen(A) + 1;
     int n = strlen(B) + 1;
 
-    if (print) {
+    if (print)
+    {
         int i = m - 1;
         int j = n - 1;
 
-        char* A_aligned = NULL;
-        char* B_aligned = NULL;
+        char *A_aligned = NULL;
+        char *B_aligned = NULL;
 
-        while (i > 0 || j > 0) {
-            if (i > 0 && j > 0 && F[i * m + j] == F[(i - 1) * m + j - 1] + (A[i - 1] == B[j - 1] ? match : mismatch)) {
+        while (i > 0 || j > 0)
+        {
+            if (i > 0 && j > 0 && F[i * m + j] == F[(i - 1) * m + j - 1] + (A[i - 1] == B[j - 1] ? match : mismatch))
+            {
                 string_insert(&A_aligned, A + (i - 1));
                 string_insert(&B_aligned, B + (j - 1));
                 i--;
                 j--;
             }
-            else if (i > 0 && F[i * m + j] == F[(i - 1) * m + j] + gap) {
+            else if (i > 0 && F[i * m + j] == F[(i - 1) * m + j] + gap)
+            {
                 string_insert(&A_aligned, A + (i - 1));
                 string_insert(&B_aligned, "-");
                 i--;
             }
-            else {
+            else
+            {
                 // else if (j > 0 && F[i * m + j] == F[i * m + j - 1] + gap) {
                 string_insert(&A_aligned, "-");
                 string_insert(&B_aligned, B + (j - 1));
@@ -932,7 +947,8 @@ int align(int* F, char A [], char B [], int match, int mismatch, int gap, int pr
  * in  : B : Second char array.
  * out : Max similarity score of the `A` and `B` sequences.
  */
-int needleman_wunsch(char A[], char B[]){
+int needleman_wunsch(char A[], char B[])
+{
     int m = strlen(A) + 1;
     int n = strlen(B) + 1;
 
@@ -940,7 +956,7 @@ int needleman_wunsch(char A[], char B[]){
     int mismatch = -1;
     int gap = -1;
 
-    int* F = calculate_scoring_matrix(A, B, match, mismatch, gap);
+    int *F = calculate_scoring_matrix(A, B, match, mismatch, gap);
     // print_mat(F, A, B, m, n, n - 1, m - 1);
 
     int score = align(F, A, B, match, mismatch, gap, 0);
@@ -959,7 +975,8 @@ int needleman_wunsch(char A[], char B[]){
  * in  : n : Size of the `bin_B` divided by 2.
  * out : Max similarity score of the `A` and `B` sequences.
  */
-int needleman_wunsch_bin(long int* bin_A, long int* bin_B, int m, int n){
+int needleman_wunsch_bin(long int *bin_A, long int *bin_B, int m, int n)
+{
     // long int* bin_A = set_binary_array(A, strlen(A));
     // long int* bin_B = set_binary_array(B, strlen(B));
 
@@ -967,7 +984,7 @@ int needleman_wunsch_bin(long int* bin_A, long int* bin_B, int m, int n){
     int mismatch = -1;
     int gap = -1;
 
-    int* F = bin_calculate_scoring_matrix(bin_A, bin_B, m, n, match, mismatch, gap);
+    int *F = bin_calculate_scoring_matrix(bin_A, bin_B, m, n, match, mismatch, gap);
     // print_mat(F, A, B, m, n, n - 1, m - 1);
 
     // int score = align(F, A, B, match, mismatch, gap, 1);
@@ -976,44 +993,49 @@ int needleman_wunsch_bin(long int* bin_A, long int* bin_B, int m, int n){
     return F[(m + 1) * (n + 1) - 1];
 }
 
-
 /* Count files in a directory
  *
  */
-int countfiles() {
+int countfiles()
+{
     int count = 0;
-    struct dirent* entry;
+    struct dirent *entry;
 
-    DIR* dir = opendir("./fastas/");
+    DIR *dir = opendir("./fastas/");
 
-    while ((entry = readdir(dir)) != NULL) {
+    while ((entry = readdir(dir)) != NULL)
+    {
         if (strstr(entry->d_name, ".fasta"))
             count++;
     }
     return count;
 }
 
-void insert_list(node_t** head, long int* data, int size) {
+void insert_list(node_t **head, long int *data, int size)
+{
     if (data == NULL)
         printf("Error data \n");
 
-    node_t* tmp_node = (node_t*)malloc(sizeof(node_t));
-    node_t* last = *head;
+    node_t *tmp_node = (node_t *)malloc(sizeof(node_t));
+    node_t *last = *head;
 
     tmp_node->seq = malloc(sizeof(long) * (size));
 
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++)
+    {
         tmp_node->seq[i] = data[i];
     }
 
     tmp_node->size = size;
     tmp_node->next = NULL;
 
-    if (*head == NULL) {
+    if (*head == NULL)
+    {
         tmp_node->prev = NULL;
         *head = tmp_node;
     }
-    else {
+    else
+    {
         while (last->next != NULL)
             last = last->next;
 
@@ -1022,26 +1044,34 @@ void insert_list(node_t** head, long int* data, int size) {
     }
 }
 
-int readfiles(int comm_size, int nbseq) {
+int readfiles(int comm_size, int nbseq)
+{
 
     int align_rank = comm_size - 1;
 
     int nb = countfiles();
-    char** content = malloc(sizeof(char*) * nb);
-    FILE* fp;
+    char **content = malloc(sizeof(char *) * nb);
+    FILE *fp;
 
-    if (output == 1) {
+    if (output == 1)
+    {
+        struct stat st = {0};
+        if (stat("./output/", &st) == -1)
+        {
+            mkdir("./output/", 0700);
+        }
 
         fp = fopen("./output/rapport_bin.html", "w+");
-        if (fp == NULL) {
+        if (fp == NULL)
+        {
             printf("Cannot open file \n");
             exit(0);
         }
         fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
     }
-    DIR* dir;
-    FILE* input;
-    struct dirent* file;
+    DIR *dir;
+    FILE *input;
+    struct dirent *file;
 
     char folder_name[50] = "./fastas/";
 
@@ -1050,10 +1080,11 @@ int readfiles(int comm_size, int nbseq) {
         return printf("Error: Can't open fastas folder\n"), -1;
 
     int i = 0;
-    node_t* head = NULL;
+    node_t *head = NULL;
 
     // Iterate if a file exists in this directory
-    while (((file = readdir(dir)) != NULL) && (i < nbseq)){
+    while (((file = readdir(dir)) != NULL) && (i < nbseq))
+    {
 
         // Skip directories (linux)
         if (file->d_type == DT_DIR)
@@ -1061,10 +1092,10 @@ int readfiles(int comm_size, int nbseq) {
         if ((!strcmp(file->d_name, ".")) && (!strcmp(file->d_name, "..")))
             continue;
 
-        printf("Reading file : %s\n", file->d_name);
+         printf("Reading file : %s\n", file->d_name);
 
         // Get filepath
-        char* filepath = NULL;
+        char *filepath = NULL;
         filepath = malloc(sizeof(char) * (strlen(folder_name) + strlen(file->d_name)));
         strcpy(filepath, folder_name);
         strcat(filepath, file->d_name);
@@ -1074,13 +1105,13 @@ int readfiles(int comm_size, int nbseq) {
         stat(filepath, &st);
         long filesize = st.st_size;
 
-        content[i] = (char*)malloc(filesize * sizeof(char));
+        content[i] = (char *)malloc(filesize * sizeof(char));
 
         // Open fasta file
         if ((input = fopen(filepath, "r")) == NULL)
             return printf("Error: Can't open fastas file %s\n", filepath), -1;
 
-        char* line;
+        char *line;
         size_t len = 0;
         ssize_t read;
 
@@ -1094,7 +1125,8 @@ int readfiles(int comm_size, int nbseq) {
         strcpy(content[i], line);
 
         // Concat each lines in content[i], while toggling newline.
-        while ((read = getline(&line, &len, input)) != -1) {
+        while ((read = getline(&line, &len, input)) != -1)
+        {
             line[strcspn(line, "\n") - 1] = '\0';
             strcat(content[i], line);
         }
@@ -1105,13 +1137,13 @@ int readfiles(int comm_size, int nbseq) {
         if (output)
             fprintf(fp, "<details><summary> %s </summary>\n<a href=\"sequences/rank_%d_%d_bin.html\"> %s </a></details>\n", file->d_name, recv, i / comm_size, file->d_name);
 
-        printf("%d) sending to %d\n", rank, recv);
+         printf("%d) sending to %d\n", rank, recv);
         MPI_Send(content[i], strlen(content[i]), MPI_CHAR, recv, 0, MPI_COMM_WORLD);
 
         // Sends seq for alignment purposes.
-        MPI_Send(content[i], strlen(content[i]), MPI_CHAR, align_rank, 4, MPI_COMM_WORLD);
+           MPI_Send(content[i], strlen(content[i]), MPI_CHAR, align_rank, 4, MPI_COMM_WORLD);
         i++;
-        printf("Count i : %d\n", i);
+         printf("Count i : %d\n", i);
     }
 
     MPI_Send(&i, 1, MPI_INT, align_rank, 5, MPI_COMM_WORLD);
@@ -1126,24 +1158,27 @@ int readfiles(int comm_size, int nbseq) {
 
     MPI_Status status;
 
-    printf("%d) comm_size = %d", rank, comm_size);
+    // printf("%d) comm_size = %d", rank, comm_size);
 
     // while (cont < comm_size) {
-    do {
+    do
+    {
         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-        if (status.MPI_TAG == 3) {
+        if (status.MPI_TAG == 3)
+        {
             MPI_Recv(&i, 1, MPI_INT, status.MPI_SOURCE, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             cont++;
-            printf("cont = %d comm_size = %d \n", cont, comm_size);
+            // printf("cont = %d comm_size = %d \n", cont, comm_size);
         }
-        else {
-            // printf("%d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
+        else
+        {
+             printf("%d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
 
             int count;
 
             MPI_Get_count(&status, MPI_LONG, &count);
-            long int* tmp = malloc(sizeof(long int) * count);
+            long int *tmp = malloc(sizeof(long int) * count);
 
             MPI_Recv(tmp, count, MPI_LONG, status.MPI_SOURCE, 2, MPI_COMM_WORLD, &status);
 
@@ -1152,19 +1187,48 @@ int readfiles(int comm_size, int nbseq) {
         }
     } while (cont < comm_size - 1);
 
-    printf("Rank 0 ended receiving data\n");
+     printf("Rank 0 ended receiving data\n");
 
-    node_t* seq1;
-    node_t* seq2;
+    node_t *seq1;
+    node_t *seq2;
 
     seq1 = head;
-    printf("%ld\n", seq1->seq[0]);
+    // printf("%ld\n", seq1->seq[0]);
 
-    while (seq1 != NULL) {
+    FILE *comp;
+
+    if (output)
+    {
+
+        fprintf(fp, "<details><summary> %s </summary>\n<a href=\"comp/comp_bin.html\"> Matching score </a></details>\n");
+
+        struct stat st = {0};
+        if (stat("./output/comp", &st) == -1)
+        {
+            mkdir("./output/comp", 0700);
+        }
+
+        comp = fopen("./output/comp_bin.html", "w+");
+
+        if (fp == NULL)
+        {
+            printf("Cannot open file \n");
+            exit(0);
+        }
+        fprintf(comp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
+
+        fprintf(comp, "<table>\n<tbody>\n<tr>\n<td class = \"title\">Sequence 1</td>\n<td class = \"title\">Sequence 2</td>\n<td class = \"title\">Score</td></tr>\n");
+    }
+
+    while (seq1 != NULL)
+    {
         seq2 = seq1->next;
-        while (seq2 != NULL) {
+        while (seq2 != NULL)
+        {
             // printf("%ld\n", seq2->seq[0]);
             float calc = calculating_matching_score(seq1->seq, seq1->size, seq2->seq, seq2->size);
+            if (output)
+                fprintf(comp, "<tr><td>SEQ 1</td><td>SEQ 2</td><td>%f</td></tr>", calc);
             printf("Matching score : %f\n", calc);
             seq2 = seq2->next;
         }
@@ -1178,110 +1242,130 @@ int readfiles(int comm_size, int nbseq) {
     if (closedir(dir) == -1)
         return printf("Error close dir\n"), -1;
 
-    if (output) {
+    if (output)
+    {
+        fprintf(comp, "</table> </body></html>");
+        fclose(comp);
+
         fprintf(fp, "</html>");
         fclose(fp);
     }
-    printf("Rank 0 terminated\n");
+     printf("Rank 0 terminated\n");
     return 0;
 }
 
-void alignment_work(int rank){
+void alignment_work(int rank)
+{
     int real_nb_seqs = NULL;
     MPI_Status sta;
 
-    char** seq = malloc(sizeof(char*) * 200);
+    char **seq = malloc(sizeof(char *) * 200);
 
     int cont = 1;
     int i = 0;
     int flag;
-    while (cont) {
+    while (cont)
+    {
         MPI_Status status;
 
         MPI_Iprobe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 
-        if (flag) {
-            // printf("ALIGN IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
-            if (status.MPI_TAG == 5) {
+        if (flag)
+        {
+             printf("ALIGN IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
+            if (status.MPI_TAG == 5)
+            {
                 MPI_Status sta;
                 MPI_Recv(&real_nb_seqs, 1, MPI_INT, 0, 5, MPI_COMM_WORLD, &sta);
-                if (i == real_nb_seqs) cont = 0;
+                if (i == real_nb_seqs)
+                    cont = 0;
             }
-            else if (status.MPI_TAG == 4) {
+            else if (status.MPI_TAG == 4)
+            {
                 int count = 0;
                 MPI_Get_count(&status, MPI_CHAR, &count);
-                seq[i] = (char*)malloc(sizeof(char) * count);
+                seq[i] = (char *)malloc(sizeof(char) * count);
                 MPI_Recv(seq[i], count, MPI_CHAR, 0, 4, MPI_COMM_WORLD, &sta);
                 i++;
 
-                if(real_nb_seqs && i == real_nb_seqs) cont = 0;
+                if (real_nb_seqs && i == real_nb_seqs)
+                    cont = 0;
             }
         }
     }
 
-    for(int i = 1; i < real_nb_seqs ; i++){
+    for (int i = 1; i < real_nb_seqs; i++)
+    {
         // int score = needleman_wunsch(seq[i], seq[i+1]);
-        long* previous_seq_bin;
-        long* seq_bin;
+        long *previous_seq_bin;
+        long *seq_bin;
         long previous_len_seq;
         long len_seq;
 
-        if (i != 0){
+        if (i != 0)
+        {
             previous_seq_bin = seq_bin;
             previous_len_seq = len_seq;
         }
-        else{
-            previous_seq_bin = convert_to_binary(seq[i-1], strlen(seq[i-1]));
-            previous_len_seq = strlen(seq[i-1]) * 2;
+        else
+        {
+            previous_seq_bin = convert_to_binary(seq[i - 1], strlen(seq[i - 1]));
+            previous_len_seq = strlen(seq[i - 1]) * 2;
         }
         seq_bin = convert_to_binary(seq[i], strlen(seq[i]));
         len_seq = strlen(seq[i]) * 2;
 
-        int score = needleman_wunsch_bin(previous_seq_bin, seq_bin, previous_len_seq/2, len_seq/2);
-        free(seq[i-1]);
-        printf("*%d\tAlignment score (%d:%d) : %d\033[0m\n", rank, i-1, i, score);
+        int score = needleman_wunsch_bin(previous_seq_bin, seq_bin, previous_len_seq / 2, len_seq / 2);
+        free(seq[i - 1]);
+         printf("*%d\tAlignment score (%d:%d) : %d\033[0m\n", rank, i - 1, i, score);
     }
     free(seq[i]);
     free(seq);
 }
 
-void process_work(int rank) {
+void process_work(int rank)
+{
     int flag;
     int cont = 1;
 
     int nb = countfiles();
-    char* seq[nb];
+    char *seq[nb];
 
     int i = 0;
     int count = 0;
 
-    printf("PROCESS WORK : %d\n", rank);
+     printf("PROCESS WORK : %d\n", rank);
 
-    while (cont) {
+    while (cont)
+    {
         MPI_Status status;
 
         MPI_Iprobe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 
-        if (flag) {
+        if (flag)
+        {
             printf("IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
-            if (status.MPI_TAG == 1) {
+            if (status.MPI_TAG == 1)
+            {
                 MPI_Status sta;
                 MPI_Recv(&count, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &sta);
                 cont = 0;
             }
-            else {
+            else
+            {
                 MPI_Get_count(&status, MPI_CHAR, &count);
-                seq[i] = (char*)malloc(sizeof(char) * count);
+                seq[i] = (char *)malloc(sizeof(char) * count);
                 MPI_Recv(seq[i], count, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
                 i++;
             }
         }
     }
 
-    for (int j = 0; j < i; j++) {
-        printf("*\033[33mRank %3d - Iterating %d/%d\033[0m\n", rank, j, i);
+    for (int j = 0; j < i; j++)
+    {
+         printf("*\033[33mRank %3d - Iterating %d/%d\033[0m\n", rank, j, i);
         gene_map_t gene_map;
-        long* seq_bin;
+        long *seq_bin;
         long len_seq;
 
         seq_bin = convert_to_binary(seq[j], strlen(seq[j]));
@@ -1293,22 +1377,57 @@ void process_work(int rank) {
 
         detecting_genes(seq_bin, len_seq, &gene_map);
 
-        printf("*%d\tGenes detected : %lld\n", rank, gene_map.genes_counter);
+        // printf("*%d\tGenes detected : %lld\n", rank, gene_map.genes_counter);
+        FILE *fp;
 
-        for (unsigned long long k = 0; k < gene_map.genes_counter; k++) {
+        if (output)
+        {
+
+            struct stat st = {0};
+            if (stat("./output/sequences", &st) == -1)
+            {
+                mkdir("./output/sequences", 0700);
+            }
+
+            char *rank_c, *nb_c;
+
+            char name_f[50];
+
+            asprintf(&rank_c, "%d", rank);
+
+            asprintf(&nb_c, "%d", j);
+
+            strcat(strcpy(name_f, "./output/sequences/rank_"), rank_c);
+
+            strcat(strcat(name_f, "_"), nb_c);
+
+            strcat(name_f, "_bin.html");
+
+            fp = fopen(name_f, "w+");
+
+            if (fp == NULL)
+            {
+                printf("Cannot open file \n");
+                exit(0);
+            }
+            fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
+        }
+        for (unsigned long long k = 0; k < gene_map.genes_counter; k++)
+        {
             mutation_map mut_m;
 
-            long* genes = get_piece_binary_array(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
+            long *genes = get_piece_binary_array(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
 
-            char* amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
-            if (amino != NULL)
-                printf("*%d\tamino acid chain = %s\n", rank, amino);
+            char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
+             if (amino != NULL)
+              printf("*%d\tamino acid chain = %s\n", rank, amino);
 
             mut_m.size = malloc(sizeof(*mut_m.size) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
 
-            printf("*%d\t MRNA = %s\n", rank, generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
+            char *mrna = generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
+             printf("*%d\t MRNA = %s\n", rank, mrna);
 
             detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
 
@@ -1316,19 +1435,55 @@ void process_work(int rank) {
             if (!size_m)
                 size_m = 1;
 
-            printf("*%d\tSending genes (%d) to 0\n", rank, size_m);
+            if (output)
+            {
+
+                fprintf(fp, "<table>\n<tbody>\n<tr>\n<td class = \"title\">Sequence</td>\n<td class = \"title\">MRNA</td>\n<td class = \"title\">Chain</td>\n<td class = \"title\">Mutation</td>\n</tr>\n");
+
+                fprintf(fp, "<tr><td>%s</td>", binary_to_dna(genes, (gene_map.gene_end[k] - gene_map.gene_start[k]) + 3));
+                fprintf(fp, "<td>%s</td>\n", mrna);
+                if (amino != NULL)
+                    fprintf(fp, "<td>%s</td>\n", amino);
+                else
+                    fprintf(fp, "<td>NONE</td>\n");
+
+                if (mut_m.size[0] == 0)
+                    fprintf(fp, "<td>NONE</td>\n");
+                else
+                {
+                    fprintf(fp, "<td>");
+                    int c = 0;
+                    while ((mut_m.size[0] != 0) && (c < 5))
+                    {
+                        fprintf(fp, "[%lu,%lu]", mut_m.start_mut[c], mut_m.end_mut[c]);
+                        c++;
+                    }
+                    fprintf(fp, "</td>\n");
+                }
+
+                fprintf(fp, "</tbody>\n</table>\n");
+            }
+
+            // printf("*%d\tSending genes (%d) to 0\n", rank, size_m);
             MPI_Send(genes, size_m, MPI_LONG, 0, 2, MPI_COMM_WORLD);
 
             free(mut_m.end_mut);
             free(mut_m.size);
             free(mut_m.start_mut);
         }
+
+        if (output)
+        {
+            fprintf(fp, "</html>");
+            fclose(fp);
+        }
     }
 
     MPI_Send(&cont, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
 }
 
-void launch(int affichage, int sequences) {
+void launch(int affichage, int sequences)
+{
     output = affichage;
     int RANK_MASTER = 0;
 
@@ -1344,12 +1499,14 @@ void launch(int affichage, int sequences) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
-    if (rank == RANK_MASTER) {
+    if (rank == RANK_MASTER)
+    {
         readfiles(comm_size, sequences);
     }
     else if (rank == comm_size - 1)
         alignment_work(rank);
-    else {
+    else
+    {
         process_work(rank);
     }
 
