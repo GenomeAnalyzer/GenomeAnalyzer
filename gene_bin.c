@@ -349,7 +349,7 @@ char *generating_mRNA(const long int *gene_seq, const unsigned long long start_p
 
     // Allocate memory and verify it has been allocated
     char *rna_seq = NULL;
-    rna_seq = malloc(sizeof(*rna_seq) * ((stop_pos - start_pos) / 2) + 2);
+    rna_seq = malloc(sizeof(*rna_seq) * ((stop_pos - start_pos) / 2) +2);
     if (!rna_seq)
         return printf("ERROR: generating_mRNA: cannot allocate memory\n"), NULL;
 
@@ -377,7 +377,8 @@ char *generating_mRNA(const long int *gene_seq, const unsigned long long start_p
             rna_seq[index] = value;
         }
     }
-    rna_seq[stop_pos / 2] = '\0';
+
+    rna_seq[((stop_pos-start_pos) / 2)+1] = '\0';
     return rna_seq;
 }
 
@@ -1054,7 +1055,7 @@ void getfile(int rank)
             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             //  printf("%d) 1054\n", rank);
 
-          //  if (amino != NULL)
+            //  if (amino != NULL)
             //    printf("amino acid chain = %s\n", amino);
             printf("%d) MRNA = %s\n", rank, generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
             // printf("%d) 966\n", rank);
@@ -1072,7 +1073,7 @@ void getfile(int rank)
 
             MPI_Send(&genes, size_m, MPI_LONG, 0, 2, MPI_COMM_WORLD);
 
-                  printf("%d) finis send \n", rank);
+            printf("%d) finis send \n", rank);
 
             free(mut_m.end_mut);
             free(mut_m.size);
