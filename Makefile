@@ -87,7 +87,6 @@ run_bin:
 	python3 $(V1PYTHON)/main_bin.py $(runargs)
 
 setup_bin_par:
-	sed "s|sources.*|sources=[\"$(V3PYTHON)/DNA_mod.pyx\"],|g" -i $(V3PYTHON)/setup_bin.py
 	MPICC=mpicc python3 $(V3PYTHON)/setup_bin.py build_ext --inplace
 	mv *.so $(V3PYTHON)
 
