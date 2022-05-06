@@ -79,7 +79,7 @@ check: run_test_gene test_DNA run_test_gene_bin test_DNA_bin test_DNA_bool
 run:
 	python3 $(V0PYTHON)/setup.py install
 	python3 $(V0PYTHON)/main.py $(runargs)
-	
+
 
 #For only running the binary program
 run_bin:
@@ -87,6 +87,7 @@ run_bin:
 	python3 $(V1PYTHON)/main_bin.py $(runargs)
 
 setup_bin_par:
+	sed "s|sources.*|sources=[\"$(V3PYTHON)/DNA_mod.pyx\"],|g" -i $(V3PYTHON)/setup_bin.py
 	MPICC=mpicc python3 $(V3PYTHON)/setup_bin.py build_ext --inplace
 	mv *.so $(V3PYTHON)
 
