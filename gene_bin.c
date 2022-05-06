@@ -928,7 +928,7 @@ int readfiles(int size_r, int nbseq)
             insert_list(&head, tmp, count);
             free(tmp);
         }
-    } while (cont < size_r);
+    } while (cont != size_r);
 
     printf("Let's go \n");
 
@@ -1054,8 +1054,8 @@ void getfile(int rank)
             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             //  printf("%d) 1054\n", rank);
 
-            if (amino != NULL)
-                printf("amino acid chain = %s\n", amino);
+          //  if (amino != NULL)
+            //    printf("amino acid chain = %s\n", amino);
             printf("%d) MRNA = %s\n", rank, generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
             // printf("%d) 966\n", rank);
 
@@ -1070,9 +1070,9 @@ void getfile(int rank)
             if (!size_m)
                 size_m = 1;
 
-            MPI_Send(genes, size_m, MPI_LONG, 0, 2, MPI_COMM_WORLD);
+            MPI_Send(&genes, size_m, MPI_LONG, 0, 2, MPI_COMM_WORLD);
 
-            //      printf("%d) finis send \n", rank);
+                  printf("%d) finis send \n", rank);
 
             free(mut_m.end_mut);
             free(mut_m.size);
