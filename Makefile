@@ -87,20 +87,12 @@ run_bin:
 	python3 $(V1PYTHON)/setup_bin.py install
 	python3 $(V1PYTHON)/main_bin.py $(runargs)
 
-<<<<<<< HEAD
-run_bin_par:
-	sudo MPICC=mpicc$(MPI) python3 $(V3PYTHON)/setup_bin.py build_ext --inplace
-	mv *.so  $(V3PYTHON)
-	mpirun$(MPI) -np $(NP) python3 $(V3PYTHON)/main.py $(runargs)
-=======
 setup_bin_par:
-	sed "s|sources.*|sources=[\"$(V3PYTHON)/DNA_mod.pyx\"],|g" -i $(V3PYTHON)/setup_bin.py
 	MPICC=mpicc python3 $(V3PYTHON)/setup_bin.py build_ext --inplace
 	mv *.so $(V3PYTHON)
 
 run_bin_par: setup_bin_par
 	mpirun $(MPIFLAGS) -np $(NP) python3 $(V3PYTHON)/main.py $(runargs)
->>>>>>> master
 
 %.o:
 	$(CC) $(CFLAGS) -c -o $(BUILD)/$(*F).o $(*D)/$(*F).c
