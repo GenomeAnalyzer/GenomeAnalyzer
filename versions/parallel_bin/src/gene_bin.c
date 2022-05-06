@@ -376,7 +376,8 @@ char *generating_mRNA(const long int *gene_seq, const unsigned long long start_p
             rna_seq[index] = value;
         }
     }
-    rna_seq[stop_pos / 2] = '\0';
+    // rna_seq[stop_pos / 2] = '\0';
+    rna_seq[((stop_pos - start_pos) / 2) + 1] = '\0';
     return rna_seq;
 }
 
@@ -1249,7 +1250,7 @@ void process_work(int rank) {
             mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
 
-            // printf("*%d\t MRNA = %s\n", rank, generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
+            printf("*%d\t MRNA = %s\n", rank, generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
 
             detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
 
