@@ -83,7 +83,7 @@ long int *set_binary_array(const char *seq_char, const size_t seq_size)
 
     int pos = 0;
 
-    int bit1, bit2, c;
+    // int bit1, bit2, c;
 
 #pragma omp parallel default(shared)
     {
@@ -242,7 +242,7 @@ long int *get_piece_binary_array(const long int *seq_bin, const unsigned long lo
 
     // stop position.
 
-    long j = 0;
+    // long j = 0;
 
 // Parse the binary array,
 // from the bit at 'pos_start' position to 'pos_stop' position
@@ -309,7 +309,7 @@ char *binary_to_dna(long int *bin_dna_seq, const unsigned size)
 #pragma omp parallel shared(bin_dna_seq, size, dna_seq, i) private(nucl1, nucl2, index, value)
     {
 #pragma omp for schedule(static, 32)
-        for (long i = 0; i < size; i += 2)
+        for (unsigned i = 0; i < size; i += 2)
         {
             // nucleotides = A, T, G, C
             nucl1 = get_binary_value(bin_dna_seq, i);

@@ -51,7 +51,7 @@ if sys.version_info[0] < 3:
 
 ext_modules = [
     Extension("DNA_mod",
-              sources=["./versions/bin_S2/python/DNA_mod.pyx"],
+              sources=["./versions/parallel_bin/python/DNA_mod.pyx"],
               language='c',
               extra_compile_args=extra_flags_c + mpi_compile_args,
               extra_link_args=mpi_link_args + extra_link_args_c
