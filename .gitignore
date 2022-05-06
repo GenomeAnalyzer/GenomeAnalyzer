@@ -8,3 +8,4 @@
 *.so
 fastas/
 !fastas/test.fasta
+*__pycache__*
