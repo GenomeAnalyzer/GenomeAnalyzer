@@ -11,7 +11,7 @@
 #include <nmmintrin.h>
 #include <immintrin.h>
 
-int output = 1;
+int output;
 
 int rank;
 
@@ -793,26 +793,24 @@ void insert_list(node_t **head, long int *data, int size)
     }
 }
 
-int readfiles(int size_r)
+int readfiles(int size_r, int nbseq)
 {
 
     int nb = countfiles();
     char **content = malloc(sizeof(char *) * nb);
-
-    //#if output == 1
-
     FILE *fp;
 
-    /*  fp = fopen("./ouput/rapport_bin.html", "w");
-      if (fp == NULL)
-      {
-          printf("Cannot open file \n");
-          exit(0);
-      }
-      fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
-  */
-    //#endif
+    if (output == 1)
+    {
 
+        fp = fopen("./ouput/rapport_bin.html", "w+");
+        if (fp == NULL)
+        {
+            printf("Cannot open file \n");
+            exit(0);
+        }
+        fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
+    }
     DIR *dir;
 
     FILE *input;
@@ -828,7 +826,7 @@ int readfiles(int size_r)
     node_t *head = NULL;
 
     // Iterate if a file exists in this directory
-    while ((file = readdir(dir)) != NULL)
+    while (((file = readdir(dir)) != NULL) || (i >= nbseq))
     {
         if (file->d_type == DT_DIR)
             continue;
@@ -878,20 +876,15 @@ int readfiles(int size_r)
             strcat(content[i], line);
         }
 
-#ifdef DEBUG
-        printf("SEQ:    %s\n", content[i]);
-#endif
         fclose(input);
 
         int recv = i % (size_r);
 
         if (recv == 0)
             recv++;
-        //#if output == 1
 
-        //  fprintf(fp, "<details><summary> %s </summary>\n<a href=\"sequences/rank_%d_%d_bin.html\"> %s </a></details>\n", file->d_name, recv, i / size_r, file->d_name);
-
-        //#endif
+        if (output)
+            fprintf(fp, "<details><summary> %s </summary>\n<a href=\"sequences/rank_%d_%d_bin.html\"> %s </a></details>\n", file->d_name, recv, i / size_r, file->d_name);
 
         printf("%d) sending to %d\n", rank, recv);
         MPI_Send(content[i], strlen(content[i]), MPI_CHAR, recv, 0, MPI_COMM_WORLD);
@@ -910,7 +903,7 @@ int readfiles(int size_r)
 
     printf("%d) size = %d", rank, size_r);
 
-    while (cont < size_r)
+    do
     {
         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
@@ -935,7 +928,9 @@ int readfiles(int size_r)
             insert_list(&head, tmp, count);
             free(tmp);
         }
-    }
+    } while (cont < size_r);
+
+    printf("Let's go \n");
 
     node_t *seq1;
     node_t *seq2;
@@ -961,7 +956,12 @@ int readfiles(int size_r)
 
     if (closedir(dir) == -1)
         return printf("Error close dir\n"), -1;
-    // fclose(fp);
+
+    if (output)
+    {
+        fprintf(fp, "</html>");
+        fclose(fp);
+    }
     printf("0 FINIS\n");
 
     return 0;
@@ -1039,35 +1039,40 @@ void getfile(int rank)
         {
             mutation_map mut_m;
 
-         //   printf("%d) début req\n", rank);
+            //   printf("%d) début req\n", rank);
 
             //  genes[i][gene_map.gene_end[i] - gene_map.gene_start[i]];
             long *genes = get_piece_binary_array(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
-     //       printf("%d) 957\n", rank);
+            //       printf("%d) 957\n", rank);
 
             char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
 
-      //      printf("%d) 1048\n", rank);
+            //      printf("%d) 1048\n", rank);
 
             mut_m.size = malloc(sizeof(*mut_m.size) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
-          //  printf("%d) 1054\n", rank);
+            //  printf("%d) 1054\n", rank);
 
-          /*  if (amino != NULL)
-                printf("amino acid chain = %s\n", amino);*/
-       //     printf("%d) MRNA = %s\n", rank, generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
-            //printf("%d) 966\n", rank);
+            if (amino != NULL)
+                printf("amino acid chain = %s\n", amino);
+            printf("%d) MRNA = %s\n", rank, generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
+            // printf("%d) 966\n", rank);
 
             detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
 
-   //        printf("%d) 970\n", rank);
+            printf("%d) 970\n", rank);
 
-           // printf("%d)  %lld %lld %ld piece req \n", rank, k, gene_map.genes_counter, genes[0]);
+            // printf("%d)  %lld %lld %ld piece req \n", rank, k, gene_map.genes_counter, genes[0]);
 
-            MPI_Send(genes, (gene_map.gene_end[k] - gene_map.gene_start[k]) / int_SIZE, MPI_LONG, 0, 2, MPI_COMM_WORLD);
+            int size_m = (gene_map.gene_end[k] - gene_map.gene_start[k]) / int_SIZE;
 
-      //      printf("%d) finis send \n", rank);
+            if (!size_m)
+                size_m = 1;
+
+            MPI_Send(genes, size_m, MPI_LONG, 0, 2, MPI_COMM_WORLD);
+
+            //      printf("%d) finis send \n", rank);
 
             free(mut_m.end_mut);
             free(mut_m.size);
@@ -1083,8 +1088,9 @@ void getfile(int rank)
     //   printf("%d FINIS\n", rank);
 }
 
-void launch()
+void launch(int affichage, int sequences)
 {
+    output = affichage;
     int RANK_MASTER = 0;
 
     int initialized, finalized;
@@ -1103,7 +1109,7 @@ void launch()
 
     if (rank == RANK_MASTER)
     {
-        readfiles(size);
+        readfiles(size, sequences);
     }
     else
     {
