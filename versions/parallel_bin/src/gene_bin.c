@@ -4,14 +4,17 @@
 #include <mpi.h>
 #include "../headers/gene_bin.h"
 #include <sys/types.h>
+
+#define __USE_MISC
 #include <dirent.h>
+
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <nmmintrin.h>
 #include <immintrin.h>
 
-int output = 1;
+int output;
 
 int rank;
 
@@ -976,35 +979,31 @@ int needleman_wunsch_bin(long int* bin_A, long int* bin_B, int m, int n){
 /* Count files in a directory
  *
  */
-int countfiles()
-{
+int countfiles() {
     int count = 0;
-    struct dirent *entry;
+    struct dirent* entry;
 
-    DIR *dir = opendir("./fastas/");
+    DIR* dir = opendir("./fastas/");
 
-    while ((entry = readdir(dir)) != NULL)
-    {
+    while ((entry = readdir(dir)) != NULL) {
         if (strstr(entry->d_name, ".fasta"))
             count++;
     }
     return count;
 }
 
-void insert_list(node_t **head, long int *data, int size)
-{
+void insert_list(node_t** head, long int* data, int size) {
 
     if (data == NULL)
         printf("Error data \n");
 
-    node_t *tmp_node = (node_t *)malloc(sizeof(node_t));
+    node_t* tmp_node = (node_t*)malloc(sizeof(node_t));
 
-    node_t *last = *head;
+    node_t* last = *head;
 
     tmp_node->seq = malloc(sizeof(long) * (size));
 
-    for (int i = 0; i < size; i++)
-    {
+    for (int i = 0; i < size; i++) {
         tmp_node->seq[i] = data[i];
     }
 
@@ -1012,13 +1011,11 @@ void insert_list(node_t **head, long int *data, int size)
 
     tmp_node->next = NULL;
 
-    if (*head == NULL)
-    {
+    if (*head == NULL) {
         tmp_node->prev = NULL;
         *head = tmp_node;
     }
-    else
-    {
+    else {
         while (last->next != NULL)
             last = last->next;
 
@@ -1028,115 +1025,147 @@ void insert_list(node_t **head, long int *data, int size)
     }
 }
 
-int readfiles(int size_r){
+int readfiles(int comm_size, int nbseq) {
     int nb = countfiles();
-    char **content = malloc(sizeof(char *) * nb);
+    char** content = malloc(sizeof(char*) * nb);
+    FILE* fp;
 
-    DIR *dir;
-    FILE *input;
-    struct dirent *file;
+    if (output == 1) {
+
+        fp = fopen("./output/rapport_bin.html", "w+");
+        if (fp == NULL) {
+            printf("Cannot open file \n");
+            exit(0);
+        }
+        fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
+    }
+    DIR* dir;
+    FILE* input;
+    struct dirent* file;
+
+    char folder_name[50] = "./fastas/";
 
     // Open the directory which contain all the fastas files
-    if ((dir = opendir("fastas")) == NULL)
+    if ((dir = opendir(folder_name)) == NULL)
         return printf("Error: Can't open fastas folder\n"), -1;
 
     int i = 0;
-    node_t *head = NULL;
+    node_t* head = NULL;
 
     // Iterate if a file exists in this directory
-    while ((file = readdir(dir)) != NULL){
+    while (((file = readdir(dir)) != NULL) && (i < nbseq)){
+
+        // Skip directories (linux)
         if (file->d_type == DT_DIR)
             continue;
-        // Skip parent directory ( linux)
         if ((!strcmp(file->d_name, ".")) && (!strcmp(file->d_name, "..")))
             continue;
 
-        char name[50] = "./fastas/";
+        printf("Reading file : %s\n", file->d_name);
 
-        strcat(name, file->d_name);
+        // Get filepath
+        char* filepath = NULL;
+        filepath = malloc(sizeof(char) * (strlen(folder_name) + strlen(file->d_name)));
+        strcpy(filepath, folder_name);
+        strcat(filepath, file->d_name);
 
-        // Get size of the file to allocate enough memory
+        // Get file size (will be used for content allocation)
         struct stat st;
-        stat(name, &st);
-        long size = st.st_size;
+        stat(filepath, &st);
+        long filesize = st.st_size;
 
-        content[i] = (char *)malloc(size * sizeof(char));
+        content[i] = (char*)malloc(filesize * sizeof(char));
 
         // Open fasta file
-        if ((input = fopen(name, "r")) == NULL){
-            // fclose(input);
-            return printf("Error: Can't open fastas file %s\n", name), -1;
-        }
+        if ((input = fopen(filepath, "r")) == NULL)
+            return printf("Error: Can't open fastas file %s\n", filepath), -1;
 
-        char *line;
+        char* line;
         size_t len = 0;
         ssize_t read;
 
-        // first line , we need to skip it
+        // Skipping first line, as it's only fasta's metadata.
         read = getline(&line, &len, input);
 
-        content[i] = (char *)malloc((size - read - 1) * sizeof(char));
-
+        // Init content[i] with second line (first data line)
+        content[i] = malloc((filesize - read - 1) * sizeof(char));
         getline(&line, &len, input);
         line[strcspn(line, "\n") - 1] = '\0';
-
         strcpy(content[i], line);
 
-        while ((read = getline(&line, &len, input)) != -1){
-            // Toggle newline
+        // Concat each lines in content[i], while toggling newline.
+        while ((read = getline(&line, &len, input)) != -1) {
             line[strcspn(line, "\n") - 1] = '\0';
-
-            // Copy the line in the content variable
             strcat(content[i], line);
         }
         fclose(input);
 
-        int recv = i % (size_r);
+        int recv = i % (comm_size-1)+1;
 
-        if (recv == 0)
-            recv++;
 
+        // int recv = i % (comm_size);
+        // if (recv == 0)
+        //     recv++;
+
+        if (output)
+            fprintf(fp, "<details><summary> %s </summary>\n<a href=\"sequences/rank_%d_%d_bin.html\"> %s </a></details>\n", file->d_name, recv, i / comm_size, file->d_name);
+
+        printf("%d) sending to %d\n", rank, recv);
         MPI_Send(content[i], strlen(content[i]), MPI_CHAR, recv, 0, MPI_COMM_WORLD);
         i++;
+        printf("Count i : %d\n", i);
     }
 
     i = 0;
-    for (int j = 1; j < size_r; j++)
+
+    // Sends the sequence count to receiver. Ends communication from MASTER to receiver
+    for (int j = 1; j < comm_size; j++)
         MPI_Send(&i, 1, MPI_INT, j, 1, MPI_COMM_WORLD);
 
     int cont = 1;
 
     MPI_Status status;
 
-    while (cont < size_r){
+    printf("%d) comm_size = %d", rank, comm_size);
+
+    // while (cont < comm_size) {
+    do {
         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-        if (status.MPI_TAG == 3){
+        if (status.MPI_TAG == 3) {
             MPI_Recv(&i, 1, MPI_INT, status.MPI_SOURCE, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             cont++;
+            printf("cont = %d comm_size = %d \n", cont, comm_size);
         }
-        else{
+        else {
+            // printf("%d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
+
             int count;
 
             MPI_Get_count(&status, MPI_LONG, &count);
-            long int *tmp = (long *)malloc(sizeof(long) * count);
+            long int* tmp = malloc(sizeof(long int) * count);
 
             MPI_Recv(tmp, count, MPI_LONG, status.MPI_SOURCE, 2, MPI_COMM_WORLD, &status);
 
             insert_list(&head, tmp, count);
             free(tmp);
         }
-    }
+    } while (cont < comm_size);
 
-    node_t *seq1;
-    node_t *seq2;
+    printf("Rank 0 ended receiving data\n");
+
+    node_t* seq1;
+    node_t* seq2;
 
     seq1 = head;
+    printf("%ld\n", seq1->seq[0]);
 
-    while (seq1 != NULL){
+    while (seq1 != NULL) {
         seq2 = seq1->next;
-        while (seq2 != NULL){
-            calculating_matching_score(seq1->seq, seq1->size, seq2->seq, seq2->size);
+        while (seq2 != NULL) {
+            // printf("%ld\n", seq2->seq[0]);
+            float calc = calculating_matching_score(seq1->seq, seq1->size, seq2->seq, seq2->size);
+            printf("Matching score : %f\n", calc);
             seq2 = seq2->next;
         }
 
@@ -1149,45 +1178,53 @@ int readfiles(int size_r){
     if (closedir(dir) == -1)
         return printf("Error close dir\n"), -1;
 
+    if (output) {
+        fprintf(fp, "</html>");
+        fclose(fp);
+    }
+    printf("Rank 0 terminated\n");
     return 0;
 }
 
-void getfile(int rank){
-
+void process_work(int rank) {
     int flag;
     int cont = 1;
 
     int nb = countfiles();
-    char *seq[nb];
+    char* seq[nb];
 
     int i = 0;
     int count = 0;
 
-    while (cont){
+    while (cont) {
         MPI_Status status;
 
         MPI_Iprobe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+        // printf("IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
 
-        if (flag){
-            if (status.MPI_TAG == 1){
+        if (flag) {
+            if (status.MPI_TAG == 1) {
                 MPI_Status sta;
                 MPI_Recv(&count, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &sta);
                 cont = 0;
             }
-            else{
+            else {
                 MPI_Get_count(&status, MPI_CHAR, &count);
-                seq[i] = (char *)malloc(sizeof(char) * count);
+                seq[i] = (char*)malloc(sizeof(char) * count);
                 MPI_Recv(seq[i], count, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
                 i++;
             }
         }
     }
 
-    for (int j = 0; j < i; j++){
+    for (int j = 0; j < i; j++) {
+        printf("*\033[33mRank %3d - Iterating %d/%d\033[0m\n", rank, j, i);
         gene_map_t gene_map;
-        long *seq_bin;
+        long* seq_bin;
+        long* previous_seq_bin;
         long len_seq;
 
+        if (j != 0) previous_seq_bin = seq_bin;
         seq_bin = convert_to_binary(seq[j], strlen(seq[j]));
 
         len_seq = strlen(seq[j]) * 2;
@@ -1197,24 +1234,32 @@ void getfile(int rank){
 
         detecting_genes(seq_bin, len_seq, &gene_map);
 
-        for (unsigned long long k = 0; k < gene_map.genes_counter; k++){
+        printf("*%d\tGenes detected : %lld\n", rank, gene_map.genes_counter);
+
+        for (unsigned long long k = 0; k < gene_map.genes_counter; k++) {
             mutation_map mut_m;
 
-            long *genes = get_piece_binary_array(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
+            long* genes = get_piece_binary_array(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
 
-            char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
+            char* amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
+            if (amino != NULL)
+                printf("*%d\tamino acid chain = %s\n", rank, amino);
 
             mut_m.size = malloc(sizeof(*mut_m.size) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
 
-            if (amino != NULL)
-                printf("amino acid chain = %s\n", amino);
-            printf("MRNA = %s\n", generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
+            // printf("*%d\t MRNA = %s\n", rank, generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]));
 
             detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
 
-            MPI_Send(genes, (gene_map.gene_end[k] - gene_map.gene_start[k]) / int_SIZE, MPI_LONG, 0, 2, MPI_COMM_WORLD);
+            int size_m = (gene_map.gene_end[k] - gene_map.gene_start[k]) / int_SIZE;
+            if (!size_m)
+                size_m = 1;
+
+            // MPI_Send(genes, (gene_map.gene_end[k] - gene_map.gene_start[k]) / int_SIZE, MPI_LONG, 0, 2, MPI_COMM_WORLD);
+            printf("*%d\tSending genes (%d) to 0\n", rank, size_m);
+            MPI_Send(genes, size_m, MPI_LONG, 0, 2, MPI_COMM_WORLD);
 
             free(mut_m.end_mut);
             free(mut_m.size);
@@ -1225,8 +1270,8 @@ void getfile(int rank){
     MPI_Send(&cont, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
 }
 
-void launch()
-{
+void launch(int affichage, int sequences) {
+    output = affichage;
     int RANK_MASTER = 0;
 
     int initialized, finalized;
@@ -1236,18 +1281,16 @@ void launch()
         MPI_Init(NULL, NULL);
 
     //   int rank;
-    int size;
+    int comm_size;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
-    if (rank == RANK_MASTER)
-    {
-        readfiles(size);
+    if (rank == RANK_MASTER) {
+        readfiles(comm_size, sequences);
     }
-    else
-    {
-        getfile(rank);
+    else {
+        process_work(rank);
     }
 
     MPI_Finalized(&finalized);
