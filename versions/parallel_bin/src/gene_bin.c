@@ -98,13 +98,10 @@ long int *set_binary_array(const char *seq_char, const size_t seq_size)
             // Add '00' bits in this case
             int c = 0;
             if (!seq_char[i])
-            {
                 printf("WARNING: set_binary_array: size input is different than the char sequence.\n");
-            }
             else
-            {
                 c = seq_char[i] - 65;
-            }
+
             // get the 2-bits value of char read
             int bit1, bit2;
             bit1 = L[c][0];
@@ -176,6 +173,7 @@ long int *xor_binary_array(const long int *seq_bin1, const int seq_size1,
     xor = calloc(ss1, sizeof(*xor));
     if (!xor)
         return printf("ERROR: xor_binary_array: cannot allocate memory.\n"), NULL;
+
 #pragma omp parallel default(shared)
     {
 #pragma omp for schedule(static, 64)
@@ -244,8 +242,6 @@ long int *get_piece_binary_array(const long int *seq_bin, const unsigned long lo
         return printf("ERROR: get_piece_binary_array: cannot allocate memory.\n"), NULL;
 
         // stop position.
-
-        // long j = 0;
 
 // Parse the binary array,
 // from the bit at 'pos_start' position to 'pos_stop' position
@@ -975,8 +971,7 @@ int needleman_wunsch(char A[], char B[])
  * in  : n : Size of the `bin_B` divided by 2.
  * out : Max similarity score of the `A` and `B` sequences.
  */
-int needleman_wunsch_bin(long int *bin_A, long int *bin_B, int m, int n)
-{
+int needleman_wunsch_bin(long int* bin_A, long int* bin_B, int m, int n) {
     // long int* bin_A = set_binary_array(A, strlen(A));
     // long int* bin_B = set_binary_array(B, strlen(B));
 
@@ -984,13 +979,14 @@ int needleman_wunsch_bin(long int *bin_A, long int *bin_B, int m, int n)
     int mismatch = -1;
     int gap = -1;
 
-    int *F = bin_calculate_scoring_matrix(bin_A, bin_B, m, n, match, mismatch, gap);
+    int* F = bin_calculate_scoring_matrix(bin_A, bin_B, m, n, match, mismatch, gap);
     // print_mat(F, A, B, m, n, n - 1, m - 1);
 
     // int score = align(F, A, B, match, mismatch, gap, 1);
     // printf("Max score : %d\n", score);
-    // return score;
-    return F[(m + 1) * (n + 1) - 1];
+    int score = F[(m + 1) * (n + 1) - 1];
+    free(F);
+    return score;
 }
 
 /* Count files in a directory
@@ -1008,6 +1004,7 @@ int countfiles()
         if (strstr(entry->d_name, ".fasta"))
             count++;
     }
+    closedir(dir);
     return count;
 }
 
@@ -1130,6 +1127,7 @@ int readfiles(int comm_size, int nbseq)
             line[strcspn(line, "\n") - 1] = '\0';
             strcat(content[i], line);
         }
+        free(line);
         fclose(input);
 
         int recv = i % (comm_size - 2) + 1;
@@ -1137,14 +1135,15 @@ int readfiles(int comm_size, int nbseq)
         if (output)
             fprintf(fp, "<details><summary> %s </summary>\n<a href=\"sequences/rank_%d_%d_bin.html\"> %s </a></details>\n", file->d_name, recv, i / comm_size, file->d_name);
 
-        printf("%d) sending to %d\n", rank, recv);
+        // printf("%d) sending to %d\n", rank, recv);
         MPI_Send(content[i], strlen(content[i]), MPI_CHAR, recv, 0, MPI_COMM_WORLD);
 
         // Sends seq for alignment purposes.
         MPI_Send(content[i], strlen(content[i]), MPI_CHAR, align_rank, 4, MPI_COMM_WORLD);
         i++;
-        printf("Count i : %d\n", i);
     }
+
+    closedir(dir);
 
     MPI_Send(&i, 1, MPI_INT, align_rank, 5, MPI_COMM_WORLD);
 
@@ -1173,7 +1172,7 @@ int readfiles(int comm_size, int nbseq)
         }
         else
         {
-            printf("%d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
+            // printf("%d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
 
             int count;
 
@@ -1254,37 +1253,31 @@ int readfiles(int comm_size, int nbseq)
     return 0;
 }
 
-void alignment_work(int rank)
-{
+void alignment_work(int rank) {
     int real_nb_seqs = NULL;
     MPI_Status sta;
 
-    char **seq = malloc(sizeof(char *) * 200);
+    char** seq = malloc(sizeof(char*) * 200);
 
     int cont = 1;
     int i = 0;
     int flag;
-    while (cont)
-    {
+    while (cont) {
         MPI_Status status;
 
         MPI_Iprobe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 
-        if (flag)
-        {
-            printf("ALIGN IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
-            if (status.MPI_TAG == 5)
-            {
+        if (flag) {
+            if (status.MPI_TAG == 5) {
                 MPI_Status sta;
                 MPI_Recv(&real_nb_seqs, 1, MPI_INT, 0, 5, MPI_COMM_WORLD, &sta);
                 if (i == real_nb_seqs)
                     cont = 0;
             }
-            else if (status.MPI_TAG == 4)
-            {
+            else if (status.MPI_TAG == 4) {
                 int count = 0;
                 MPI_Get_count(&status, MPI_CHAR, &count);
-                seq[i] = (char *)malloc(sizeof(char) * count);
+                seq[i] = (char*)malloc(sizeof(char) * count);
                 MPI_Recv(seq[i], count, MPI_CHAR, 0, 4, MPI_COMM_WORLD, &sta);
                 i++;
 
@@ -1294,32 +1287,20 @@ void alignment_work(int rank)
         }
     }
 
-    for (int i = 1; i < real_nb_seqs; i++)
-    {
-        // int score = needleman_wunsch(seq[i], seq[i+1]);
-        long *previous_seq_bin;
-        long *seq_bin;
-        long previous_len_seq;
-        long len_seq;
-
-        if (i != 0)
-        {
-            previous_seq_bin = seq_bin;
-            previous_len_seq = len_seq;
-        }
-        else
-        {
-            previous_seq_bin = convert_to_binary(seq[i - 1], strlen(seq[i - 1]));
-            previous_len_seq = strlen(seq[i - 1]) * 2;
-        }
+    long* seq_bin, seq_bin2;
+    long len_seq, len_seq2;
+    for (int i = 0; i < real_nb_seqs - 1; i++) {
         seq_bin = convert_to_binary(seq[i], strlen(seq[i]));
         len_seq = strlen(seq[i]) * 2;
+        seq_bin2 = convert_to_binary(seq[i+1], strlen(seq[i+1]));
+        len_seq2 = strlen(seq[i+1]) * 2;
 
-        int score = needleman_wunsch_bin(previous_seq_bin, seq_bin, previous_len_seq / 2, len_seq / 2);
-        free(seq[i - 1]);
+        int score = needleman_wunsch_bin(seq_bin, seq_bin2, len_seq / 2, len_seq2 / 2);
         printf("*%d\tAlignment score (%d:%d) : %d\033[0m\n", rank, i - 1, i, score);
+        free(seq[i]);
+        free(seq_bin);
     }
-    free(seq[i]);
+    free(seq[real_nb_seqs-2]);
     free(seq);
 }
 
@@ -1334,8 +1315,6 @@ void process_work(int rank)
     int i = 0;
     int count = 0;
 
-    printf("PROCESS WORK : %d\n", rank);
-
     while (cont)
     {
         MPI_Status status;
@@ -1344,7 +1323,6 @@ void process_work(int rank)
 
         if (flag)
         {
-            printf("IPROBE : %d receive from %d | tag : %d\n", rank, status.MPI_SOURCE, status.MPI_TAG);
             if (status.MPI_TAG == 1)
             {
                 MPI_Status sta;
@@ -1363,7 +1341,6 @@ void process_work(int rank)
 
     for (int j = 0; j < i; j++)
     {
-        printf("*\033[33mRank %3d - Iterating %d/%d\033[0m\n", rank, j, i);
         gene_map_t gene_map;
         long *seq_bin;
         long len_seq;
@@ -1427,7 +1404,7 @@ void process_work(int rank)
             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
 
             char *mrna = generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
-            printf("*%d\t MRNA = %s\n", rank, mrna);
+            printf("*%d\tMRNA = %s\n", rank, mrna);
 
             detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
 
