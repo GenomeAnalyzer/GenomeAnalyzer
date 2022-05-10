@@ -1,4 +1,9 @@
 nw
 bin
+diag
+alls
+*.out
+*.dat
+*.svg
 perf.data*
 build/
