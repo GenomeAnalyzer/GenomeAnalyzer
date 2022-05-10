@@ -2,9 +2,10 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "rdtsc.h"
 
-#include "../../versions/bin/headers/gene_bin.h"
-#include "../../versions/bin/src/gene_bin.c"
+#include "gene_bin.h"
+#include "gene_bin.c"
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
@@ -53,7 +54,7 @@ void print_sim_mat(int* F, char A [], char B [], int m, int n, int k, int l) {
  * in  : gap : Score for a gap.
  * out : F : The similarity matrix in COL MAJOR. <!> Its dimensions are `(m+1)*(n+1)`.
  */
-int* bin_calculate_scoring_matrix(long int* bin_A, long int* bin_B, int m, int n, int match, int mismatch, int gap) {
+int* bin_calculate_scoring_matrix(long int* bin_A, long int* bin_B, int m, int n, int match, int mismatch, int gap, char A [], char B []) {
     m++;
     n++;
 
@@ -186,12 +187,21 @@ int main() {
     int mismatch = -1;
     int gap = -1;
 
+    unsigned long long before, after;
+    double elapsed;
+
     // int* F = calculate_scoring_matrix(A, B, match, mismatch, gap);
-    int* F = bin_calculate_scoring_matrix(bin_A, bin_B, strlen(A), strlen(B), match, mismatch, gap);
-    print_sim_mat(F, A, B, m, n, n - 1, m - 1);
+    before = rdtsc();
+    int* F = bin_calculate_scoring_matrix(bin_A, bin_B, strlen(A), strlen(B), match, mismatch, gap, A, B);
+    after = rdtsc();
+    // print_sim_mat(F, A, B, m, n, n - 1, m - 1);
 
-    int score = align(F, A, B, match, mismatch, gap, 1);
-    printf("Max score : %d\n", score);
+    // int score = align(F, A, B, match, mismatch, gap, 0);
+    int score = F[m * n - 1];
 
+    elapsed = (double)(after - before);
+    printf("*Max score : %d\n", score);
+    printf("*Cycles count : %.0f\n", elapsed);
+    printf("*Time : %.3f sec\n", elapsed / 3.3e9);
     free(F);
 }
