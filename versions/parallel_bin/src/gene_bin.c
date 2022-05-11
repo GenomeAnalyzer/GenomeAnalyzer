@@ -308,7 +308,7 @@ char *binary_to_dna(long int *bin_dna_seq, const unsigned size)
 #pragma omp parallel shared(bin_dna_seq, size, dna_seq, i) private(nucl1, nucl2, index, value)
     {
 #pragma omp for schedule(static, 32)
-        for (unsigned i = 0; i < size; i += 2)
+        for (i = 0; i < size; i += 2)
         {
             // nucleotides = A, T, G, C
             nucl1 = get_binary_value(bin_dna_seq, i);
@@ -730,17 +730,14 @@ float calculating_matching_score(long int *seq1, const int seq_size1,
  * in : k : Colors background of selected case in `F`, which position is `k` and `l`. Defaults it to 0 if not intended to use.
  * in : l : Colors background of selected case in `F`, which position is `k` and `l`. Defaults it to 0 if not intended to use.
  */
-void print_sim_mat(int *F, char A[], char B[], int m, int n, int k, int l)
-{
+void print_sim_mat(int* F, char A [], char B [], int m, int n, int k, int l) {
     printf("%3s  %3s  ", "*", "-");
     for (int j = 0; j < m; j++)
         printf("%3c  ", A[j]);
     printf("\n");
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         printf("%3c  ", i == 0 ? '-' : B[i - 1]);
-        for (int j = 0; j < m; j++)
-        {
+        for (int j = 0; j < m; j++) {
             if (i == k && j == l)
                 printf("\033[101m% 3d  \033[0m", F[i * m + j]);
             else
@@ -750,71 +747,10 @@ void print_sim_mat(int *F, char A[], char B[], int m, int n, int k, int l)
     }
 }
 
-//////////////// Calculate Similarity Matrix (Binary)
+//////////////// Calculate Similarity Matrix (anti-diagonal)
 /**
  * Calculates the similarity matrix of two sequences.
- * Sequences are stored as pairs of two bits, for each nucleotide.
- * One extra space for the similarity matrix is required, its returned dimensions are `(m+1)*(n+1)`
- *
- * in : bin_A : Horizontal binary array. Its size is `m*2`
- * in : bin_B : Vertical binary array. Its size is `n*2`
- * in : m : Number of columns of `F`. Also the `A` length + 1
- * in : n : Number of lines of `F`. Also the `B` length + 1
- * in  : match : Score for a match.
- * in  : mismatch : Score for a mismatch.
- * in  : gap : Score for a gap.
- * out : F : The similarity matrix in COL MAJOR. <!> Its dimensions are `(m+1)*(n+1)`.
- */
-int *bin_calculate_scoring_matrix(long int *bin_A, long int *bin_B, int m, int n, int match, int mismatch, int gap)
-{
-    m++;
-    n++;
-
-    int *F = NULL;
-    F = (int *)calloc(m * n, sizeof(int));
-
-    int diag = 0;
-    int left = 0;
-    int up = 0;
-
-    // Setting F borders
-    for (int i = 0; i < n; i++)
-        F[i] = gap * i;
-    for (int j = 0; j < m; j++)
-        F[j * n] = gap * j;
-
-    // Relative position of iterator in bin_X
-    int i_bin_A, j_bin_B;
-
-    // Two right bits
-    unsigned short int aa, bb;
-
-    //    G C A T G C G
-    //<=> G C G T A C G
-    //  0b10011011000110
-
-    // Calculate scoring matrix
-    for (int i = 1; i < n; i++)
-    {
-        i_bin_A = i / int_SIZE + (i % int_SIZE != 0) - 1;
-        aa = (bin_A[i_bin_A] >> ((i - 1) * 2) % int_SIZE) & 0b11;
-        for (int j = 1; j < m; j++)
-        {
-            j_bin_B = j / int_SIZE + (j % int_SIZE != 0) - 1;
-            bb = (bin_B[j_bin_B] >> ((j - 1) * 2) % int_SIZE) & 0b11;
-            diag = F[(i - 1) * m + j - 1] + (aa == bb ? match : mismatch);
-            up = F[(i - 1) * m + j] + gap;
-            left = F[i * m + j - 1] + gap;
-            int var = MAX(MAX(diag, left), up);
-            F[i * m + j] = var;
-        }
-    }
-    return F;
-}
-
-//////////////// Calculate Similarity Matrix (Char)
-/**
- * Calculates the similarity matrix of two sequences.
+ * Iteration method is anti-diagonal
  * Sequences are stored as char arrays.
  * One extra space for the similarity matrix is required, its returned dimensions are (`A` length+1)*(`B` length+1`
  *
@@ -825,34 +761,48 @@ int *bin_calculate_scoring_matrix(long int *bin_A, long int *bin_B, int m, int n
  * in  : gap : Score for a gap.
  * out : F : The similarity matrix in COL MAJOR. <!> Its dimensions are (`A` length+1)*(`B` length+1).
  */
-int *calculate_scoring_matrix(char A[], char B[], int match, int mismatch, int gap)
-{
+int* calculate_scoring_matrix_antidiag(char A [], char B [], int match, int mismatch, int gap) {
     int m = strlen(A) + 1;
     int n = strlen(B) + 1;
 
-    int *F = NULL;
-    F = (int *)calloc(m * n, sizeof(int));
+    int* F = NULL;
+    F = (int*)calloc(m * n, sizeof(int));
 
     int diag = 0;
     int left = 0;
     int up = 0;
 
     // Setting F borders
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < m; i++)
         F[i] = gap * i;
-    for (int j = 0; j < m; j++)
-        F[j * n] = gap * j;
+    for (int j = 0; j < n; j++)
+        F[j * m] = gap * j;
 
-    // Calculate scoring matrix
-    for (int i = 1; i < n; i++)
-        for (int j = 1; j < m; j++)
-        {
+    int max_l, i, j;
+    for (int k = 1; k < m + n - 2; k++) {
+        if (k > (m - 1)) {
+            max_l = n - (k - (m - 1)) - 1;
+            if (max_l > m - 1) max_l = m - 1;
+        }
+        else max_l = k;
+
+#pragma omp parallel for schedule(guided)
+        for (int l = 1; l <= max_l; l++) {
+            if (k > (m - 1)) {
+                i = k - (m - 1) + l;
+                j = (m - 1) - l + 1;
+            }
+            else {
+                i = l;
+                j = k - i + 1;
+            }
             diag = F[(i - 1) * m + j - 1] + (A[j - 1] == B[i - 1] ? match : mismatch);
             up = F[(i - 1) * m + j] + gap;
             left = F[i * m + j - 1] + gap;
             int var = MAX(MAX(diag, left), up);
             F[i * m + j] = var;
         }
+    }
     return F;
 }
 
@@ -863,15 +813,13 @@ int *calculate_scoring_matrix(char A[], char B[], int match, int mismatch, int g
  * in/out : dest   : Destination string, to which we insert the `source` char
  * in     : source : Char to be inerted at beginning of `dest`.
  */
-void string_insert(char **dest, char *source)
-{
-    if (*dest == NULL)
-    {
+void string_insert(char** dest, char* source) {
+    if (*dest == NULL) {
         *dest = calloc(sizeof(char), 2);
         memcpy(*dest, source, 1);
         return;
     }
-    char *temp = calloc(sizeof(char), strlen(*dest) + 2);
+    char* temp = calloc(sizeof(char), strlen(*dest) + 2);
     memcpy(temp, source, 1);
     strcat(temp, *dest);
     free(*dest);
@@ -892,36 +840,30 @@ void string_insert(char **dest, char *source)
  * in  : print : Enables (1) or Disables (0) alignment output. Returns max similarity score either ways.
  * out : Max similarity score of the `A` and `B` sequences.
  */
-int align(int *F, char A[], char B[], int match, int mismatch, int gap, int print)
-{
+int align(int* F, char A [], char B [], int match, int mismatch, int gap, int print) {
     int m = strlen(A) + 1;
     int n = strlen(B) + 1;
 
-    if (print)
-    {
+    if (print) {
         int i = m - 1;
         int j = n - 1;
 
-        char *A_aligned = NULL;
-        char *B_aligned = NULL;
+        char* A_aligned = NULL;
+        char* B_aligned = NULL;
 
-        while (i > 0 || j > 0)
-        {
-            if (i > 0 && j > 0 && F[i * m + j] == F[(i - 1) * m + j - 1] + (A[i - 1] == B[j - 1] ? match : mismatch))
-            {
+        while (i > 0 || j > 0) {
+            if (i > 0 && j > 0 && F[i * m + j] == F[(i - 1) * m + j - 1] + (A[i - 1] == B[j - 1] ? match : mismatch)) {
                 string_insert(&A_aligned, A + (i - 1));
                 string_insert(&B_aligned, B + (j - 1));
                 i--;
                 j--;
             }
-            else if (i > 0 && F[i * m + j] == F[(i - 1) * m + j] + gap)
-            {
+            else if (i > 0 && F[i * m + j] == F[(i - 1) * m + j] + gap) {
                 string_insert(&A_aligned, A + (i - 1));
                 string_insert(&B_aligned, "-");
                 i--;
             }
-            else
-            {
+            else {
                 // else if (j > 0 && F[i * m + j] == F[i * m + j - 1] + gap) {
                 string_insert(&A_aligned, "-");
                 string_insert(&B_aligned, B + (j - 1));
@@ -934,53 +876,26 @@ int align(int *F, char A[], char B[], int match, int mismatch, int gap, int prin
     return F[m * n - 1];
 }
 
-//////////////// Needleman-Wunsch (Char)
+//////////////// Needleman-Wunsch (anti-diag)
 /**
  * Basic Needleman-Wunsch application.
  * Given two char arrays, returns the maximum similarity score.
  *
- * in  : A : First char array.
- * in  : B : Second char array.
+ * in  : A : Horizontal char array.
+ * in  : B : Vertical char array.
+ * in  : m : Length of `A`.
+ * in  : n : Length of `B`.
  * out : Max similarity score of the `A` and `B` sequences.
  */
-int needleman_wunsch(char A[], char B[])
-{
-    int m = strlen(A) + 1;
-    int n = strlen(B) + 1;
+int needleman_wunsch_antidiag(char A[], char B[]) {
+    int m = strlen(A);
+    int n = strlen(B);
 
     int match = 1;
     int mismatch = -1;
     int gap = -1;
 
-    int *F = calculate_scoring_matrix(A, B, match, mismatch, gap);
-    // print_mat(F, A, B, m, n, n - 1, m - 1);
-
-    int score = align(F, A, B, match, mismatch, gap, 0);
-    // printf("Max score : %d\n", score);
-    return score;
-}
-
-//////////////// Needleman-Wunsch (Binary)
-/**
- * Basic Needleman-Wunsch application.
- * Given two binary arrays, returns the maximum similarity score.
- *
- * in  : bin_A : First binary array.
- * in  : bin_B : Second binary array.
- * in  : m : Size of the `bin_A` array divided by 2.
- * in  : n : Size of the `bin_B` divided by 2.
- * out : Max similarity score of the `A` and `B` sequences.
- */
-int needleman_wunsch_bin(long int* bin_A, long int* bin_B, int m, int n) {
-    // long int* bin_A = set_binary_array(A, strlen(A));
-    // long int* bin_B = set_binary_array(B, strlen(B));
-
-    int match = 1;
-    int mismatch = -1;
-    int gap = -1;
-
-    int* F = bin_calculate_scoring_matrix(bin_A, bin_B, m, n, match, mismatch, gap);
-    // print_mat(F, A, B, m, n, n - 1, m - 1);
+    int* F = calculate_scoring_matrix_antidiag(A, B, match, mismatch, gap);
 
     // int score = align(F, A, B, match, mismatch, gap, 1);
     // printf("Max score : %d\n", score);
@@ -1041,26 +956,20 @@ void insert_list(node_t **head, long int *data, int size)
     }
 }
 
-int readfiles(int comm_size, int nbseq)
-{
-
+int readfiles(int comm_size, int nbseq){
     int align_rank = comm_size - 1;
 
     int nb = countfiles();
     char **content = malloc(sizeof(char *) * nb);
     FILE *fp;
 
-    if (output == 1)
-    {
+    if (output == 1){
         struct stat st = {0};
         if (stat("./output/", &st) == -1)
-        {
             mkdir("./output/", 0700);
-        }
 
         fp = fopen("./output/rapport_bin.html", "w+");
-        if (fp == NULL)
-        {
+        if (fp == NULL){
             printf("Cannot open file \n");
             exit(0);
         }
@@ -1080,9 +989,7 @@ int readfiles(int comm_size, int nbseq)
     node_t *head = NULL;
 
     // Iterate if a file exists in this directory
-    while (((file = readdir(dir)) != NULL) && (i < nbseq))
-    {
-
+    while (((file = readdir(dir)) != NULL) && (i < nbseq)){
         // Skip directories (linux)
         if (file->d_type == DT_DIR)
             continue;
@@ -1122,8 +1029,7 @@ int readfiles(int comm_size, int nbseq)
         strcpy(content[i], line);
 
         // Concat each lines in content[i], while toggling newline.
-        while ((read = getline(&line, &len, input)) != -1)
-        {
+        while ((read = getline(&line, &len, input)) != -1){
             line[strcspn(line, "\n") - 1] = '\0';
             strcat(content[i], line);
         }
@@ -1143,7 +1049,8 @@ int readfiles(int comm_size, int nbseq)
         i++;
     }
 
-    closedir(dir);
+    if (closedir(dir) == -1)
+        return printf("Error close dir\n"), -1;
 
     MPI_Send(&i, 1, MPI_INT, align_rank, 5, MPI_COMM_WORLD);
 
@@ -1238,9 +1145,6 @@ int readfiles(int comm_size, int nbseq)
     // Free everything
     free(content);
 
-    if (closedir(dir) == -1)
-        return printf("Error close dir\n"), -1;
-
     if (output)
     {
         fprintf(comp, "</table> </body></html>");
@@ -1254,7 +1158,7 @@ int readfiles(int comm_size, int nbseq)
 }
 
 void alignment_work(int rank) {
-    int real_nb_seqs = NULL;
+    int real_nb_seqs = 0;
     MPI_Status sta;
 
     char** seq = malloc(sizeof(char*) * 200);
@@ -1287,21 +1191,13 @@ void alignment_work(int rank) {
         }
     }
 
-    long* seq_bin, seq_bin2;
-    long len_seq, len_seq2;
     for (int i = 0; i < real_nb_seqs - 1; i++) {
-        seq_bin = convert_to_binary(seq[i], strlen(seq[i]));
-        len_seq = strlen(seq[i]) * 2;
-        seq_bin2 = convert_to_binary(seq[i+1], strlen(seq[i+1]));
-        len_seq2 = strlen(seq[i+1]) * 2;
-
-        int score = needleman_wunsch_bin(seq_bin, seq_bin2, len_seq / 2, len_seq2 / 2);
-        printf("Rank %d - %.0f%% (%d/%d)\n", rank, (float)(i + 1) / (real_nb_seqs - 1) * 100, (i + 1), real_nb_seqs - 1);
-        // printf("*%d\tAlignment score (%d:%d) : %d\033[0m\n", rank, i - 1, i, score);
+        int score = needleman_wunsch_antidiag(seq[i], seq[i+1]);
+        // printf("*%d\tAlignment score (%d:%d) : %d\n", rank, i, i+1, score);
+        printf("Rank %d - %.0f%% (%d/%d)\n", rank, (float)(i + 1) / (real_nb_seqs-1) * 100, (i + 1), real_nb_seqs-1);
         free(seq[i]);
-        free(seq_bin);
     }
-    free(seq[real_nb_seqs-2]);
+    free(seq[real_nb_seqs-1]);
     free(seq);
 }
 
@@ -1358,33 +1254,25 @@ void process_work(int rank)
         // printf("*%d\tGenes detected : %lld\n", rank, gene_map.genes_counter);
         FILE *fp;
 
-        if (output)
-        {
-
+        if (output){
             struct stat st = {0};
+
             if (stat("./output/sequences", &st) == -1)
-            {
                 mkdir("./output/sequences", 0700);
-            }
 
             char *rank_c, *nb_c;
-
             char name_f[50];
 
             asprintf(&rank_c, "%d", rank);
-
             asprintf(&nb_c, "%d", j);
 
             strcat(strcpy(name_f, "./output/sequences/rank_"), rank_c);
-
             strcat(strcat(name_f, "_"), nb_c);
-
             strcat(name_f, "_bin.html");
 
             fp = fopen(name_f, "w+");
 
-            if (fp == NULL)
-            {
+            if (fp == NULL){
                 printf("Cannot open file \n");
                 exit(0);
             }
@@ -1415,7 +1303,6 @@ void process_work(int rank)
 
             if (output)
             {
-
                 fprintf(fp, "<table>\n<tbody>\n<tr>\n<td class = \"title\">Sequence</td>\n<td class = \"title\">MRNA</td>\n<td class = \"title\">Chain</td>\n<td class = \"title\">Mutation</td>\n</tr>\n");
 
                 fprintf(fp, "<tr><td>%s</td>", binary_to_dna(genes, (gene_map.gene_end[k] - gene_map.gene_start[k]) + 3));
@@ -1442,7 +1329,7 @@ void process_work(int rank)
                 fprintf(fp, "</tbody>\n</table>\n");
             }
 
-            // printf("*%d\tSending genes (%d) to 0\n", rank, size_m);
+            // printf("*%d\tSending %d genes to 0\n", rank, gene_map.genes_counter);
             MPI_Send(genes, size_m, MPI_LONG, 0, 2, MPI_COMM_WORLD);
 
             free(mut_m.end_mut);
@@ -1450,12 +1337,11 @@ void process_work(int rank)
             free(mut_m.start_mut);
         }
 
-        if (output)
-        {
+        if (output){
             fprintf(fp, "</html>");
             fclose(fp);
         }
-        printf("Rank %d - %.0f%% (%d/%d)\n", rank, (float)(j + 1) / i * 100, (j + 1), i);
+        printf("Rank %d - %.0f%% (%d/%d)\n", rank, (float)(j + 1) / i*100, (j + 1), i);
     }
 
     MPI_Send(&cont, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
