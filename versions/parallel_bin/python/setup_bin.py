@@ -6,8 +6,8 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
-extra_flags_c = ["-fopenmp","-O3", "-march=native" ]
-extra_link_args_c = ["-fopenmp" ,"-O3", "-march=native"]
+extra_flags_c = ["-fopenmp","-O3", "-march=native", "-Wno-maybe-uninitialized", "-Wno-discarded-qualifiers"]
+extra_link_args_c = ["-fopenmp","-O3", "-march=native", "-Wno-maybe-uninitialized", "-Wno-discarded-qualifiers"]
 mpi_compile_args = []
 mpi_link_args = []
 

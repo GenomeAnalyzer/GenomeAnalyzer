@@ -5,7 +5,9 @@
 #include "../headers/gene_bin.h"
 #include <sys/types.h>
 
+#ifndef __USE_MISC
 #define __USE_MISC
+#endif
 #include <dirent.h>
 
 #include <string.h>
@@ -973,7 +975,7 @@ int readfiles(int comm_size, int nbseq){
             printf("Cannot open file \n");
             exit(0);
         }
-        fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
+        fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 %% ;\n}\ntable {\n    width:\n        90 %% ;\n        margin - left : 5 %% ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
     }
     DIR *dir;
     FILE *input;
@@ -1106,7 +1108,7 @@ int readfiles(int comm_size, int nbseq){
     if (output)
     {
 
-        fprintf(fp, "<details><summary> %s </summary>\n<a href=\"comp/comp_bin.html\"> Matching score </a></details>\n");
+        fprintf(fp, "<details><summary> %s </summary>\n<a href=\"comp/comp_bin.html\"> Matching score </a></details>\n", "");
 
         struct stat st = {0};
         if (stat("./output/comp", &st) == -1)
@@ -1121,7 +1123,7 @@ int readfiles(int comm_size, int nbseq){
             printf("Cannot open file \n");
             exit(0);
         }
-        fprintf(comp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
+        fprintf(comp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 %% ;\n}\ntable {\n    width:\n        90 %% ;\n        margin - left : 5 %% ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
 
         fprintf(comp, "<table>\n<tbody>\n<tr>\n<td class = \"title\">Sequence 1</td>\n<td class = \"title\">Sequence 2</td>\n<td class = \"title\">Score</td></tr>\n");
     }
@@ -1192,7 +1194,7 @@ void alignment_work(int rank) {
     }
 
     for (int i = 0; i < real_nb_seqs - 1; i++) {
-        int score = needleman_wunsch_antidiag(seq[i], seq[i+1]);
+        needleman_wunsch_antidiag(seq[i], seq[i+1]);
         // printf("*%d\tAlignment score (%d:%d) : %d\n", rank, i, i+1, score);
         printf("Rank %d - %.0f%% (%d/%d)\n", rank, (float)(i + 1) / (real_nb_seqs-1) * 100, (i + 1), real_nb_seqs-1);
         free(seq[i]);
@@ -1276,7 +1278,7 @@ void process_work(int rank)
                 printf("Cannot open file \n");
                 exit(0);
             }
-            fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 % ;\n}\ntable {\n    width:\n        90 % ;\n        margin - left : 5 % ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
+            fprintf(fp, "<html>\n<head><style>\n th, td {\n        font - size : 10px; \n}\n.title {\n        font - size : 15px; \n}\ntable, th, td {\n    border:\n        1px solid black;\n        border - collapse : collapse;\n        border - style : dashed;\n}\n.title {\n        border - style : dashed dashed dashed solid;\n        padding - left : 1 %% ;\n}\ntable {\n    width:\n        90 %% ;\n        margin - left : 5 %% ;\n}\n\n\ndetails > summary {\n    padding:\n        4px;\n    width:\n        200px;\n        background - color : #eeeeee;\n    border:\n        none;\n        box - shadow : 1px 1px 2px #bbbbbb;\n    cursor:\n        help;\n}\n</style>\n</head>\n");
         }
         for (unsigned long long k = 0; k < gene_map.genes_counter; k++)
         {
