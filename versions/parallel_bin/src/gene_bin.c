@@ -1228,7 +1228,7 @@ int readfiles(int comm_size, int nbseq)
             float calc = calculating_matching_score(seq1->seq, seq1->size * 32, seq2->seq, seq2->size * 32);
             if (output)
                 fprintf(comp, "<tr><td>%s</td><td>%s</td><td>%f</td></tr>", binary_to_dna(seq1->seq, seq1->size * 32), binary_to_dna(seq2->seq, seq2->size * 32), calc);
-            printf("Matching score : %f\n", calc);
+            // printf("Matching score : %f\n", calc);
             seq2 = seq2->next;
         }
 
@@ -1296,7 +1296,8 @@ void alignment_work(int rank) {
         len_seq2 = strlen(seq[i+1]) * 2;
 
         int score = needleman_wunsch_bin(seq_bin, seq_bin2, len_seq / 2, len_seq2 / 2);
-        printf("*%d\tAlignment score (%d:%d) : %d\033[0m\n", rank, i - 1, i, score);
+        printf("Rank %d - %.0f%% (%d/%d)\n", rank, (float)(i + 1) / (real_nb_seqs - 1) * 100, (i + 1), real_nb_seqs - 1);
+        // printf("*%d\tAlignment score (%d:%d) : %d\033[0m\n", rank, i - 1, i, score);
         free(seq[i]);
         free(seq_bin);
     }
@@ -1396,15 +1397,15 @@ void process_work(int rank)
             long *genes = get_piece_binary_array(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
 
             char *amino = generating_amino_acid_chain(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
-            if (amino != NULL)
-                printf("*%d\tamino acid chain = %s\n", rank, amino);
+            // if (amino != NULL)
+            //     printf("*%d\tamino acid chain = %s\n", rank, amino);
 
             mut_m.size = malloc(sizeof(*mut_m.size) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.start_mut = malloc(sizeof(*mut_m.start_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
             mut_m.end_mut = malloc(sizeof(*mut_m.end_mut) * ((gene_map.gene_end[k] - gene_map.gene_start[k]) / 5) * int_SIZE);
 
             char *mrna = generating_mRNA(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k]);
-            printf("*%d\tMRNA = %s\n", rank, mrna);
+            // printf("*%d\tMRNA = %s\n", rank, mrna);
 
             detecting_mutations(seq_bin, gene_map.gene_start[k], gene_map.gene_end[k], mut_m);
 
@@ -1454,6 +1455,7 @@ void process_work(int rank)
             fprintf(fp, "</html>");
             fclose(fp);
         }
+        printf("Rank %d - %.0f%% (%d/%d)\n", rank, (float)(j + 1) / i * 100, (j + 1), i);
     }
 
     MPI_Send(&cont, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
