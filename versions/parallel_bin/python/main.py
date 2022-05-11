@@ -40,7 +40,7 @@ for current_argument, current_value in arguments:
         elif current_argument in ("-o", "--output"):
             output = 1
 if find == False:
-        fin = 25698
+        fin = 20
 if help == False:
     DNA_mod.py_launch(output,fin)
 #    DNA_bin.launch(mpi4py.MPI.COMM_WORLD)
